@@ -1,11 +1,12 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": ["EXPO_PUBLIC_API_URL", "NEXT_PUBLIC_API_URL", "API_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+      "outputs": ["dist/**", "web-build/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -13,6 +14,7 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "format": {},
     "dev": {
       "cache": false,
       "persistent": true
