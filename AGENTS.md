@@ -2,3 +2,11 @@
 
 ## apps/mobile
 - **Expo HAS CHANGED:** Read the exact versioned docs at https://docs.expo.dev/versions/v54.0.0/ before writing any code in this directory.
+
+## Custom Agent Skills Integration
+- **Code Organization & Structure**: You must use the `smart-code-architecture` skill when asked to create, refactor, or organize directories, features, components, and layout files.
+- **UI Design & Screenshot Translation**: You must use the `screenshot-to-code` skill when provided with layout designs, Figma, Dribbble, or web/mobile mockup images, or asked to recreate visuals.
+- **Deduplication & Reusability**: You must use the `component-reuse-assistant` skill when creating any new UI component or page layout to verify existing components first and prevent code duplication.
+- **Brand Identity & Colors**: You must use the `brand-guidelines` skill when generating assets, formatting artifacts, or applying Portl-specific branding colors and typography.
+- **Frontend Design & Aesthetics**: You must use the `frontend-design` skill when designing new interfaces, choosing layouts, establishing typography, or ensuring high-quality, non-templated visual design.
+
