@@ -20,9 +20,11 @@ import Button from "../../components/ui/button";
 import FormPhone from "../../components/ui/form-phone";
 import IconButton from "../../components/ui/icon-button";
 import { Images } from "../../../assets/images";
+import { useRole } from "../../context/role-context";
 
 export default function VerifyScreen() {
   const router = useRouter();
+  const { setRole } = useRole();
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [timerCount, setTimerCount] = useState(30);
@@ -68,6 +70,7 @@ export default function VerifyScreen() {
   const onVerifyOtp = async (data: OtpBody) => {
     console.log("Verifying OTP:", data.otp, "for", phoneNumber);
     alert("Verification Successful!");
+    setRole("resident");
     router.replace("/");
   };
 
