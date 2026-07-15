@@ -14,7 +14,7 @@ export const theme = {
 
     border: "#ECE8DD",
 
-    success: "#28C76F",
+    success: "#1a9953ff",
     warning: "#FFB547",
     danger: "#FF5A5F",
     info: "#4D9FFF",
