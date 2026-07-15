@@ -6,6 +6,11 @@ export const RegisterRequestSchema = z.object({
     .min(3, "Name must be at least 3 characters long")
     .max(50, "Name must be at most 50 characters long"),
   email: z.email().min(1, "Email is required"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number is too long")
+    .regex(/^[0-9]+$/, "Phone number must contain only numbers"),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters long")
@@ -25,4 +30,19 @@ export const LoginSchema = z.object({
     .string()
     .min(6, "Password must be at least 6 characters long")
     .max(50, "Password must be at most 50 characters long"),
+});
+
+export const PhoneSchema = z.object({
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number is too long")
+    .regex(/^[0-9]+$/, "Phone number must contain only numbers"),
+});
+
+export const OtpSchema = z.object({
+  otp: z
+    .string()
+    .length(6, "Verification code must be exactly 6 digits")
+    .regex(/^[0-9]+$/, "Verification code must contain only numbers"),
 });

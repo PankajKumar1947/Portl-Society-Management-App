@@ -9,31 +9,33 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 import { theme } from "../../constants";
 import { OnboardingSlide } from "./_components/onboarding-slide";
 import { OnboardingIndicator } from "./_components/onboarding-indicator";
 import { Button } from "../../components/ui/button";
+import { Images } from "../../../assets/images";
 
 const { width } = Dimensions.get("window");
 
 const SLIDES = [
   {
-    image: require("../../../assets/images/security-guard.png"),
+    image: Images.securityGuard,
     title: "Smarter Visitor\nManagement",
     subtitle: "Visitor requests, approvals and\nreal-time entry logs in one place.",
   },
   {
-    image: require("../../../assets/images/community-splash.png"),
+    image: Images.communitySplash,
     title: "Everything Your\nCommunity Needs",
     subtitle: "Notices, amenities, helpdesk, polls and\npayments – all in your pocket.",
   },
   {
-    image: require("../../../assets/images/notice-board.png"),
+    image: Images.noticeBoard,
     title: "Stay Connected,\nStay Informed",
     subtitle: "Get real-time updates, participate in polls\nand never miss an important notice.",
   },
   {
-    image: require("../../../assets/images/get-start-splash.png"),
+    image: Images.getStartSplash,
     title: "",
     subtitle: "",
     isLast: true,
@@ -41,6 +43,7 @@ const SLIDES = [
 ];
 
 export default function OnboardingIndex() {
+  const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const insets = useSafeAreaInsets();
@@ -71,7 +74,7 @@ export default function OnboardingIndex() {
   };
 
   const handleGetStarted = () => {
-    alert("Welcome to Portl!");
+    router.replace("/login");
   };
 
   const currentSlide = SLIDES[activeIndex];
