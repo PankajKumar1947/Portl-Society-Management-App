@@ -6,13 +6,12 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import { theme } from "../../../constants";
-import { ScreenHeader } from "../../../components/ui/screen-header";
-import { Card } from "../../../components/ui/card";
-import { Avatar } from "../../../components/ui/avatar";
-import { InfoRow } from "../../../components/ui/info-row";
-import { Button } from "../../../components/ui/button";
-
+import { theme } from "@/constants";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Card } from "@/components/ui/card";
+import { Avatar } from "@/components/ui/avatar";
+import { InfoRow } from "@/components/ui/info-row";
+import { Button } from "@/components/ui/button";
 
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [seconds, setSeconds] = useState(initial);

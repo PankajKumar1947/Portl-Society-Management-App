@@ -3,16 +3,15 @@ import { View, FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { theme } from "../../../constants";
-import { ScreenHeader } from "../../../components/ui/screen-header";
-import { FilterTabs } from "../../../components/ui/filter-tabs";
-import { Card } from "../../../components/ui/card";
-import { PersonListItem } from "../../../components/ui/person-list-item";
-import { Badge } from "../../../components/ui/badge";
-import { Fab } from "../../../components/ui/fab";
-import { EmptyState } from "../../../components/ui/empty-state";
-import { IconButton } from "../../../components/ui/icon-button";
-
+import { theme } from "@/constants";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { FilterTabs } from "@/components/ui/filter-tabs";
+import { Card } from "@/components/ui/card";
+import { PersonListItem } from "@/components/ui/person-list-item";
+import { Badge } from "@/components/ui/badge";
+import { Fab } from "@/components/ui/fab";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconButton } from "@/components/ui/icon-button";
 
 type VisitorStatus = "approved" | "pending" | "rejected";
 
@@ -98,7 +97,10 @@ export default function VisitorsScreen() {
             <Card
               variant="flat"
               style={styles.card}
-              onPress={() => router.push("/(resident)/visitors/approval")}
+              onPress={() => router.push({
+                pathname: "/(resident)/visitors/[id]/approval",
+                params: { id: item.id }
+              })}
             >
               <PersonListItem
                 name={item.name}

@@ -6,13 +6,12 @@ import {
   ScrollView,
   Share,
 } from "react-native";
-import { theme } from "../../../constants";
-import { ScreenHeader } from "../../../components/ui/screen-header";
-import { Badge } from "../../../components/ui/badge";
-import { InfoRow } from "../../../components/ui/info-row";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-
+import { theme } from "@/constants";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Badge } from "@/components/ui/badge";
+import { InfoRow } from "@/components/ui/info-row";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 /** Styled QR-code placeholder — replace View with QRCode from
  *  react-native-qrcode-svg once the library is installed. */

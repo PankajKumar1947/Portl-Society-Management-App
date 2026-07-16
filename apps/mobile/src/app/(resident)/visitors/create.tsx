@@ -8,16 +8,16 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
-import { theme } from "../../../constants";
-import { ScreenHeader } from "../../../components/ui/screen-header";
-import { TypeSelector } from "../../../components/ui/type-selector";
-import { Card } from "../../../components/ui/card";
-import { ToggleSwitch } from "../../../components/ui/toggle-switch";
-import { Button } from "../../../components/ui/button";
-import { FormInput } from "../../../components/ui/form-input";
-import { FormPhone } from "../../../components/ui/form-phone";
-import { FormSelect } from "../../../components/ui/form-select";
-import { FormDate } from "../../../components/ui/form-date";
+import { theme } from "@/constants";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { TypeSelector } from "@/components/ui/type-selector";
+import { Card } from "@/components/ui/card";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/ui/form-input";
+import { FormPhone } from "@/components/ui/form-phone";
+import { FormSelect } from "@/components/ui/form-select";
+import { FormDate } from "@/components/ui/form-date";
 
 
 const VISITOR_TYPES = [
@@ -58,7 +58,10 @@ export default function CreateVisitorScreen() {
   });
 
   const onSubmit = () => {
-    router.push("/(resident)/visitors/pass");
+    router.push({
+      pathname: "/(resident)/visitors/[id]/pass",
+      params: { id: "new-pass" }
+    });
   };
 
   return (
