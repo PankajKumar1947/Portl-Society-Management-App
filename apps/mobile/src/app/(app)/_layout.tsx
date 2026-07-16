@@ -21,7 +21,7 @@ const ROLE_TABS: Record<string, { name: string; title: string; icon: keyof typeo
   guard: [
     { name: "index", title: "Gate Home", icon: "shield-outline", activeIcon: "shield" },
     { name: "log", title: "Visitor Log", icon: "list-outline", activeIcon: "list" },
-    { name: "notices/index", title: "Notices", icon: "notifications-outline", activeIcon: "notifications" },
+    { name: "notices", title: "Notices", icon: "notifications-outline", activeIcon: "notifications" },
     { name: "profile", title: "Profile", icon: "person-outline", activeIcon: "person" },
   ],
 };
@@ -40,9 +40,7 @@ export default function AppLayout() {
         tabBarLabelStyle: { fontSize: theme.spacing.md, fontWeight: theme.fontWeights.semibold },
       }}
     >
-      <Tabs.Screen name="notices/index" options={{ href: null }} />
-      <Tabs.Screen name="notices/create" options={{ href: null }} />
-      <Tabs.Screen name="notices/[id]" options={{ href: null }} />
+      <Tabs.Screen name="notices" options={{ href: null }} />
 
       {tabs.map((tab) => (
         <Tabs.Screen

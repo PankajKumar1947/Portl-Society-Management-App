@@ -1,11 +1,11 @@
-import React, { useLayoutEffect } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 interface Notice {
   id: string;
@@ -55,13 +55,6 @@ const NOTICES: Notice[] = [
 
 export default function NoticesScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
-
-  useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => parent?.setOptions({ tabBarStyle: undefined });
-  }, [navigation]);
 
   return (
     <View style={styles.container}>

@@ -106,7 +106,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
     minHeight: 120,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
   },
   inputWrapperFocused: {
     borderColor: theme.colors.primary,

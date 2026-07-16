@@ -6,6 +6,7 @@ import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/form-input";
+import { FormSelect } from "@/components/ui/form-select";
 import { FormTextArea } from "@/components/ui/form-textarea";
 import { DocumentPicker } from "@/components/ui/document-picker";
 
@@ -13,6 +14,12 @@ interface FileAttachment {
   title: string;
   size: string;
 }
+
+const RECIPIENT_OPTIONS = [
+  { label: "All", value: "all" },
+  { label: "Residents", value: "residents" },
+  { label: "Guards", value: "guard" },
+];
 
 export default function CreateNoticeScreen() {
   const router = useRouter();
@@ -24,6 +31,7 @@ export default function CreateNoticeScreen() {
   const methods = useForm({
     defaultValues: {
       title: "",
+      recipient: "all",
       description: "",
     },
   });
@@ -58,6 +66,16 @@ export default function CreateNoticeScreen() {
               name="title"
               label="Notice Title"
               placeholder="Enter notice title"
+              required
+            />
+
+            <View style={styles.fieldGap} />
+
+            <FormSelect
+              name="recipient"
+              label="Recipient"
+              options={RECIPIENT_OPTIONS}
+              placeholder="Select recipient group"
               required
             />
 
