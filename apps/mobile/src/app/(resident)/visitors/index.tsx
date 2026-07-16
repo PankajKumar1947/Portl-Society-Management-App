@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../../constants";
@@ -54,13 +55,13 @@ export default function VisitorsScreen() {
   const filtered = MOCK_VISITORS.filter((v) => v.filter === activeTab);
 
   return (
-    <View style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Visitors"
         showBack={false}
         leftElement={
           <IconButton
-            onPress={() => { }}
+            onPress={() => router.push("/(resident)/amenities")}
             icon={<Ionicons name="calendar-outline" size={22} color={theme.colors.text} />}
             variant="ghost"
           />
@@ -121,7 +122,7 @@ export default function VisitorsScreen() {
         label="Invite Visitor"
         onPress={() => router.push("/(resident)/visitors/create")}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

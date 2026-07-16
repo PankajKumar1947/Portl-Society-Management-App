@@ -28,7 +28,10 @@ export const FilterTabs: React.FC<FilterTabsProps> = ({
 }) => {
   return (
     <ScrollView
-      contentContainerStyle={[styles.container, style]}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={[{ flexGrow: 0, height: 56 }, style]}
+      contentContainerStyle={styles.container}
     >
       {tabs.map((tab) => {
         const active = tab.id === activeTab;
@@ -55,10 +58,13 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
     paddingHorizontal: theme.spacing.lg,
     paddingBottom: theme.spacing.sm,
+    paddingTop: theme.spacing.sm
   },
   tab: {
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs + 2,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.surfaceSecondary,
     borderWidth: 1,
@@ -67,6 +73,7 @@ const styles = StyleSheet.create({
   activeTab: {
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
+    borderWidth: 1,
   },
   label: {
     fontSize: 13,

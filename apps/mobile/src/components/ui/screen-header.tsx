@@ -1,5 +1,4 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TextStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { theme } from "../../constants";
@@ -11,6 +10,7 @@ export interface ScreenHeaderProps {
   showBack?: boolean;
   leftElement?: React.ReactNode;
   rightElement?: React.ReactNode;
+  titleStyle?: TextStyle;
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
@@ -19,6 +19,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   showBack = true,
   leftElement,
   rightElement,
+  titleStyle,
 }) => {
   const router = useRouter();
 
@@ -48,7 +49,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         {renderLeft()}
       </View>
 
-      <Text style={styles.title} numberOfLines={1}>
+      <Text style={[styles.title, titleStyle]} numberOfLines={1}>
         {title}
       </Text>
 
@@ -67,6 +68,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: theme.spacing.sm,
     backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
     flex: 1,

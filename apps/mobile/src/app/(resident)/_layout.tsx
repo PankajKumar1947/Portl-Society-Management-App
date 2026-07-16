@@ -47,13 +47,13 @@ export default function ResidentLayout() {
         }}
       />
       <Tabs.Screen
-        name="bookings"
+        name="amenities"
         options={{
-          title: "Bookings",
+          title: "Amenities",
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
               <Ionicons
-                name={focused ? "calendar" : "calendar-outline"}
+                name={focused ? "business" : "business-outline"}
                 size={22}
                 color={focused ? theme.colors.text : color}
               />
