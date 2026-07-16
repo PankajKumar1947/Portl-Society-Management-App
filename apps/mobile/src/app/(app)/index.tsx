@@ -62,7 +62,7 @@ export default function HomeScreen() {
             <Text style={styles.subText}>Tower A - 402</Text>
           </View>
           <IconButton
-            onPress={() => console.log("Notifications pressed")}
+            onPress={() => router.push(Routes.Notifications)}
             icon={<Ionicons name="notifications-outline" size={24} color={theme.colors.text} />}
             variant="ghost"
             style={styles.bellButton}

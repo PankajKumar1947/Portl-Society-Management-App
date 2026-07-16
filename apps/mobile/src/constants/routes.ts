@@ -30,6 +30,7 @@ export const Routes = {
     }),
   },
   Bookings: app("/bookings"),
+  Notifications: app("/notifications"),
   Profile: {
     Index: app("/profile"),
     MyFamily: app("/profile/family"),
