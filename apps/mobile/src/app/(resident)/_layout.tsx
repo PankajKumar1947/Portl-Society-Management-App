@@ -47,13 +47,25 @@ export default function ResidentLayout() {
         }}
       />
       <Tabs.Screen
-        name="amenities"
+        name="notices/index"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="notices/create"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="notices/[id]"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="community/index"
         options={{
-          title: "Amenities",
+          title: "Community",
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
               <Ionicons
-                name={focused ? "business" : "business-outline"}
+                name={focused ? "people-circle" : "people-circle-outline"}
                 size={22}
                 color={focused ? theme.colors.text : color}
               />
@@ -62,13 +74,13 @@ export default function ResidentLayout() {
         }}
       />
       <Tabs.Screen
-        name="helpdesk"
+        name="amenities"
         options={{
-          title: "Helpdesk",
+          title: "Amenities",
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
               <Ionicons
-                name={focused ? "chatbubble-ellipses" : "chatbubble-ellipses-outline"}
+                name={focused ? "business" : "business-outline"}
                 size={22}
                 color={focused ? theme.colors.text : color}
               />

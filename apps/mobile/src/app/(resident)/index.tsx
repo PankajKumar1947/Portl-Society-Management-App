@@ -39,7 +39,7 @@ export default function ResidentDashboard() {
   const servicesGrid: GridItem[] = [
     { id: "visitors", title: "Visitors", icon: "people-outline", route: Routes.Visitors.Index },
     { id: "amenities", title: "Amenities", icon: "business-outline", route: Routes.Amenities.Index },
-    { id: "notices", title: "Notices", icon: "document-text-outline", route: Routes.Helpdesk },
+    { id: "notices", title: "Notices", icon: "document-text-outline", route: Routes.Notices.Index },
     { id: "helpdesk", title: "Helpdesk", icon: "construct-outline", route: Routes.Helpdesk },
     { id: "polls", title: "Polls", icon: "checkbox-outline", route: Routes.Helpdesk },
     { id: "payments", title: "Payments", icon: "wallet-outline", route: Routes.Bookings },

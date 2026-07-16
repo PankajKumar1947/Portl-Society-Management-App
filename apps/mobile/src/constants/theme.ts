@@ -48,4 +48,4 @@ export const theme = {
     xxxl: 32,
     section: 40,
   },
-};
+} as const;

@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { theme } from "../../constants";
+import { theme } from "@/constants";
 
-export default function HelpdeskScreen() {
+export default function CommunityScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Helpdesk</Text>
-      <Text style={styles.subtitle}>Raise tickets, track status, and chat with administration.</Text>
+      <Text style={styles.title}>Community</Text>
+      <Text style={styles.subtitle}>Notices, polls, and community updates.</Text>
     </View>
   );
 }

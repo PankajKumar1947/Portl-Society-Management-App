@@ -16,6 +16,18 @@ export const Routes = {
   Helpdesk: "/(resident)/helpdesk",
   Bookings: "/(resident)/bookings",
 
+  Community: {
+    Index: "/(resident)/community",
+  },
+  Notices: {
+    Index: "/(resident)/notices",
+    Create: "/(resident)/notices/create",
+    Details: (id: string) => ({
+      pathname: "/(resident)/notices/[id]" as const,
+      params: { id },
+    }),
+  },
+
   Visitors: {
     Index: "/(resident)/visitors",
     Create: "/(resident)/visitors/create",
