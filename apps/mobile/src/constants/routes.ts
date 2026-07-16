@@ -21,6 +21,14 @@ export const Routes = {
       params: { id },
     }),
   },
+  Complaints: {
+    Index: app("/complaints"),
+    Create: app("/complaints/create"),
+    Details: (id: string) => ({
+      pathname: app("/complaints/[id]"),
+      params: { id },
+    }),
+  },
   Polls: {
     Index: app("/polls"),
     Create: app("/polls/create"),

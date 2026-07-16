@@ -45,6 +45,7 @@ export default function AppLayout() {
       <Tabs.Screen name="polls" options={{ href: null }} />
 
       <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="complaints" options={{ href: null }} />
 
       {tabs.map((tab) => (
         <Tabs.Screen
