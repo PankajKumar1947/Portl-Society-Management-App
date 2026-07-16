@@ -41,6 +41,7 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen name="notices" options={{ href: null }} />
+      <Tabs.Screen name="helpdesk" options={{ href: null }} />
 
       {tabs.map((tab) => (
         <Tabs.Screen

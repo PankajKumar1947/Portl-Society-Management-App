@@ -40,6 +40,7 @@ export default function HomeScreen() {
     { id: "amenities", title: "Amenities", icon: "business-outline", route: () => router.push(Routes.Amenities.Index) },
     { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index) },
     { id: "community", title: "Community", icon: "people-circle-outline", route: () => router.push(Routes.Community.Index) },
+    { id: "helpdesk", title: "Helpdesk", icon: "help-buoy-outline", route: () => router.push(Routes.Helpdesk.Index) },
   ];
 
   const quickActions: QuickAction[] = [

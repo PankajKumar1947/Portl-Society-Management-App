@@ -13,7 +13,14 @@ export const Routes = {
     Verify: "/verify",
   },
 
-  Helpdesk: app("/helpdesk"),
+  Helpdesk: {
+    Index: app("/helpdesk"),
+    Create: app("/helpdesk/create"),
+    Details: (id: string) => ({
+      pathname: app("/helpdesk/[id]"),
+      params: { id },
+    }),
+  },
   Bookings: app("/bookings"),
 
   Community: {
