@@ -84,7 +84,7 @@ export default function HistoryScreen() {
             variant="flat"
             style={styles.card}
             onPress={() => router.push({
-              pathname: "/(resident)/visitors/[id]/pass",
+              pathname: "/visitors/[id]/pass",
               params: {
                 id: item.id,
                 name: item.name,

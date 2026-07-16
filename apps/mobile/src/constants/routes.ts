@@ -1,11 +1,11 @@
+const app = <T extends string>(path: T) => `${path}` as const;
+
 export const Routes = {
   Root: "/",
 
-  Home: "/(resident)",
+  App: app(""),
 
   Onboarding: "/(onboarding)",
-  Admin: "/(admin)",
-  Guard: "/(guard)",
 
   Auth: {
     Login: "/login",
@@ -13,53 +13,53 @@ export const Routes = {
     Verify: "/verify",
   },
 
-  Helpdesk: "/(resident)/helpdesk",
-  Bookings: "/(resident)/bookings",
+  Helpdesk: app("/helpdesk"),
+  Bookings: app("/bookings"),
 
   Community: {
-    Index: "/(resident)/community",
+    Index: app("/community"),
   },
   Notices: {
-    Index: "/(resident)/notices",
-    Create: "/(resident)/notices/create",
+    Index: app("/notices"),
+    Create: app("/notices/create"),
     Details: (id: string) => ({
-      pathname: "/(resident)/notices/[id]" as const,
+      pathname: app("/notices/[id]"),
       params: { id },
     }),
   },
 
   Visitors: {
-    Index: "/(resident)/visitors",
-    Create: "/(resident)/visitors/create",
-    History: "/(resident)/visitors/history",
+    Index: app("/visitors"),
+    Create: app("/visitors/create"),
+    History: app("/visitors/history"),
     Approval: (id: string) => ({
-      pathname: "/(resident)/visitors/[id]/approval" as const,
+      pathname: app("/visitors/[id]/approval"),
       params: { id },
     }),
     Pass: (id: string) => ({
-      pathname: "/(resident)/visitors/[id]/pass" as const,
+      pathname: app("/visitors/[id]/pass"),
       params: { id },
     }),
   },
 
   Amenities: {
-    Index: "/(resident)/amenities" as const,
+    Index: app("/amenities"),
     Details: (id: string) => ({
-      pathname: "/(resident)/amenities/[id]" as const,
+      pathname: app("/amenities/[id]"),
       params: { id },
     }),
     Book: (id: string, name: string) => ({
-      pathname: "/(resident)/amenities/[id]/book" as const,
+      pathname: app("/amenities/[id]/book"),
       params: { id, name },
     }),
     Confirm: (id: string, name: string, date: string, time: string) => ({
-      pathname: "/(resident)/amenities/[id]/confirm" as const,
+      pathname: app("/amenities/[id]/confirm"),
       params: { id, name, date, time },
     }),
     Bookings: {
-      Index: "/(resident)/amenities/bookings" as const,
+      Index: app("/amenities/bookings"),
       Details: (id: string, name: string, date: string, time: string, status: string, bookingId: string) => ({
-        pathname: "/(resident)/amenities/bookings/[id]" as const,
+        pathname: app("/amenities/bookings/[id]"),
         params: { id, name, date, time, status, bookingId },
       }),
     },

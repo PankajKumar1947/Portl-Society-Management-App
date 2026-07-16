@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Platform,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,38 +22,32 @@ interface GridItem {
   id: string;
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
-  route: string;
+  route: () => void;
 }
 
 interface QuickAction {
   id: string;
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
-  route: string;
+  route: () => void;
 }
 
-export default function ResidentDashboard() {
+export default function HomeScreen() {
   const router = useRouter();
 
   const servicesGrid: GridItem[] = [
-    { id: "visitors", title: "Visitors", icon: "people-outline", route: Routes.Visitors.Index },
-    { id: "amenities", title: "Amenities", icon: "business-outline", route: Routes.Amenities.Index },
-    { id: "notices", title: "Notices", icon: "document-text-outline", route: Routes.Notices.Index },
-    { id: "helpdesk", title: "Helpdesk", icon: "construct-outline", route: Routes.Helpdesk },
-    { id: "polls", title: "Polls", icon: "checkbox-outline", route: Routes.Helpdesk },
-    { id: "payments", title: "Payments", icon: "wallet-outline", route: Routes.Bookings },
+    { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index) },
+    { id: "amenities", title: "Amenities", icon: "business-outline", route: () => router.push(Routes.Amenities.Index) },
+    { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index) },
+    { id: "community", title: "Community", icon: "people-circle-outline", route: () => router.push(Routes.Community.Index) },
   ];
 
   const quickActions: QuickAction[] = [
-    { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: Routes.Visitors.Create },
-    { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: Routes.Visitors.Index },
-    { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: Routes.Amenities.Bookings.Index },
-    { id: "pass", title: "View Pass", icon: "qr-code-outline", route: Routes.Visitors.Index },
+    { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: () => router.push(Routes.Visitors.Create) },
+    { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: () => router.push(Routes.Visitors.Index) },
+    { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: () => router.push(Routes.Amenities.Bookings.Index) },
+    { id: "pass", title: "View Pass", icon: "qr-code-outline", route: () => router.push(Routes.Visitors.Index) },
   ];
-
-  const handleGridPress = (route: string) => {
-    router.push(route as any);
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -80,7 +73,7 @@ export default function ResidentDashboard() {
             <Card
               key={item.id}
               variant="flat"
-              onPress={() => handleGridPress(item.route)}
+              onPress={item.route}
               style={styles.gridCard}
             >
               <View style={styles.iconContainer}>
@@ -104,7 +97,7 @@ export default function ResidentDashboard() {
             <Card
               key={action.id}
               variant="flat"
-              onPress={() => handleGridPress(action.route)}
+              onPress={action.route}
               style={styles.quickActionCard}
             >
               <View style={styles.quickActionIconWrapper}>
@@ -150,7 +143,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   scrollContent: {
-    // 72px (tab bar) + 24px (bottom offset) + 16px extra breathing room
     paddingBottom: 112,
   },
   header: {

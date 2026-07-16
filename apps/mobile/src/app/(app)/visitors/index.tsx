@@ -101,7 +101,7 @@ export default function VisitorsScreen() {
             onPress={() => {
               if (item.status === "approved") {
                 router.push({
-                  pathname: "/(resident)/visitors/[id]/pass",
+                  pathname: "/visitors/[id]/pass",
                   params: {
                     id: item.id,
                     name: item.name,

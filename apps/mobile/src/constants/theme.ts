@@ -36,7 +36,7 @@ export const theme = {
     bold: "700",
     extrabold: "800",
     black: "900",
-  },
+  } as const,
 
   spacing: {
     xs: 4,
@@ -48,4 +48,4 @@ export const theme = {
     xxxl: 32,
     section: 40,
   },
-} as const;
+};
