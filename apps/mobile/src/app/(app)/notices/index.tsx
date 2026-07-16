@@ -58,9 +58,9 @@ export default function NoticesScreen() {
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
-    const tabBar = navigation.getParent();
-    tabBar?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => tabBar?.setOptions({ tabBarStyle: undefined });
+    const parent = navigation.getParent();
+    parent?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
   return (

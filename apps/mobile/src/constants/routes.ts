@@ -44,6 +44,7 @@ export const Routes = {
 
   Amenities: {
     Index: app("/amenities"),
+    Create: app("/amenities/create"),
     Details: (id: string) => ({
       pathname: app("/amenities/[id]"),
       params: { id },

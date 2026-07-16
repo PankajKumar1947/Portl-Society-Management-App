@@ -62,11 +62,20 @@ export default function AmenitiesScreen() {
         title="Amenities"
         showBack={true}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Amenities.Bookings.Index)}
-            icon={<Ionicons name="time-outline" size={24} color={theme.colors.text} />}
-            variant="ghost"
-          />
+          <View style={styles.headerActions}>
+            <IconButton
+              onPress={() => router.push(Routes.Amenities.Create)}
+              icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
+              variant="ghost"
+              size="sm"
+            />
+            <IconButton
+              onPress={() => router.push(Routes.Amenities.Bookings.Index)}
+              icon={<Ionicons name="time-outline" size={24} color={theme.colors.text} />}
+              variant="ghost"
+              size="sm"
+            />
+          </View>
         }
       />
 
@@ -136,5 +145,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: theme.spacing.md,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: theme.spacing.xs,
   },
 });

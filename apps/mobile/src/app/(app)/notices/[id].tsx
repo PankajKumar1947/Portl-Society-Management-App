@@ -86,9 +86,9 @@ export default function NoticeDetailsScreen() {
   const notice = NOTICES.find((n) => n.id === id);
 
   useLayoutEffect(() => {
-    const tabBar = navigation.getParent();
-    tabBar?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => tabBar?.setOptions({ tabBarStyle: undefined });
+    const parent = navigation.getParent();
+    parent?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
   if (!notice) {
