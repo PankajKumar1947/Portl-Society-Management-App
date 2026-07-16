@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { HorizontalCalendar } from "@/components/ui/horizontal-calendar";
 import { Button } from "@/components/ui/button";
@@ -37,15 +37,12 @@ export default function BookAmenityScreen() {
   const executeBooking = () => {
     setConfirmVisible(false);
     const slotLabel = MOCK_SLOTS.find((s) => s.id === selectedSlot)?.label || "";
-    router.push({
-      pathname: "/(resident)/amenities/[id]/confirm",
-      params: {
-        id,
-        name,
-        date: selectedDate.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
-        time: slotLabel,
-      },
-    });
+    router.push(Routes.Amenities.Confirm(
+      id,
+      name,
+      selectedDate.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+      slotLabel
+    ));
   };
 
   return (

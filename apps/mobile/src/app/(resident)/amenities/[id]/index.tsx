@@ -1,9 +1,9 @@
 import React from "react";
 import { View, StyleSheet, ScrollView, Image, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { theme } from "../../../../constants";
-import { ScreenHeader } from "../../../../components/ui/screen-header";
-import { Button } from "../../../../components/ui/button";
+import { theme, Routes } from "@/constants";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Button } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const AMENITY_DETAILS = {
@@ -51,10 +51,7 @@ export default function AmenityDetailsScreen() {
   const details = AMENITY_DETAILS[id as keyof typeof AMENITY_DETAILS] || AMENITY_DETAILS["1"];
 
   const handleBook = () => {
-    router.push({
-      pathname: "/(resident)/amenities/[id]/book",
-      params: { id, name: details.name },
-    });
+    router.push(Routes.Amenities.Book(id, details.name));
   };
 
   return (

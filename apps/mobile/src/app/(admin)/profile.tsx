@@ -5,6 +5,7 @@ import { useRole, UserRole } from "../../context/role-context";
 import Button from "../../components/ui/button";
 import Card from "../../components/ui/card";
 import { useRouter } from "expo-router";
+import { Routes } from "../../constants/routes";
 
 export default function AdminProfileScreen() {
   const { role, setRole } = useRole();
@@ -12,7 +13,7 @@ export default function AdminProfileScreen() {
 
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
-    router.replace("/");
+    router.replace(Routes.Root);
   };
 
   return (

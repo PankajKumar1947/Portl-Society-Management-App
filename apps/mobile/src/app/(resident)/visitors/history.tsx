@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { PersonListItem } from "@/components/ui/person-list-item";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Routes } from "@/constants";
 
 type HistoryType = "all" | "guest" | "delivery" | "staff";
 type VisitorStatus = "approved" | "rejected" | "checked_out";
@@ -82,10 +83,7 @@ export default function HistoryScreen() {
           <Card
             variant="flat"
             style={styles.card}
-            onPress={() => router.push({
-              pathname: "/(resident)/visitors/[id]/pass",
-              params: { id: item.id }
-            })}
+            onPress={() => router.push(Routes.Visitors.Pass(item.id))}
           >
             <PersonListItem
               name={item.name}

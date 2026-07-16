@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { theme } from "../../constants";
+import { Routes } from "../../constants/routes";
 import { OnboardingSlide } from "./_components/onboarding-slide";
 import { OnboardingIndicator } from "./_components/onboarding-indicator";
 import { Button } from "../../components/ui/button";
@@ -74,7 +75,7 @@ export default function OnboardingIndex() {
   };
 
   const handleGetStarted = () => {
-    router.replace("/login");
+    router.replace(Routes.Auth.Login);
   };
 
   const currentSlide = SLIDES[activeIndex];

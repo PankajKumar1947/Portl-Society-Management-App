@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
 import { InfoRow } from "@/components/ui/info-row";
@@ -34,7 +34,7 @@ export default function BookingDetailsScreen() {
 
   const handleCancelBooking = () => {
     setCancelModalVisible(false);
-    router.replace("/(resident)/amenities/bookings");
+    router.replace(Routes.Amenities.Bookings.Index);
   };
 
   const isUpcoming = status === "upcoming" || !status;

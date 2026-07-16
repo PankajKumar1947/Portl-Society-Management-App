@@ -14,6 +14,7 @@ import Badge from "../../components/ui/badge";
 import IconButton from "../../components/ui/icon-button";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Routes } from "@/constants";
 
 const { width } = Dimensions.get("window");
 const GRID_ITEM_WIDTH = (width - theme.spacing.lg * 2 - theme.spacing.md * 2) / 3;
@@ -36,19 +37,19 @@ export default function ResidentDashboard() {
   const router = useRouter();
 
   const servicesGrid: GridItem[] = [
-    { id: "visitors", title: "Visitors", icon: "people-outline", route: "/(resident)/visitors" },
-    { id: "amenities", title: "Amenities", icon: "business-outline", route: "/(resident)/bookings" },
-    { id: "notices", title: "Notices", icon: "document-text-outline", route: "/(resident)/helpdesk" },
-    { id: "helpdesk", title: "Helpdesk", icon: "construct-outline", route: "/(resident)/helpdesk" },
-    { id: "polls", title: "Polls", icon: "checkbox-outline", route: "/(resident)/helpdesk" },
-    { id: "payments", title: "Payments", icon: "wallet-outline", route: "/(resident)/bookings" },
+    { id: "visitors", title: "Visitors", icon: "people-outline", route: Routes.Visitors.Index },
+    { id: "amenities", title: "Amenities", icon: "business-outline", route: Routes.Amenities.Index },
+    { id: "notices", title: "Notices", icon: "document-text-outline", route: Routes.Helpdesk },
+    { id: "helpdesk", title: "Helpdesk", icon: "construct-outline", route: Routes.Helpdesk },
+    { id: "polls", title: "Polls", icon: "checkbox-outline", route: Routes.Helpdesk },
+    { id: "payments", title: "Payments", icon: "wallet-outline", route: Routes.Bookings },
   ];
 
   const quickActions: QuickAction[] = [
-    { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: "/(resident)/visitors" },
-    { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: "/(resident)/visitors" },
-    { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: "/(resident)/bookings" },
-    { id: "pass", title: "View Pass", icon: "qr-code-outline", route: "/(resident)/visitors" },
+    { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: Routes.Visitors.Create },
+    { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: Routes.Visitors.Index },
+    { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: Routes.Amenities.Bookings.Index },
+    { id: "pass", title: "View Pass", icon: "qr-code-outline", route: Routes.Visitors.Index },
   ];
 
   const handleGridPress = (route: string) => {

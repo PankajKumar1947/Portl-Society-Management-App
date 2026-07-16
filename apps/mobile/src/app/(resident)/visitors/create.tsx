@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { TypeSelector } from "@/components/ui/type-selector";
 import { Card } from "@/components/ui/card";
@@ -58,10 +58,7 @@ export default function CreateVisitorScreen() {
   });
 
   const onSubmit = () => {
-    router.push({
-      pathname: "/(resident)/visitors/[id]/pass",
-      params: { id: "new-pass" }
-    });
+    router.push(Routes.Visitors.Pass("new-pass"));
   };
 
   return (

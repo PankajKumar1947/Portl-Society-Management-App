@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Text, Image } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,7 +25,7 @@ export default function BookingConfirmationScreen() {
   const imageUrl = AMENITY_IMAGES[id as keyof typeof AMENITY_IMAGES] || AMENITY_IMAGES["1"];
 
   const handleFinish = () => {
-    router.replace("/(resident)/amenities/bookings");
+    router.replace(Routes.Amenities.Bookings.Index);
   };
 
   return (

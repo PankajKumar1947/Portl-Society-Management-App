@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, FlatList, StyleSheet, Image, Text } from "react-native";
 import { useRouter } from "expo-router";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Card } from "@/components/ui/card";
@@ -63,7 +63,7 @@ export default function AmenitiesScreen() {
         showBack={true}
         rightElement={
           <IconButton
-            onPress={() => router.push("/(resident)/amenities/bookings")}
+            onPress={() => router.push(Routes.Amenities.Bookings.Index)}
             icon={<Ionicons name="time-outline" size={24} color={theme.colors.text} />}
             variant="ghost"
           />
@@ -85,10 +85,7 @@ export default function AmenitiesScreen() {
           <Card
             variant="flat"
             style={styles.card}
-            onPress={() => router.push({
-              pathname: "/(resident)/amenities/[id]",
-              params: { id: item.id }
-            })}
+            onPress={() => router.push(Routes.Amenities.Details(item.id))}
           >
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
             <View style={styles.footerRow}>

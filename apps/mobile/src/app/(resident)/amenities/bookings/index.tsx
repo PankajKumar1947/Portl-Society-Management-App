@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, FlatList, StyleSheet, Image, Text } from "react-native";
 import { useRouter } from "expo-router";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Card } from "@/components/ui/card";
@@ -69,17 +69,14 @@ export default function MyBookingsScreen() {
           <Card
             variant="flat"
             style={styles.bookingCard}
-            onPress={() => router.push({
-              pathname: "/(resident)/amenities/bookings/[id]",
-              params: {
-                id: item.id === "BK1" ? "1" : "2",
-                name: item.amenityName,
-                date: item.date,
-                time: item.timeSlot,
-                status: item.status,
-                bookingId: item.id === "BK1" ? "BK12345678" : "BK87654321",
-              }
-            })}
+            onPress={() => router.push(Routes.Amenities.Bookings.Details(
+              item.id === "BK1" ? "1" : "2",
+              item.amenityName,
+              item.date,
+              item.timeSlot,
+              item.status,
+              item.id === "BK1" ? "BK12345678" : "BK87654321"
+            ))}
           >
             <Image source={{ uri: item.imageUrl }} style={styles.bookingImage} />
             <View style={styles.bookingInfo}>

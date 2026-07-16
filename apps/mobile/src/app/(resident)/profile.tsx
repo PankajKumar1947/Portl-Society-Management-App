@@ -5,6 +5,7 @@ import { useRole, UserRole } from "../../context/role-context";
 import Button from "../../components/ui/button";
 import Card from "../../components/ui/card";
 import { useRouter } from "expo-router";
+import { Routes } from "../../constants/routes";
 
 export default function ProfileScreen() {
   const { role, setRole } = useRole();
@@ -13,7 +14,7 @@ export default function ProfileScreen() {
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
     // Redirect to entry page which handles role routing
-    router.replace("/");
+    router.replace(Routes.Root);
   };
 
   return (

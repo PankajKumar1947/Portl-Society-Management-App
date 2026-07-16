@@ -4,6 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { RegisterSchema, RegisterBody } from "@repo/schema";
+import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import Button from "../../components/ui/button";
 import FormInput from "../../components/ui/form-input";
@@ -28,7 +29,7 @@ export default function RegisterScreen() {
   const onSubmit = async (data: RegisterBody) => {
     console.log("Registration data:", data);
     // On success, redirect to verify phone screen
-    router.push("/verify");
+    router.push(Routes.Auth.Verify);
   };
 
   return (
@@ -96,7 +97,7 @@ export default function RegisterScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
-          <Text style={styles.linkText} onPress={() => router.push("/login")}>
+          <Text style={styles.linkText} onPress={() => router.push(Routes.Auth.Login)}>
             Log In
           </Text>
         </View>

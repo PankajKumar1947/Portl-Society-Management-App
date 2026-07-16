@@ -4,6 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { LoginSchema, LoginBody } from "@repo/schema";
+import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import Button from "../../components/ui/button";
 import FormInput from "../../components/ui/form-input";
@@ -27,7 +28,7 @@ export default function LoginScreen() {
     // Mock login execution
     console.log("Login data:", data);
     // After login, navigate to verification screen as requested in sequence
-    router.push("/verify");
+    router.push(Routes.Auth.Verify);
   };
 
   return (
@@ -74,7 +75,7 @@ export default function LoginScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Are you a Society Head? </Text>
-          <Text style={styles.linkText} onPress={() => router.push("/register")}>
+          <Text style={styles.linkText} onPress={() => router.push(Routes.Auth.Register)}>
             Register Society
           </Text>
         </View>

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Fab } from "@/components/ui/fab";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
+import { Routes } from "@/constants/routes";
 
 type VisitorStatus = "approved" | "pending" | "rejected";
 
@@ -60,7 +61,7 @@ export default function VisitorsScreen() {
         showBack={false}
         leftElement={
           <IconButton
-            onPress={() => router.push("/(resident)/amenities")}
+            onPress={() => router.push(Routes.Amenities.Index)}
             icon={<Ionicons name="calendar-outline" size={22} color={theme.colors.text} />}
             variant="ghost"
           />
@@ -97,10 +98,7 @@ export default function VisitorsScreen() {
             <Card
               variant="flat"
               style={styles.card}
-              onPress={() => router.push({
-                pathname: "/(resident)/visitors/[id]/approval",
-                params: { id: item.id }
-              })}
+            onPress={() => router.push(Routes.Visitors.Approval(item.id))}
             >
               <PersonListItem
                 name={item.name}
@@ -122,7 +120,7 @@ export default function VisitorsScreen() {
       <Fab
         icon="person-add-outline"
         label="Invite Visitor"
-        onPress={() => router.push("/(resident)/visitors/create")}
+        onPress={() => router.push(Routes.Visitors.Create)}
       />
     </SafeAreaView>
   );

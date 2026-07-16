@@ -14,6 +14,7 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { PhoneSchema, OtpSchema, PhoneBody, OtpBody } from "@repo/schema";
+import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import { Feather } from "@expo/vector-icons";
 import Button from "../../components/ui/button";
@@ -71,7 +72,7 @@ export default function VerifyScreen() {
     console.log("Verifying OTP:", data.otp, "for", phoneNumber);
     alert("Verification Successful!");
     setRole("resident");
-    router.replace("/");
+    router.replace(Routes.Root);
   };
 
   const handleResend = () => {
