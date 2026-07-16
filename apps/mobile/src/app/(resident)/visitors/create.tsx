@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   View,
+  Text,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -74,7 +75,8 @@ export default function CreateVisitorScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Visitor Type */}
-          <Card variant="flat" style={styles.section}>
+          <Text style={styles.label}>Visitor Type</Text>
+          <Card variant="outlined" style={styles.section}>
             <TypeSelector
               options={VISITOR_TYPES}
               value={visitorType}
@@ -155,15 +157,22 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: 112,
     gap: theme.spacing.md,
+    marginTop: theme.spacing.md,
   },
   section: {
     backgroundColor: theme.colors.surface,
     paddingVertical: theme.spacing.md,
   },
+  label: {
+    fontSize: 14,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
+    paddingHorizontal: theme.spacing.xs,
+  },
   form: {
     gap: theme.spacing.sm,
+    paddingBottom: theme.spacing.md,
   },
   row: {
     flexDirection: "row",

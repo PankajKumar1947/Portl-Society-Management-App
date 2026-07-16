@@ -107,12 +107,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   statusText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.primaryDark,
     marginBottom: theme.spacing.xs,
     textTransform: "capitalize",

@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   subtitle: {
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   amenityName: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   dateText: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
   priceValue: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     marginTop: 6,
   },

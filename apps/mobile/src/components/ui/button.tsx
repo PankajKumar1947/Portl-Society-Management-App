@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   text: {
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     textAlign: "center",
   },
   // Variants
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   lgText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
   },
   // Disabled state
   disabled: {

@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     marginTop: 4,
   },
   iconWrapper: {

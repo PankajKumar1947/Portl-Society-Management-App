@@ -90,7 +90,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
             <Modal
               transparent
               visible={modalVisible}
-              animationType="slide"
+              animationType="fade"
               onRequestClose={() => setModalVisible(false)}
             >
               <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs * 1.5,
   },
@@ -192,19 +192,20 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: 12,
     marginTop: theme.spacing.xs,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   modalContent: {
     backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: theme.radius.xl,
-    borderTopRightRadius: theme.radius.xl,
-    maxHeight: "60%",
-    paddingBottom: 34,
+    borderRadius: theme.radius.xl,
+    width: "80%",
+    maxHeight: "65%",
+    overflow: "hidden",
   },
   modalHeader: {
     flexDirection: "row",
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   listContent: {
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   optionLabelActive: {
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
   },
 });
 

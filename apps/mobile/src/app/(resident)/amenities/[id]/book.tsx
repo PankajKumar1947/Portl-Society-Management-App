@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   slotText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
   },
   bookedSlotText: {
@@ -187,12 +187,12 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
   priceValue: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   continueButton: {

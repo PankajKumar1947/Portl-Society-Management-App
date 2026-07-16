@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     marginBottom: 4,
   },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },

@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
 });

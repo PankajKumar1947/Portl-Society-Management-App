@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     textAlign: "center",
     marginBottom: theme.spacing.xs,

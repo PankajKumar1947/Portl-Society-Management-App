@@ -44,12 +44,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
   value: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
     color: theme.colors.text,
     flex: 1,
   },

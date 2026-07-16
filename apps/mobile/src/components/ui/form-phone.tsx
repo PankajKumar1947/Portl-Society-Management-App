@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs * 1.5,
   },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   countryCodeText: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     marginRight: theme.spacing.xs,
   },
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: 12,
     marginTop: theme.spacing.xs,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
 });
 

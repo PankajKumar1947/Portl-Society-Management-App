@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs * 1.5,
   },
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: 12,
     marginTop: theme.spacing.xs,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   modalOverlay: {
     flex: 1,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   searchBarContainer: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   optionLabelActive: {
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
   },
   emptyContainer: {
     alignItems: "center",

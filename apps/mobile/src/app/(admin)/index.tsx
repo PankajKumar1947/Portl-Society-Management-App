@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   subText: {
@@ -123,18 +123,18 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   metricLabel: {
     fontSize: 11,
     color: theme.colors.textSecondary,
     marginTop: 2,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   shortcutTitle: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   shortcutDesc: {

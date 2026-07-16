@@ -83,7 +83,18 @@ export default function HistoryScreen() {
           <Card
             variant="flat"
             style={styles.card}
-            onPress={() => router.push(Routes.Visitors.Pass(item.id))}
+            onPress={() => router.push({
+              pathname: "/(resident)/visitors/[id]/pass",
+              params: {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                date: item.date.split(",")[0],
+                time: item.date.split(",")[1] || "10:00 AM – 11:00 AM",
+                status: item.status,
+                passId: `VP${12345670 + parseInt(item.id)}`,
+              }
+            })}
           >
             <PersonListItem
               name={item.name}

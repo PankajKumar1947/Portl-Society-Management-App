@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     textAlign: "center",
     marginBottom: theme.spacing.sm,
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   },
   boldSubtitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     textAlign: "center",
     marginTop: theme.spacing.xs,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   },
   otpBoxText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   timerContainer: {
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   resendText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     textDecorationLine: "underline",
   },
@@ -345,6 +345,6 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: 12,
     marginTop: theme.spacing.sm,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
 });

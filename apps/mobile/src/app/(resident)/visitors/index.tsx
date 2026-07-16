@@ -98,7 +98,24 @@ export default function VisitorsScreen() {
             <Card
               variant="flat"
               style={styles.card}
-            onPress={() => router.push(Routes.Visitors.Approval(item.id))}
+            onPress={() => {
+              if (item.status === "approved") {
+                router.push({
+                  pathname: "/(resident)/visitors/[id]/pass",
+                  params: {
+                    id: item.id,
+                    name: item.name,
+                    type: item.type,
+                    date: item.time.split(",")[0],
+                    time: item.time.split(",")[1] || "10:00 AM – 11:00 AM",
+                    status: item.status,
+                    passId: `VP${12345670 + parseInt(item.id)}`,
+                  }
+                });
+              } else {
+                router.push(Routes.Visitors.Approval(item.id));
+              }
+            }}
             >
               <PersonListItem
                 name={item.name}

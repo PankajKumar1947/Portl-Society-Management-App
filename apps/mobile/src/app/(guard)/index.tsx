@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   subText: {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   },
   onlineText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.success,
   },
   metricCard: {
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   metricNumber: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   metricLabel: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.primaryDark,
   },
   actionsGrid: {
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   },
   actionTitle: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     textAlign: "center",
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   logName: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   logSubText: {

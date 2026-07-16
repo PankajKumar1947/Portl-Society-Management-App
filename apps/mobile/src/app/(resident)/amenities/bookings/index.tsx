@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   bookingName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   bookingDetails: {

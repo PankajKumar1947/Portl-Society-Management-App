@@ -164,11 +164,11 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 16,
     color: theme.colors.textSecondary,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   nameText: {
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     lineHeight: 32,
   },
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   gridCardTitle: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     textAlign: "center",
   },
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   quickActionsContainer: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   quickActionCardTitle: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     textAlign: "center",
     width: "100%",
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   visitorName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   visitorSubText: {

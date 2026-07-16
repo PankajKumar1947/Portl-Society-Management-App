@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   monthHeader: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: theme.spacing.md,
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   dayNum: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   selectedText: {

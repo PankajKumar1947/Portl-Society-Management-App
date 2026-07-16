@@ -6,12 +6,13 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import { theme } from "@/constants";
+import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { InfoRow } from "@/components/ui/info-row";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "expo-router";
 
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [seconds, setSeconds] = useState(initial);
@@ -34,6 +35,7 @@ function CountdownTimer({ seconds: initial }: { seconds: number }) {
 }
 
 export default function ApprovalScreen() {
+  const router = useRouter();
   const [note, setNote] = useState("");
 
   return (
@@ -79,7 +81,9 @@ export default function ApprovalScreen() {
           </Button>
           <Button
             style={{ flex: 1, height: 50 }}
-            onPress={() => { }}
+            onPress={() => {
+              router.replace(Routes.Visitors.Pass("1"));
+            }}
           >
             Approve
           </Button>
@@ -134,7 +138,7 @@ const styles = StyleSheet.create({
   },
   visitorName: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
   },
   visitorRole: {
@@ -153,7 +157,7 @@ const styles = StyleSheet.create({
   timer: {
     textAlign: "center",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
   timerUrgent: {
@@ -175,7 +179,7 @@ const styles = StyleSheet.create({
   },
   noteLabel: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
   noteInput: {

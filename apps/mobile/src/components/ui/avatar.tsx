@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   initials: {
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.textSecondary,
   },
 });

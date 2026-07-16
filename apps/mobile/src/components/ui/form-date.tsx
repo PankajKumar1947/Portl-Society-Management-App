@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs * 1.5,
   },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     color: theme.colors.danger,
     fontSize: 12,
     marginTop: theme.spacing.xs,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   modalOverlay: {
     flex: 1,
@@ -220,12 +220,12 @@ const styles = StyleSheet.create({
   cancelText: {
     color: theme.colors.textSecondary,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium,
   },
   confirmText: {
     color: theme.colors.text,
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
   },
 });
 

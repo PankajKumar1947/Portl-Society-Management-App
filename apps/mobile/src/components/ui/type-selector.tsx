@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
   activeLabel: {

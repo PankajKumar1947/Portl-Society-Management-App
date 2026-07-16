@@ -106,12 +106,12 @@ const styles = StyleSheet.create({
   visitorLabel: {
     fontSize: 11,
     color: theme.colors.textMuted,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
     textTransform: "uppercase",
   },
   visitorName: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
   visitorFlat: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   declineText: {
     fontSize: 13,
     color: theme.colors.textSecondary,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
   },
   approveBtn: {
     flex: 1,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   approveText: {
     fontSize: 13,
     color: theme.colors.text,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.semibold,
   },
   contentContainer: {
     position: "absolute",
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "900",
+    fontWeight: theme.fontWeights.black,
     color: theme.colors.text,
     textAlign: "center",
     marginBottom: theme.spacing.md,
