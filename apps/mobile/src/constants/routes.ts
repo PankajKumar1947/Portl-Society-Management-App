@@ -30,6 +30,17 @@ export const Routes = {
     }),
   },
   Bookings: app("/bookings"),
+  Profile: {
+    Index: app("/profile"),
+    MyFamily: app("/profile/family"),
+    AddFamily: app("/profile/family/add"),
+    EditProfile: app("/profile/edit"),
+    Settings: app("/profile/settings"),
+    Support: app("/profile/support"),
+    About: app("/profile/about"),
+    Vehicles: app("/profile/vehicles"),
+    AddVehicle: app("/profile/vehicles/add"),
+  },
 
   Community: {
     Index: app("/community"),

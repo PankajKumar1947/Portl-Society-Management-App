@@ -1,0 +1,265 @@
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { theme, Routes } from "@/constants";
+import ScreenHeader from "@/components/ui/screen-header";
+import Card from "@/components/ui/card";
+import Button from "@/components/ui/button";
+import { useRole, UserRole } from "@/context/role-context";
+import ProfileRow from "@/components/ui/profile-row";
+
+export default function ProfileScreen() {
+  const { role, setRole } = useRole();
+  const router = useRouter();
+
+  const handleRoleChange = (newRole: UserRole) => {
+    setRole(newRole);
+    router.replace(Routes.Root);
+  };
+
+  const handleLogout = () => {
+    router.replace(Routes.Auth.Login);
+  };
+
+  const menuItems = [
+    {
+      id: "family",
+      title: "My Family",
+      icon: "people-outline" as const,
+      badge: "3 Members",
+      onPress: () => router.push(Routes.Profile.MyFamily),
+    },
+    {
+      id: "vehicles",
+      title: "Vehicle Details",
+      icon: "car-outline" as const,
+      badge: "2 Vehicles",
+      onPress: () => router.push(Routes.Profile.Vehicles),
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      icon: "settings-outline" as const,
+      onPress: () => router.push(Routes.Profile.Settings),
+    },
+    {
+      id: "support",
+      title: "Support",
+      icon: "help-circle-outline" as const,
+      onPress: () => router.push(Routes.Profile.Support),
+    },
+    {
+      id: "about",
+      title: "About Portl",
+      icon: "information-circle-outline" as const,
+      onPress: () => router.push(Routes.Profile.About),
+    },
+  ];
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScreenHeader title="Profile" />
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* User Profile Card */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.profileCard}
+          onPress={() => router.push(Routes.Profile.EditProfile)}
+        >
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120" }}
+              style={styles.avatar}
+            />
+            <View style={styles.editBadge}>
+              <Ionicons name="pencil" size={12} color="#FFF" />
+            </View>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>Sunita Sharma</Text>
+            <Text style={styles.userFlat}>A-1203, Tower A</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
+        </TouchableOpacity>
+
+        {/* Menu Items */}
+        <View style={styles.menuContainer}>
+          {menuItems.map((item, index) => (
+            <ProfileRow
+              key={item.id}
+              icon={item.icon}
+              title={item.title}
+              onPress={item.onPress}
+              showBorder={index < menuItems.length - 1}
+              rightElement={
+                item.badge ? (
+                  <View style={styles.badgeContainer}>
+                    <Text style={styles.badgeText}>{item.badge}</Text>
+                  </View>
+                ) : undefined
+              }
+            />
+          ))}
+        </View>
+
+        {/* Role Simulator (Developer Feature) */}
+        <Card variant="flat" style={styles.roleCard}>
+          <Text style={styles.sectionTitle}>Simulate Roles</Text>
+          <Text style={styles.sectionDesc}>
+            Toggle between roles to see different user dashboards:
+          </Text>
+          <View style={styles.buttonGroup}>
+            <Button
+              variant={role === "resident" ? "primary" : "outline"}
+              size="sm"
+              onPress={() => handleRoleChange("resident")}
+              style={styles.roleButton}
+            >
+              Resident
+            </Button>
+            <Button
+              variant={role === "guard" ? "primary" : "outline"}
+              size="sm"
+              onPress={() => handleRoleChange("guard")}
+              style={styles.roleButton}
+            >
+              Guard
+            </Button>
+            <Button
+              variant={role === "admin" ? "primary" : "outline"}
+              size="sm"
+              onPress={() => handleRoleChange("admin")}
+              style={styles.roleButton}
+            >
+              Admin
+            </Button>
+          </View>
+        </Card>
+
+        {/* Logout Button */}
+        <Button
+          variant="outline"
+          style={styles.logoutButton}
+          textStyle={styles.logoutText}
+          onPress={handleLogout}
+        >
+          Logout
+        </Button>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  content: {
+    padding: theme.spacing.lg,
+    gap: theme.spacing.lg,
+  },
+  profileCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.lg,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  avatarContainer: {
+    position: "relative",
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.surfaceSecondary,
+  },
+  editBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: theme.colors.primaryDark,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: theme.colors.surface,
+  },
+  profileInfo: {
+    flex: 1,
+    marginLeft: theme.spacing.md,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+    marginBottom: 2,
+  },
+  userFlat: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+  },
+  menuContainer: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    overflow: "hidden",
+  },
+  badgeContainer: {
+    backgroundColor: theme.colors.surfaceSecondary,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs / 2,
+    borderRadius: theme.radius.full,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.textSecondary,
+  },
+  roleCard: {
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.lg,
+    marginTop: theme.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
+  },
+  sectionDesc: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: theme.spacing.md,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: theme.spacing.xs,
+  },
+  roleButton: {
+    flex: 1,
+    height: 36,
+  },
+  logoutButton: {
+    width: "100%",
+    height: 52,
+    borderColor: theme.colors.danger,
+    backgroundColor: "transparent",
+    marginTop: theme.spacing.md,
+  },
+  logoutText: {
+    color: theme.colors.danger,
+    fontWeight: theme.fontWeights.bold,
+  },
+});
