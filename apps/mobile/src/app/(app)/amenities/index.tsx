@@ -60,7 +60,7 @@ export default function AmenitiesScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Amenities"
-        showBack={true}
+        onBack={() => router.replace(Routes.Root)}
         rightElement={
           <View style={styles.headerActions}>
             <IconButton

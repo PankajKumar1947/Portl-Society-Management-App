@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../constants";
@@ -14,6 +15,7 @@ import IconButton from "../../components/ui/icon-button";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Routes } from "@/constants";
+import { Images } from "@/assets/images";
 
 const { width } = Dimensions.get("window");
 const GRID_ITEM_WIDTH = (width - theme.spacing.lg * 2 - theme.spacing.md * 2) / 3;
@@ -57,17 +59,31 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greetingText}>Good Morning,</Text>
-            <Text style={styles.nameText}>Sunita 👋</Text>
-            <Text style={styles.subText}>Tower A - 402</Text>
-          </View>
-          <IconButton
-            onPress={() => router.push(Routes.Notifications)}
-            icon={<Ionicons name="notifications-outline" size={24} color={theme.colors.text} />}
-            variant="ghost"
-            style={styles.bellButton}
+          <Image
+            source={Images.logoText}
+            style={styles.logoImage}
+            resizeMode="contain"
           />
+          <View style={styles.headerActions}>
+            <IconButton
+              onPress={() => router.push(Routes.Notifications)}
+              icon={<Ionicons name="notifications-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              style={styles.headerActionButton}
+            />
+            <IconButton
+              onPress={() => router.push(Routes.Profile.Index)}
+              icon={<Ionicons name="person-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              style={styles.headerActionButton}
+            />
+          </View>
+        </View>
+
+        {/* Welcome Greeting Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.greetingText}>Good Morning,</Text>
+          <Text style={styles.nameText}>Sunita 👋</Text>
         </View>
 
         {/* Dashboard Grid Services Section */}
@@ -115,7 +131,7 @@ export default function HomeScreen() {
 
         {/* Upcoming Visits Section */}
         <View style={styles.sectionHeaderContainer}>
-          <Text style={styles.sectionTitle}>Upcoming</Text>
+          <Text style={styles.sectionTitle}>Upcoming Visitors</Text>
         </View>
         <Card variant="flat" style={styles.upcomingCard}>
           <View style={styles.upcomingContent}>
@@ -152,8 +168,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingRight: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  logoImage: {
+    width: 130,
+    height: 40,
+  },
+  welcomeSection: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
     marginBottom: theme.spacing.lg,
   },
   greetingText: {
@@ -166,17 +192,18 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     lineHeight: 32,
-  },
-  subText: {
-    fontSize: 13,
-    color: theme.colors.textMuted,
     marginTop: 2,
   },
-  bellButton: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.xs,
+  },
+  headerActionButton: {
     backgroundColor: theme.colors.surfaceSecondary,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   gridContainer: {
     flexDirection: "row",

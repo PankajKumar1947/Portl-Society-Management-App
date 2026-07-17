@@ -54,7 +54,7 @@ export default function CreateNoticeScreen() {
       >
         <ScreenHeader
           title="Create Notice"
-          onBack={() => router.push(Routes.Notices.Index)}
+          onBack={() => router.back()}
         />
 
         <ScrollView

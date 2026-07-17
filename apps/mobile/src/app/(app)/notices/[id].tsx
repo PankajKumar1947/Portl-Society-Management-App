@@ -106,7 +106,7 @@ export default function NoticeDetailsScreen() {
     <View style={styles.container}>
       <ScreenHeader
         title="Notice Details"
-        onBack={() => router.push(Routes.Notices.Index)}
+        onBack={() => router.back()}
       />
 
       <ScrollView

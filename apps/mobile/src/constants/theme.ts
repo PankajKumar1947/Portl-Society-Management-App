@@ -6,7 +6,7 @@ export const theme = {
 
     background: "#FAF9F5",
     surface: "#FFFFFF",
-    surfaceSecondary: "#F5F4EF",
+    surfaceSecondary: "#eceed68f",
 
     text: "#444852",
     textSecondary: "#5E6573",

@@ -60,7 +60,7 @@ export default function NoticesScreen() {
     <View style={styles.container}>
       <ScreenHeader
         title="Notices"
-        onBack={() => router.push(Routes.Root)}
+        onBack={() => router.replace(Routes.Root)}
         rightElement={
           <IconButton
             onPress={() => router.push(Routes.Notices.Create)}

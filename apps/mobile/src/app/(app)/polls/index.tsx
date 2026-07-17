@@ -94,7 +94,7 @@ export default function PollsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Polls"
-        onBack={() => router.push(Routes.Root)}
+        onBack={() => router.replace(Routes.Root)}
         rightElement={
           <IconButton
             onPress={() => router.push(Routes.Polls.Create)}

@@ -118,7 +118,7 @@ export default function HelpdeskScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Helpdesk"
-        onBack={() => router.push(Routes.Root)}
+        onBack={() => router.replace(Routes.Root)}
       />
 
       <View style={styles.tabContainer}>

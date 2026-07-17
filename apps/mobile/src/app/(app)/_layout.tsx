@@ -40,13 +40,6 @@ export default function AppLayout() {
         tabBarLabelStyle: { fontSize: theme.spacing.md, fontWeight: theme.fontWeights.semibold },
       }}
     >
-      <Tabs.Screen name="notices" options={{ href: null }} />
-      <Tabs.Screen name="helpdesk" options={{ href: null }} />
-      <Tabs.Screen name="polls" options={{ href: null }} />
-
-      <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="complaints" options={{ href: null }} />
-
       {tabs.map((tab) => (
         <Tabs.Screen
           key={tab.name}
@@ -63,6 +56,12 @@ export default function AppLayout() {
           }}
         />
       ))}
+
+      <Tabs.Screen name="notices" options={{ href: null }} />
+      <Tabs.Screen name="helpdesk" options={{ href: null }} />
+      <Tabs.Screen name="polls" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="complaints" options={{ href: null }} />
     </Tabs>
   );
 }
