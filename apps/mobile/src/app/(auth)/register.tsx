@@ -16,7 +16,8 @@ export default function RegisterScreen() {
   const methods = useForm({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phone: "",
       password: "",
@@ -46,9 +47,17 @@ export default function RegisterScreen() {
         <FormProvider {...methods}>
           <View style={styles.form}>
             <FormInput
-              name="name"
-              label="Full Name"
-              placeholder="Enter your full name"
+              name="firstName"
+              label="First Name"
+              placeholder="Enter your first name"
+              autoCapitalize="words"
+              required
+            />
+
+            <FormInput
+              name="lastName"
+              label="Last Name"
+              placeholder="Enter your last name"
               autoCapitalize="words"
               required
             />

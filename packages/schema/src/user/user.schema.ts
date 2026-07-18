@@ -13,8 +13,8 @@ export const UserSchema = z.object({
   emailVerified: z.boolean().default(false),
   role: UserRoleSchema,
   password: z.string().min(6, "Password must be at least 6 characters long"),
-  dob: z.string().min(1, "Date of birth is required"),
-  gender: z.string().min(1, "Gender is required"),
+  dob: z.string().date().optional(),
+  gender: z.string().optional(),
   profilePhoto: z.string().optional(),
 });
 

@@ -10,7 +10,7 @@ export class CreateUserDto extends createZodDto(CreateUserSchema) {
   alternatePhone?: string;
   role!: UserRole;
   password!: string;
-  dob!: string;
-  gender!: string;
+  dob?: string;
+  gender?: string;
   profilePhoto?: string;
 }

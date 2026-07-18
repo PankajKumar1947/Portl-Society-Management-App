@@ -11,7 +11,7 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({
   timestamps: true,
   toJSON: {
-    transform: (doc, ret: Record<string, any>) => {
+    transform: (_, ret: Record<string, any>) => {
       delete ret.password;
       delete ret.__v;
       return ret;
@@ -46,14 +46,16 @@ export class User {
   @Prop({ required: true })
   password?: string;
 
-  @Prop({ required: true })
-  dob: string;
+  @Prop({ type: Date })
+  dob?: Date;
 
-  @Prop({ required: true })
-  gender: string;
+  @Prop()
+  gender?: string;
 
   @Prop()
   profilePhoto?: string;
+
+  comparePassword!: (password: string) => Promise<boolean>;
 }
 
 export const UserEntity = SchemaFactory.createForClass(User);
