@@ -2,11 +2,13 @@
   "name": "@repo/schema",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "scripts": {
+    "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\""
