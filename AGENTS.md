@@ -9,4 +9,5 @@
 - **Deduplication & Reusability**: You must use the `component-reuse-assistant` skill when creating any new UI component or page layout to verify existing components first and prevent code duplication.
 - **Brand Identity & Colors**: You must use the `brand-guidelines` skill when generating assets, formatting artifacts, or applying Portl-specific branding colors and typography.
 - **Frontend Design & Aesthetics**: You must use the `frontend-design` skill when designing new interfaces, choosing layouts, establishing typography, or ensuring high-quality, non-templated visual design.
+- **Backend API Creation**: You must use the `nest-api-flow` skill when creating new NestJS REST endpoints, modules, services, repositories, DTOs, entities, or Swagger documentation.
 
