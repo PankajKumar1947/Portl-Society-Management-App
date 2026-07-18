@@ -9,35 +9,28 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import { PhoneSchema, OtpSchema, PhoneBody, OtpBody } from "@repo/schema";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { OtpSchema, OtpBody } from "@repo/schema";
+import { useVerifyOtp, useResendOtp } from "@repo/operations";
 import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import { Feather } from "@expo/vector-icons";
 import Button from "../../components/ui/button";
-import FormPhone from "../../components/ui/form-phone";
 import IconButton from "../../components/ui/icon-button";
 import { Images } from "../../../assets/images";
-import { useRole } from "../../context/role-context";
 
 export default function VerifyScreen() {
   const router = useRouter();
-  const { setRole } = useRole();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [timerCount, setTimerCount] = useState(30);
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const [timerCount, setTimerCount] = useState(60);
+  const { mutate: verifyOtp, isPending: isVerifying } = useVerifyOtp();
+  const { mutate: resendOtp, isPending: resending } = useResendOtp();
 
   const otpInputRef = useRef<TextInput>(null);
-
-  const phoneMethods = useForm({
-    resolver: zodResolver(PhoneSchema),
-    defaultValues: {
-      phone: "",
-    },
-  });
 
   const otpMethods = useForm({
     resolver: zodResolver(OtpSchema),
@@ -46,40 +39,52 @@ export default function VerifyScreen() {
     },
   });
 
-  // Countdown timer for OTP
+  // Countdown timer
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (step === "otp" && timerCount > 0) {
-      interval = setInterval(() => {
-        setTimerCount((lastTimerCount) => lastTimerCount - 1);
-      }, 1000);
-    }
+    if (timerCount <= 0) return;
+    const interval = setInterval(() => {
+      setTimerCount((t) => t - 1);
+    }, 1000);
     return () => clearInterval(interval);
-  }, [step, timerCount]);
+  }, [timerCount]);
 
-  const onSendOtp = async (data: PhoneBody) => {
-    console.log("Sending OTP to:", data.phone);
-    setPhoneNumber(data.phone);
-    setTimerCount(30);
-    setStep("otp");
-    // Focus the OTP inputs after rendering
-    setTimeout(() => {
-      otpInputRef.current?.focus();
-    }, 100);
-  };
+  // Focus the hidden input on mount
+  useEffect(() => {
+    setTimeout(() => otpInputRef.current?.focus(), 200);
+  }, []);
 
-  const onVerifyOtp = async (data: OtpBody) => {
-    console.log("Verifying OTP:", data.otp, "for", phoneNumber);
-    alert("Verification Successful!");
-    setRole("resident");
-    router.replace(Routes.Root);
+  const onVerifyOtp = (data: OtpBody) => {
+    if (!email) {
+      Alert.alert("Error", "Email not found. Please go back and try again.");
+      return;
+    }
+    verifyOtp(
+      { email, otp: data.otp },
+      {
+        onSuccess: () => {
+          router.replace(Routes.Root);
+        },
+        onError: (err) => {
+          Alert.alert("Verification Failed", err.message);
+        },
+      },
+    );
   };
 
   const handleResend = () => {
-    if (timerCount === 0) {
-      setTimerCount(30);
-      console.log("Resending OTP to:", phoneNumber);
-    }
+    if (timerCount > 0 || !email) return;
+    resendOtp(
+      { email },
+      {
+        onSuccess: () => {
+          setTimerCount(60);
+          Alert.alert("Code Sent", "A new verification code has been sent to your email.");
+        },
+        onError: (err) => {
+          Alert.alert("Error", err.message);
+        },
+      },
+    );
   };
 
   return (
@@ -90,136 +95,89 @@ export default function VerifyScreen() {
       {/* Top back navigation header */}
       <View style={styles.navBar}>
         <IconButton
-          onPress={() => {
-            if (step === "otp") {
-              setStep("phone");
-            } else {
-              router.back();
-            }
-          }}
+          onPress={() => router.back()}
           icon={<Feather name="chevron-left" size={24} color={theme.colors.text} />}
-        />
-        <IconButton
-          onPress={() => console.log("More options pressed")}
-          icon={<Feather name="more-horizontal" size={24} color={theme.colors.text} />}
         />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {step === "phone" ? (
-          <>
-            <View style={styles.header}>
-              <Image source={Images.iconFull} style={styles.logo} resizeMode="contain" />
-              <Text style={styles.title}>Verify Number</Text>
-              <Text style={styles.subtitle}>
-                We will send you a one-time passcode to verify your phone number
-              </Text>
+        <View style={styles.header}>
+          <Image source={Images.iconFull} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.title}>Verify Your Email</Text>
+          <Text style={styles.subtitle}>We've sent a 6-digit code to</Text>
+          <Text style={styles.boldSubtitle}>{email ?? "your email"}</Text>
+        </View>
+
+        <FormProvider {...otpMethods}>
+          <View style={styles.form}>
+            <Controller
+              control={otpMethods.control}
+              name="otp"
+              render={({ field: { onChange, value }, fieldState: { error } }) => {
+                const val = value || "";
+                return (
+                  <View style={styles.otpInputWrapper}>
+                    <TextInput
+                      ref={otpInputRef}
+                      style={styles.hiddenInput}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      value={val}
+                      onChangeText={onChange}
+                      caretHidden
+                    />
+                    <View style={styles.boxesContainer}>
+                      {Array(6)
+                        .fill(0)
+                        .map((_, i) => {
+                          const char = val[i] || "";
+                          const isFocused = val.length === i;
+                          return (
+                            <TouchableOpacity
+                              key={i}
+                              style={[
+                                styles.otpBox,
+                                isFocused && styles.otpBoxFocused,
+                                error && styles.otpBoxError,
+                              ]}
+                              onPress={() => otpInputRef.current?.focus()}
+                              activeOpacity={0.8}
+                            >
+                              <Text style={styles.otpBoxText}>{char}</Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                    </View>
+                    {error && <Text style={styles.errorText}>{error.message}</Text>}
+                  </View>
+                );
+              }}
+            />
+
+            <View style={styles.timerContainer}>
+              {timerCount > 0 ? (
+                <Text style={styles.timerText}>
+                  Resend code in 00:{timerCount < 10 ? `0${timerCount}` : timerCount}
+                </Text>
+              ) : (
+                <TouchableOpacity onPress={handleResend} disabled={resending}>
+                  <Text style={styles.resendText}>
+                    {resending ? "Sending..." : "Resend code"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
-            <FormProvider {...phoneMethods}>
-              <View style={styles.form}>
-                <FormPhone
-                  name="phone"
-                  label="Phone Number"
-                  placeholder="Enter 10-digit number"
-                  required
-                />
-
-                <Button
-                  onPress={phoneMethods.handleSubmit(onSendOtp)}
-                  style={styles.submitButton}
-                  disabled={phoneMethods.formState.isSubmitting}
-                  loading={phoneMethods.formState.isSubmitting}
-                >
-                  Send OTP Code
-                </Button>
-              </View>
-            </FormProvider>
-          </>
-        ) : (
-          <>
-            <View style={styles.header}>
-              <Image source={Images.iconFull} style={styles.logo} resizeMode="contain" />
-              <Text style={styles.title}>Verify Your Number</Text>
-              <Text style={styles.subtitle}>We've sent a 6-digit code to</Text>
-              <Text style={styles.boldSubtitle}>+91 {phoneNumber}</Text>
-            </View>
-
-            <FormProvider {...otpMethods}>
-              <View style={styles.form}>
-                <Controller
-                  control={otpMethods.control}
-                  name="otp"
-                  render={({ field: { onChange, value }, fieldState: { error } }) => {
-                    const val = value || "";
-                    return (
-                      <View style={styles.otpInputWrapper}>
-                        <TextInput
-                          ref={otpInputRef}
-                          style={styles.hiddenInput}
-                          keyboardType="number-pad"
-                          maxLength={6}
-                          value={val}
-                          onChangeText={(text) => {
-                            onChange(text);
-                            if (text.length === 6) {
-                              // Let them click verify or auto-trigger
-                            }
-                          }}
-                          caretHidden
-                        />
-                        <View style={styles.boxesContainer}>
-                          {Array(6)
-                            .fill(0)
-                            .map((_, i) => {
-                              const char = val[i] || "";
-                              const isFocused = val.length === i;
-                              return (
-                                <TouchableOpacity
-                                  key={i}
-                                  style={[
-                                    styles.otpBox,
-                                    isFocused && styles.otpBoxFocused,
-                                    error && styles.otpBoxError,
-                                  ]}
-                                  onPress={() => otpInputRef.current?.focus()}
-                                  activeOpacity={0.8}
-                                >
-                                  <Text style={styles.otpBoxText}>{char}</Text>
-                                </TouchableOpacity>
-                              );
-                            })}
-                        </View>
-                        {error && <Text style={styles.errorText}>{error.message}</Text>}
-                      </View>
-                    );
-                  }}
-                />
-
-                <View style={styles.timerContainer}>
-                  {timerCount > 0 ? (
-                    <Text style={styles.timerText}>
-                      Resend code in 00:{timerCount < 10 ? `0${timerCount}` : timerCount}
-                    </Text>
-                  ) : (
-                    <TouchableOpacity onPress={handleResend}>
-                      <Text style={styles.resendText}>Resend code</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                <Button
-                  onPress={otpMethods.handleSubmit(onVerifyOtp)}
-                  style={styles.submitButton}
-                  disabled={otpMethods.formState.isSubmitting}
-                  loading={otpMethods.formState.isSubmitting}
-                >
-                  Verify & Continue
-                </Button>
-              </View>
-            </FormProvider>
-          </>
-        )}
+            <Button
+              onPress={otpMethods.handleSubmit(onVerifyOtp)}
+              style={styles.submitButton}
+              disabled={isVerifying}
+              loading={isVerifying}
+            >
+              Verify & Continue
+            </Button>
+          </View>
+        </FormProvider>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -233,7 +191,7 @@ const styles = StyleSheet.create({
   navBar: {
     height: 56,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     paddingHorizontal: theme.spacing.md,
     marginTop: Platform.OS === "ios" ? 44 : 10,

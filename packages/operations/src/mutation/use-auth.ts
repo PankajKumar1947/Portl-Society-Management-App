@@ -1,5 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { login, authQueries, register } from "@repo/api-client";
+import {
+  login,
+  register,
+  verifyOtp,
+  resendOtp,
+  authQueries,
+  setAccessToken,
+  setRefreshToken,
+} from "@repo/api-client";
 import { LoginBody, RegisterBody } from "@repo/schema";
 
 export const useLogin = () => {
@@ -7,10 +15,8 @@ export const useLogin = () => {
     mutationKey: authQueries.login.key,
     mutationFn: (data: LoginBody) => login(data),
     onSuccess: (data) => {
-      console.log("Logged in successfully", data);
-    },
-    onError: (error) => {
-      console.log("Failed to login", error);
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
     },
   });
 };
@@ -19,11 +25,23 @@ export const useRegister = () => {
   return useMutation({
     mutationKey: authQueries.register.key,
     mutationFn: (data: RegisterBody) => register(data),
+  });
+};
+
+export const useVerifyOtp = () => {
+  return useMutation({
+    mutationKey: authQueries.verifyOtp.key,
+    mutationFn: (data: { email: string; otp: string }) => verifyOtp(data),
     onSuccess: (data) => {
-      console.log("Registered successfully", data);
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
     },
-    onError: (error) => {
-      console.log("Failed to register", error);
-    },
+  });
+};
+
+export const useResendOtp = () => {
+  return useMutation({
+    mutationKey: authQueries.resendOtp.key,
+    mutationFn: (data: { email: string }) => resendOtp(data),
   });
 };

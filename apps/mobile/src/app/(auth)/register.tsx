@@ -1,9 +1,18 @@
 import React from "react";
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { RegisterSchema, RegisterBody } from "@repo/schema";
+import { useRegister } from "@repo/operations";
 import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import Button from "../../components/ui/button";
@@ -12,6 +21,7 @@ import FormPhone from "../../components/ui/form-phone";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { mutate: register, isPending: isSubmitting } = useRegister();
 
   const methods = useForm({
     resolver: zodResolver(RegisterSchema),
@@ -25,12 +35,17 @@ export default function RegisterScreen() {
     },
   });
 
-  const { handleSubmit, formState: { isSubmitting } } = methods;
+  const { handleSubmit } = methods;
 
-  const onSubmit = async (data: RegisterBody) => {
-    console.log("Registration data:", data);
-    // On success, redirect to verify phone screen
-    router.push(Routes.Auth.Verify);
+  const onSubmit = (data: RegisterBody) => {
+    register(data, {
+      onSuccess: (data) => {
+        router.push({ pathname: Routes.Auth.Verify, params: { email: data.email } });
+      },
+      onError: (err) => {
+        Alert.alert("Registration Failed", err.message);
+      },
+    });
   };
 
   return (

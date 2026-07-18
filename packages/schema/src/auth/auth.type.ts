@@ -31,5 +31,18 @@ export type LoginData = {
 
 export type RegisterData = {
   message: string;
-  name: string;
+  email: string;
+};
+
+export type VerifyOtpData = {
+  message: string;
+  accessToken: string;
+  refreshToken: string;
+  onboardingCompleted: boolean;
+  name?: string;
+};
+
+export type ResendOtpData = {
+  message: string;
+  email: string;
 };

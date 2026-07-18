@@ -1,9 +1,20 @@
 import React from "react";
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+  Alert,
+} from "react-native";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { LoginSchema, LoginBody } from "@repo/schema";
+import { useLogin } from "@repo/operations";
+import type { ApiErrorResponse } from "@repo/api-client";
 import { Routes } from "../../constants/routes";
 import { theme } from "../../constants";
 import Button from "../../components/ui/button";
@@ -13,6 +24,7 @@ import { Images } from "../../../assets/images";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { mutate: login, isPending: isSubmitting } = useLogin();
 
   const methods = useForm({
     resolver: zodResolver(LoginSchema),
@@ -22,13 +34,26 @@ export default function LoginScreen() {
     },
   });
 
-  const { handleSubmit, formState: { isSubmitting } } = methods;
+  const { handleSubmit } = methods;
 
-  const onSubmit = async (data: LoginBody) => {
-    // Mock login execution
-    console.log("Login data:", data);
-    // After login, navigate to verification screen as requested in sequence
-    router.push(Routes.Auth.Verify);
+  const onSubmit = (data: LoginBody) => {
+    login(data, {
+      onSuccess: () => {
+        router.replace(Routes.Root);
+      },
+      onError: (err) => {
+        const apiError = err as unknown as ApiErrorResponse;
+        const isUnverified =
+          apiError.status === 401 &&
+          (apiError.data as { emailVerified?: boolean })?.emailVerified === false;
+
+        if (isUnverified) {
+          router.push({ pathname: Routes.Auth.Verify, params: { email: data.email } });
+          return;
+        }
+        Alert.alert("Login Failed", apiError.message);
+      },
+    });
   };
 
   return (

@@ -138,6 +138,12 @@ importers:
       '@react-navigation/native':
         specifier: ^7.1.33
         version: 7.3.8(react-native@0.83.6(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.0))(react@19.2.0)
+      '@repo/api-client':
+        specifier: workspace:^
+        version: link:../../packages/api-client
+      '@repo/operations':
+        specifier: workspace:^
+        version: link:../../packages/operations
       '@repo/schema':
         specifier: workspace:^
         version: link:../../packages/schema
