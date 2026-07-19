@@ -10,4 +10,5 @@
 - **Brand Identity & Colors**: You must use the `brand-guidelines` skill when generating assets, formatting artifacts, or applying Portl-specific branding colors and typography.
 - **Frontend Design & Aesthetics**: You must use the `frontend-design` skill when designing new interfaces, choosing layouts, establishing typography, or ensuring high-quality, non-templated visual design.
 - **Backend API Creation**: You must use the `nest-api-flow` skill when creating new NestJS REST endpoints, modules, services, repositories, DTOs, entities, or Swagger documentation.
+- **Mobile API Integration**: You must use the `mobile-api-integration` skill when connecting a mobile screen to a backend API, adding API route functions, creating React Query mutation/query hooks in the operations package, or wiring screens with the mutate pattern.
 
