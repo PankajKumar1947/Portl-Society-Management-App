@@ -11,28 +11,23 @@ export class UserRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+  async create(
+    createUserDto: CreateUserDto & { userId: string },
+  ): Promise<UserDocument> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
-  }
-
-  async findByEmailOrUserId(
-    email: string,
-    userId: string,
-  ): Promise<UserDocument | null> {
-    return this.userModel
-      .findOne({
-        $or: [{ email }, { userId }],
-      })
-      .exec();
   }
 
   async findAll(): Promise<UserDocument[]> {
     return this.userModel.find().exec();
   }
 
-  async findOne(userId: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ userId }).exec();
+  async findOne(identifier: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({
+        $or: [{ email: identifier }, { userId: identifier }],
+      })
+      .exec();
   }
 
   async update(

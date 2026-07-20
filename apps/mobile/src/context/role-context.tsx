@@ -1,6 +1,5 @@
+import { UserRole } from "@repo/schema";
 import React, { createContext, useContext, useState } from "react";
-
-export type UserRole = "resident" | "guard" | "admin";
 
 interface RoleContextType {
   role: UserRole | null;
@@ -10,7 +9,7 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRoleState] = useState<UserRole | null>("resident");
+  const [role, setRoleState] = useState<UserRole | null>("ADMIN");
 
   const setRole = (newRole: UserRole | null) => {
     setRoleState(newRole);

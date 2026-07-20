@@ -13,11 +13,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { RegisterSchema, RegisterBody } from "@repo/schema";
 import { useRegister } from "@repo/operations";
-import { Routes } from "../../constants/routes";
-import { theme } from "../../constants";
-import Button from "../../components/ui/button";
-import FormInput from "../../components/ui/form-input";
-import FormPhone from "../../components/ui/form-phone";
+import { Routes } from "@/constants/routes";
+import { theme } from "@/constants";
+import Button from "@/components/ui/button";
+import FormInput from "@/components/ui/form-input";
+import FormPhone from "@/components/ui/form-phone";
 
 export default function RegisterScreen() {
   const router = useRouter();

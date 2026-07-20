@@ -20,6 +20,7 @@ export const UserSchema = z.object({
 
 export const CreateUserSchema = UserSchema.omit({
   emailVerified: true,
+  userId: true,
 });
 
 export const UpdateUserSchema = UserSchema.partial().omit({

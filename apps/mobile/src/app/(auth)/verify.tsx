@@ -16,12 +16,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { OtpSchema, OtpBody } from "@repo/schema";
 import { useVerifyOtp, useResendOtp } from "@repo/operations";
-import { Routes } from "../../constants/routes";
-import { theme } from "../../constants";
+import { useAuth } from "@/context/auth-context";
+import { Routes } from "@/constants/routes";
+import { theme } from "@/constants";
 import { Feather } from "@expo/vector-icons";
-import Button from "../../components/ui/button";
-import IconButton from "../../components/ui/icon-button";
-import { Images } from "../../../assets/images";
+import Button from "@/components/ui/button";
+import IconButton from "@/components/ui/icon-button";
+import { Images } from "@/assets/images";
 
 export default function VerifyScreen() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function VerifyScreen() {
   const [timerCount, setTimerCount] = useState(60);
   const { mutate: verifyOtp, isPending: isVerifying } = useVerifyOtp();
   const { mutate: resendOtp, isPending: resending } = useResendOtp();
+  const { signIn } = useAuth();
 
   const otpInputRef = useRef<TextInput>(null);
 
@@ -61,7 +63,8 @@ export default function VerifyScreen() {
     verifyOtp(
       { email, otp: data.otp },
       {
-        onSuccess: () => {
+        onSuccess: async (res) => {
+          await signIn(res.accessToken, res.refreshToken);
           router.replace(Routes.Root);
         },
         onError: (err) => {

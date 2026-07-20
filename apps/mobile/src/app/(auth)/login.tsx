@@ -14,17 +14,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { LoginSchema, LoginBody } from "@repo/schema";
 import { useLogin } from "@repo/operations";
+import { useAuth } from "@/context/auth-context";
 import type { ApiErrorResponse } from "@repo/api-client";
-import { Routes } from "../../constants/routes";
-import { theme } from "../../constants";
-import Button from "../../components/ui/button";
-import FormInput from "../../components/ui/form-input";
-
-import { Images } from "../../../assets/images";
+import { Routes } from "@/constants/routes";
+import { theme } from "@/constants";
+import Button from "@/components/ui/button";
+import FormInput from "@/components/ui/form-input";
+import { Images } from "@/assets/images";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { mutate: login, isPending: isSubmitting } = useLogin();
+  const { signIn } = useAuth();
 
   const methods = useForm({
     resolver: zodResolver(LoginSchema),
@@ -38,7 +39,8 @@ export default function LoginScreen() {
 
   const onSubmit = (data: LoginBody) => {
     login(data, {
-      onSuccess: () => {
+      onSuccess: async (res) => {
+        await signIn(res.accessToken, res.refreshToken);
         router.replace(Routes.Root);
       },
       onError: (err) => {

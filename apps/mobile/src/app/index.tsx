@@ -1,10 +1,20 @@
 import { Redirect } from "expo-router";
-import { useRole } from "../context/role-context";
+import { useAuth } from "../context/auth-context";
+import { ActivityIndicator, View } from "react-native";
+import { theme } from "../constants";
 
 export default function Index() {
-  const { role } = useRole();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (!role) {
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.colors.background }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Redirect href="/(onboarding)" />;
   }
 

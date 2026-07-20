@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { TokenService } from '../shared/token/token.service';
 import { OtpRepository } from './otp.repository';
 import { UserService } from '../user/user.service';
@@ -31,31 +30,22 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   async register(registerDto: RegisterDto) {
     const { firstName, lastName, email, phone, password } = registerDto;
 
     const existingUser = await this.userRepository
-      .findByEmailOrUserId(email, email)
+      .findOne(email)
       .catch(() => null);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
     const role = 'ADMIN';
-    const rolePrefixes: Record<string, string> = {
-      ADMIN: 'adm',
-      GUARD: 'grd',
-      RESIDENTS: 'res',
-    };
-    const prefix = rolePrefixes[role] || 'usr';
-    const randomId = crypto.randomBytes(10).toString('hex');
-    const userId = `${prefix}_${randomId}`;
 
     // Create user with default/required fields
     await this.userService.create({
-      userId,
       firstName,
       lastName,
       email,
@@ -64,11 +54,9 @@ export class AuthService {
       password,
     });
 
-    // Generate OTP
     const otp = this.generateRandomOtp();
     await this.saveOtp(email, otp);
 
-    // Send OTP email
     await this.mailService.sendOtpMail(email, otp);
 
     return {
@@ -92,7 +80,7 @@ export class AuthService {
       throw new BadRequestException('Invalid verification code');
     }
 
-    const user = await this.userRepository.findByEmailOrUserId(email, '');
+    const user = await this.userRepository.findOne(email);
     if (!user) {
       throw new NotFoundException('User not found');
     }

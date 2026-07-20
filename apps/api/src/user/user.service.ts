@@ -7,23 +7,32 @@ import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDocument } from './entities/user.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    const { email, userId } = createUserDto;
-    const existingUser = await this.userRepository.findByEmailOrUserId(
-      email,
-      userId,
-    );
+    const { email, role } = createUserDto;
+    const existingUser = await this.userRepository.findOne(email);
     if (existingUser) {
-      throw new ConflictException(
-        'User with this email or userId already exists',
-      );
+      throw new ConflictException('User with this email already exists');
     }
-    return this.userRepository.create(createUserDto);
+
+    const rolePrefixes: Record<string, string> = {
+      ADMIN: 'adm',
+      GUARD: 'grd',
+      RESIDENTS: 'res',
+    };
+    const prefix = rolePrefixes[role] || 'usr';
+    const randomId = crypto.randomBytes(10).toString('hex');
+    const userId = `${prefix}_${randomId}`;
+
+    return this.userRepository.create({
+      ...createUserDto,
+      userId,
+    });
   }
 
   async findAll(): Promise<UserDocument[]> {
