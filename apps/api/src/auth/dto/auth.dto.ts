@@ -1,14 +1,14 @@
 import { createZodDto } from 'nestjs-zod';
 import {
-  RegisterSchema,
-  LoginSchema,
-  OtpSchema,
-  ForgotPasswordRequestSchema,
-  ResetPasswordSchema,
-  ChangePasswordSchema,
+  registerSchema,
+  loginSchema,
+  otpSchema,
+  forgotPasswordRequestSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
 } from '@repo/schema';
 
-export class RegisterDto extends createZodDto(RegisterSchema) {
+export class RegisterDto extends createZodDto(registerSchema) {
   firstName!: string;
   lastName!: string;
   email!: string;
@@ -17,35 +17,35 @@ export class RegisterDto extends createZodDto(RegisterSchema) {
   confirmPassword!: string;
 }
 
-export class LoginDto extends createZodDto(LoginSchema) {
+export class LoginDto extends createZodDto(loginSchema) {
   email!: string;
   password!: string;
 }
 
-export class VerifyOtpDto extends createZodDto(OtpSchema) {
+export class VerifyOtpDto extends createZodDto(otpSchema) {
   email!: string;
   otp!: string;
 }
 
 export class ForgotPasswordDto extends createZodDto(
-  ForgotPasswordRequestSchema,
+  forgotPasswordRequestSchema,
 ) {
   email!: string;
 }
 
-export class ResetPasswordDto extends createZodDto(ResetPasswordSchema) {
+export class ResetPasswordDto extends createZodDto(resetPasswordSchema) {
   email!: string;
   otp!: string;
   password!: string;
   confirmPassword!: string;
 }
 
-export class ChangePasswordDto extends createZodDto(ChangePasswordSchema) {
+export class ChangePasswordDto extends createZodDto(changePasswordSchema) {
   oldPassword!: string;
   newPassword!: string;
   confirmPassword!: string;
 }
 
-export class ResendOtpDto extends createZodDto(ForgotPasswordRequestSchema) {
+export class ResendOtpDto extends createZodDto(forgotPasswordRequestSchema) {
   email!: string;
 }

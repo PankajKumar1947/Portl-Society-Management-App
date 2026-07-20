@@ -1,25 +1,25 @@
 import z from "zod";
 import {
-  RegisterSchema,
-  LoginSchema,
-  RegisterRequestSchema,
-  PhoneSchema,
-  OtpSchema,
-  ForgotPasswordRequestSchema,
-  ResetPasswordSchema,
-  ChangePasswordSchema,
+  registerSchema,
+  loginSchema,
+  registerRequestSchema,
+  phoneSchema,
+  otpSchema,
+  forgotPasswordRequestSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
 } from "./auth.schema";
 
-export type RegisterBody = z.infer<typeof RegisterSchema>;
-export type RegisterRequestBody = z.infer<typeof RegisterRequestSchema>;
-export type LoginBody = z.infer<typeof LoginSchema>;
-export type PhoneBody = z.infer<typeof PhoneSchema>;
-export type OtpBody = z.infer<typeof OtpSchema>;
+export type RegisterBody = z.infer<typeof registerSchema>;
+export type RegisterRequestBody = z.infer<typeof registerRequestSchema>;
+export type LoginBody = z.infer<typeof loginSchema>;
+export type PhoneBody = z.infer<typeof phoneSchema>;
+export type OtpBody = z.infer<typeof otpSchema>;
 export type ForgotPasswordRequestBody = z.infer<
-  typeof ForgotPasswordRequestSchema
+  typeof forgotPasswordRequestSchema
 >;
-export type ResetPasswordBody = z.infer<typeof ResetPasswordSchema>;
-export type ChangePasswordBody = z.infer<typeof ChangePasswordSchema>;
+export type ResetPasswordBody = z.infer<typeof resetPasswordSchema>;
+export type ChangePasswordBody = z.infer<typeof changePasswordSchema>;
 
 export type LoginData = {
   message: string;

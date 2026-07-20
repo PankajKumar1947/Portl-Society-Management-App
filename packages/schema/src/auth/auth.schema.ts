@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const RegisterRequestSchema = z.object({
+export const registerRequestSchema = z.object({
   firstName: z
     .string()
     .min(1, "First name is required")
@@ -21,14 +21,14 @@ export const RegisterRequestSchema = z.object({
     .max(50, "Password must be at most 50 characters long"),
 });
 
-export const RegisterSchema = RegisterRequestSchema.extend({
+export const registerSchema = registerRequestSchema.extend({
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
-export const LoginSchema = z.object({
+export const loginSchema = z.object({
   email: z.email().min(1, "Email is required"),
   password: z
     .string()
@@ -36,7 +36,7 @@ export const LoginSchema = z.object({
     .max(50, "Password must be at most 50 characters long"),
 });
 
-export const PhoneSchema = z.object({
+export const phoneSchema = z.object({
   phone: z
     .string()
     .min(10, "Phone number must be at least 10 digits")
@@ -44,7 +44,7 @@ export const PhoneSchema = z.object({
     .regex(/^[0-9]+$/, "Phone number must contain only numbers"),
 });
 
-export const OtpSchema = z.object({
+export const otpSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   otp: z
     .string()
@@ -52,11 +52,11 @@ export const OtpSchema = z.object({
     .regex(/^[0-9]+$/, "Verification code must contain only numbers"),
 });
 
-export const ForgotPasswordRequestSchema = z.object({
+export const forgotPasswordRequestSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-export const ResetPasswordSchema = z
+export const resetPasswordSchema = z
   .object({
     email: z.string().email("Invalid email address"),
     otp: z.string().length(6, "OTP must be exactly 6 digits"),
@@ -68,7 +68,7 @@ export const ResetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export const ChangePasswordSchema = z
+export const changePasswordSchema = z
   .object({
     oldPassword: z.string().min(6, "Password must be at least 6 characters"),
     newPassword: z.string().min(6, "Password must be at least 6 characters"),

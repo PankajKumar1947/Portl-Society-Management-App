@@ -14,7 +14,7 @@ import {
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { OtpSchema, OtpBody } from "@repo/schema";
+import { otpSchema, OtpBody } from "@repo/schema";
 import { useVerifyOtp, useResendOtp } from "@repo/operations";
 import { useAuth } from "@/context/auth-context";
 import { Routes } from "@/constants/routes";
@@ -35,7 +35,7 @@ export default function VerifyScreen() {
   const otpInputRef = useRef<TextInput>(null);
 
   const otpMethods = useForm({
-    resolver: zodResolver(OtpSchema),
+    resolver: zodResolver(otpSchema),
     defaultValues: {
       otp: "",
     },

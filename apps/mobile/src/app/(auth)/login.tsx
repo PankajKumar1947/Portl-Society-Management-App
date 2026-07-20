@@ -12,7 +12,7 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { LoginSchema, LoginBody } from "@repo/schema";
+import { loginSchema, LoginBody } from "@repo/schema";
 import { useLogin } from "@repo/operations";
 import { useAuth } from "@/context/auth-context";
 import type { ApiErrorResponse } from "@repo/api-client";
@@ -28,7 +28,7 @@ export default function LoginScreen() {
   const { signIn } = useAuth();
 
   const methods = useForm({
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",

@@ -11,7 +11,7 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { RegisterSchema, RegisterBody } from "@repo/schema";
+import { registerSchema, RegisterBody } from "@repo/schema";
 import { useRegister } from "@repo/operations";
 import { Routes } from "@/constants/routes";
 import { theme } from "@/constants";
@@ -24,7 +24,7 @@ export default function RegisterScreen() {
   const { mutate: register, isPending: isSubmitting } = useRegister();
 
   const methods = useForm({
-    resolver: zodResolver(RegisterSchema),
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: "",
       lastName: "",

@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
-import { CreateUserSchema, UserRole } from '@repo/schema';
+import { createUserSchema, UserRole } from '@repo/schema';
 
-export class CreateUserDto extends createZodDto(CreateUserSchema) {
+export class CreateUserDto extends createZodDto(createUserSchema) {
   firstName!: string;
   lastName!: string;
   email!: string;
