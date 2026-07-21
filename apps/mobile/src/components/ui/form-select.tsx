@@ -23,7 +23,7 @@ export interface FormSelectProps {
   name: string;
   label?: string;
   required?: boolean;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   placeholder?: string;
   containerStyle?: ViewStyle;
   labelStyle?: TextStyle;

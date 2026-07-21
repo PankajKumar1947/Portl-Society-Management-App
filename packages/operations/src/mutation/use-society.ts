@@ -16,7 +16,10 @@ export const useUpdateSociety = (societyId: string) => {
     mutationFn: (data: UpdateSocietyBody) => updateSociety(societyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: societyQueries.details(societyId).key
+        queryKey: societyQueries.me.key,
+      });
+      queryClient.invalidateQueries({
+        queryKey: societyQueries.details(societyId).key,
       });
     },
   });

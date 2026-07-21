@@ -8,75 +8,22 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { createSocietySchema, CreateSocietyBody } from "@repo/schema";
+import { CreateSocietyBody } from "@repo/schema";
 import { useCreateSociety } from "@repo/operations";
 import { useAuth } from "@/context/auth-context";
 import { Routes } from "@/constants/routes";
 import { theme } from "@/constants";
-import Button from "@/components/ui/button";
-import FormInput from "@/components/ui/form-input";
-import FormPhone from "@/components/ui/form-phone";
-import FormSelect, { SelectOption } from "@/components/ui/form-select";
 import type { ApiErrorResponse } from "@repo/api-client";
-
-const SOCIETY_TYPE_OPTIONS: SelectOption[] = [
-  { label: "Apartment", value: "APARTMENT" },
-  { label: "Gated Community", value: "GATED_COMMUNITY" },
-  { label: "Villa", value: "VILLA" },
-  { label: "Residential Complex", value: "RESIDENTIAL_COMPLEX" },
-  { label: "Mixed Use Building", value: "MIXED_USE" },
-];
-
-const currentYear = new Date().getFullYear();
-const YEAR_OPTIONS: SelectOption[] = Array.from(
-  { length: currentYear - 1800 + 1 },
-  (_, i) => {
-    const year = currentYear - i;
-    return { label: year.toString(), value: year.toString() };
-  }
-);
-
-interface FormValues {
-  societyName: string;
-  societyType: "APARTMENT" | "GATED_COMMUNITY" | "VILLA" | "RESIDENTIAL_COMPLEX" | "MIXED_USE";
-  primaryContactName: string;
-  primaryContactNumber: string;
-  primaryContactEmail: string;
-  establishedYear?: string | number;
-  address?: string;
-}
+import { SocietyForm } from "@/components/society/society-form";
 
 export default function SetupSocietyScreen() {
   const router = useRouter();
   const { mutate: createSociety, isPending: isSubmitting } = useCreateSociety();
   const { markSocietyCreated } = useAuth();
 
-  const methods = useForm<FormValues>({
-    resolver: zodResolver(createSocietySchema),
-    defaultValues: {
-      societyName: "",
-      societyType: "APARTMENT",
-      primaryContactName: "",
-      primaryContactNumber: "",
-      primaryContactEmail: "",
-      establishedYear: currentYear.toString(),
-      address: "",
-    },
-  });
-
-  const { handleSubmit } = methods;
-
-  const onSubmit = (data: FormValues) => {
-    // Make sure establishedYear is converted to a number if passed as string
-    const payload: CreateSocietyBody = {
-      ...data,
-      establishedYear: data.establishedYear ? Number(data.establishedYear) : undefined,
-    };
-
-    createSociety(payload, {
+  const handleCreateSociety = (data: CreateSocietyBody) => {
+    createSociety(data, {
       onSuccess: (res) => {
         Alert.alert(
           "Setup Completed",
@@ -86,7 +33,7 @@ export default function SetupSocietyScreen() {
               text: "Continue",
               onPress: async () => {
                 await markSocietyCreated();
-                router.replace("/(app)");
+                router.replace(Routes.App);
               },
             },
           ],
@@ -112,70 +59,11 @@ export default function SetupSocietyScreen() {
           </Text>
         </View>
 
-        <FormProvider {...methods}>
-          <View style={styles.form}>
-            <FormInput
-              name="societyName"
-              label="Society Name"
-              placeholder="e.g. Green Meadows Apartment"
-              required
-            />
-
-            <FormSelect
-              name="societyType"
-              label="Society Type"
-              options={SOCIETY_TYPE_OPTIONS}
-              required
-            />
-
-            <FormInput
-              name="primaryContactName"
-              label="Primary Contact Name"
-              placeholder="e.g. John Doe (Society President)"
-              required
-            />
-
-            <FormPhone
-              name="primaryContactNumber"
-              label="Primary Contact Number"
-              placeholder="Enter 10-digit number"
-              required
-            />
-
-            <FormInput
-              name="primaryContactEmail"
-              label="Primary Contact Email"
-              placeholder="e.g. society@domain.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              required
-            />
-
-            <FormSelect
-              name="establishedYear"
-              label="Established Year"
-              options={YEAR_OPTIONS}
-              placeholder="Select established year"
-            />
-
-            <FormInput
-              name="address"
-              label="Address"
-              placeholder="Full address of the society"
-              multiline
-              numberOfLines={3}
-            />
-
-            <Button
-              onPress={handleSubmit(onSubmit)}
-              style={styles.submitButton}
-              disabled={isSubmitting}
-              loading={isSubmitting}
-            >
-              Complete Setup
-            </Button>
-          </View>
-        </FormProvider>
+        <SocietyForm
+          onSubmit={handleCreateSociety}
+          isSubmitting={isSubmitting}
+          submitButtonText="Complete Setup"
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

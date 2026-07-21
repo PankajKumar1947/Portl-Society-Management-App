@@ -3,7 +3,7 @@ const app = <T extends string>(path: T) => `${path}` as const;
 export const Routes = {
   Root: "/",
 
-  App: app(""),
+  App: app("/(app)"),
 
   Onboarding: {
     Index: "/(onboarding)",
@@ -52,6 +52,11 @@ export const Routes = {
     About: app("/profile/about"),
     Vehicles: app("/profile/vehicles"),
     AddVehicle: app("/profile/vehicles/add"),
+  },
+
+  Society: {
+    Index: app("/society"),
+    Edit: app("/society/edit"),
   },
 
   Community: {

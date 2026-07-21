@@ -24,11 +24,9 @@ export const societySchema = z.object({
     .regex(/^[0-9]+$/, "Contact number must contain only numbers"),
   primaryContactEmail: z.string().email("Invalid email address"),
   establishedYear: z
-    .union([z.number(), z.string()])
-    .transform((val) => (val === "" || val === undefined ? undefined : Number(val)))
-    .refine((val) => val === undefined || (val >= 1800 && val <= new Date().getFullYear()), {
-      message: "Established year must be between 1800 and current year",
-    })
+    .number()
+    .min(1800, "Established year must be 1800 or later")
+    .max(new Date().getFullYear(), "Established year cannot be in the future")
     .optional(),
   address: z.string().min(5, "Address must be at least 5 characters").optional(),
 });
@@ -40,3 +38,23 @@ export const createSocietySchema = societySchema.omit({
 });
 
 export const updateSocietySchema = createSocietySchema.partial();
+
+
+export const SOCIETY_TYPE_OPTIONS = [
+  { label: "Apartment", value: "APARTMENT" },
+  { label: "Gated Community", value: "GATED_COMMUNITY" },
+  { label: "Villa", value: "VILLA" },
+  { label: "Residential Complex", value: "RESIDENTIAL_COMPLEX" },
+  { label: "Mixed Use Building", value: "MIXED_USE" },
+] as const;
+
+export const getEstablishedYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: currentYear - 1800 + 1 }, (_, i) => {
+    const year = currentYear - i;
+    return { label: year.toString(), value: year.toString() };
+  });
+};
+
+export const ESTABLISHED_YEAR_OPTIONS = getEstablishedYearOptions();
+
