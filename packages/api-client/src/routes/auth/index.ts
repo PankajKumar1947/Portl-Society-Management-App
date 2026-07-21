@@ -5,6 +5,8 @@ import {
   RegisterData,
   VerifyOtpData,
   ResendOtpData,
+  RefreshTokenBody,
+  RefreshTokenData,
 } from "@repo/schema";
 import { authQueries } from "../../react-queries/auth";
 import { apiClient } from "../../services/axios-instance";
@@ -31,5 +33,12 @@ export const resendOtp = async (data: {
   email: string;
 }): Promise<ResendOtpData> => {
   const res = await apiClient.post(authQueries.resendOtp.endpoint, data);
+  return res.data;
+};
+
+export const refreshToken = async (
+  data: RefreshTokenBody,
+): Promise<RefreshTokenData> => {
+  const res = await apiClient.post(authQueries.refreshToken.endpoint, data);
   return res.data;
 };

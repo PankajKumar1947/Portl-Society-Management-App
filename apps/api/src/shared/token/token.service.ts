@@ -30,7 +30,7 @@ export class TokenService {
     return { accessToken, refreshToken };
   }
 
-  async verifyAccessToken(token: string): Promise<TokenPayload> {
+  async verifyToken(token: string): Promise<TokenPayload> {
     const secret = process.env.JWT_SECRET!;
     return this.jwtService.verifyAsync<TokenPayload>(token, {
       secret,

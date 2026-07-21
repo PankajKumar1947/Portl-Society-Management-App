@@ -19,6 +19,7 @@ import {
   ResetPasswordDto,
   ChangePasswordDto,
   ResendOtpDto,
+  RefreshTokenDto,
 } from './dto/auth.dto';
 import {
   ApiRegister,
@@ -28,6 +29,7 @@ import {
   ApiResetPassword,
   ApiChangePassword,
   ApiResendOtp,
+  ApiRefreshToken,
 } from './auth.docs';
 
 @ApiTags('auth')
@@ -58,6 +60,12 @@ export class AuthController {
   @ApiLogin()
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('refresh')
+  @ApiRefreshToken()
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshToken(refreshTokenDto);
   }
 
   @Post('forgot-password')

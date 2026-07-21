@@ -20,6 +20,7 @@ import {
   ResetPasswordDto,
   ChangePasswordDto,
   ResendOtpDto,
+  RefreshTokenDto,
 } from './dto/auth.dto';
 
 import { SocietyRepository } from '../society/society.repository';
@@ -212,6 +213,33 @@ export class AuthService {
       message: 'Verification OTP resent successfully.',
       email,
     };
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    const { refreshToken: token } = refreshTokenDto;
+
+    try {
+      const payload = await this.tokenService.verifyToken(token);
+      const user = await this.userRepository.findOne(payload.userId);
+
+      if (!user) {
+        throw new UnauthorizedException('User no longer exists');
+      }
+
+      const { accessToken, refreshToken: newRefreshToken } =
+        await this.tokenService.generateTokens({
+          userId: user.userId,
+          email: user.email,
+        });
+
+      return {
+        message: 'Tokens refreshed successfully',
+        accessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
   }
 
   private generateRandomOtp(): string {

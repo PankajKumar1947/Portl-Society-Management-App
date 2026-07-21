@@ -15,4 +15,8 @@ export const authQueries = {
     key: ["resend-otp"],
     endpoint: "/auth/resend-otp",
   },
+  refreshToken: {
+    key: ["refresh-token"],
+    endpoint: "/auth/refresh",
+  },
 } as const;

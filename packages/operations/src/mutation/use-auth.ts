@@ -4,6 +4,7 @@ import {
   register,
   verifyOtp,
   resendOtp,
+  refreshToken,
   authQueries,
   setAccessToken,
   setRefreshToken,
@@ -43,5 +44,16 @@ export const useResendOtp = () => {
   return useMutation({
     mutationKey: authQueries.resendOtp.key,
     mutationFn: (data: { email: string }) => resendOtp(data),
+  });
+};
+
+export const useRefreshToken = () => {
+  return useMutation({
+    mutationKey: authQueries.refreshToken.key,
+    mutationFn: (data: { refreshToken: string }) => refreshToken(data),
+    onSuccess: (data) => {
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+    },
   });
 };

@@ -6,6 +6,7 @@ import {
   forgotPasswordRequestSchema,
   resetPasswordSchema,
   changePasswordSchema,
+  refreshTokenSchema,
 } from '@repo/schema';
 
 export class RegisterDto extends createZodDto(registerSchema) {
@@ -48,4 +49,8 @@ export class ChangePasswordDto extends createZodDto(changePasswordSchema) {
 
 export class ResendOtpDto extends createZodDto(forgotPasswordRequestSchema) {
   email!: string;
+}
+
+export class RefreshTokenDto extends createZodDto(refreshTokenSchema) {
+  refreshToken!: string;
 }

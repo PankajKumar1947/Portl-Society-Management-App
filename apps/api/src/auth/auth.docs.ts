@@ -86,3 +86,14 @@ export function ApiResendOtp() {
     ApiResponse({ status: 404, description: 'User not found.' }),
   );
 }
+
+export function ApiRefreshToken() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Refresh access token using refresh token' }),
+    ApiResponse({
+      status: 200,
+      description: 'New tokens generated successfully.',
+    }),
+    ApiResponse({ status: 401, description: 'Invalid or expired refresh token.' }),
+  );
+}

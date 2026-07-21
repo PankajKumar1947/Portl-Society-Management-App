@@ -22,7 +22,7 @@ export class JwtGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.tokenService.verifyAccessToken(token);
+      const payload = await this.tokenService.verifyToken(token);
       request.user = payload;
     } catch {
       throw new UnauthorizedException(
