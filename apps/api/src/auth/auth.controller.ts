@@ -4,13 +4,12 @@ import {
   Body,
   UseGuards,
   UsePipes,
-  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 import { JwtGuard } from './guards/jwt.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
 import {
   RegisterDto,
   LoginDto,
@@ -84,9 +83,9 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiChangePassword()
   async changePassword(
-    @Req() req: Request & { user: { userId: string } },
+    @CurrentUser('userId') userId: string,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    return this.authService.changePassword(req.user.userId, changePasswordDto);
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 }

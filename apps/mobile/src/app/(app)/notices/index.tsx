@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
@@ -57,7 +58,7 @@ export default function NoticesScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScreenHeader
         title="Notices"
         onBack={() => router.replace(Routes.Root)}
@@ -95,7 +96,7 @@ export default function NoticesScreen() {
           </Card>
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

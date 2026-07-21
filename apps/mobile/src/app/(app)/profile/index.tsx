@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,10 +8,13 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import ProfileRow from "@/components/ui/profile-row";
 import { useAuth } from "@/context/auth-context";
+import { useGetMe, useGetMySociety } from "@repo/operations";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
+  const { data: user, isLoading: isUserLoading } = useGetMe();
+  const { data: society } = useGetMySociety();
 
   const handleLogout = async () => {
     try {
@@ -21,6 +24,14 @@ export default function ProfileScreen() {
       Alert.alert("Logout Failed", "Failed to log out. Please try again.");
     }
   };
+
+  const fullName = user
+    ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User Profile"
+    : "Sunita Sharma";
+
+  const userSubtext = society?.societyName
+    ? `${society.societyName} (${society.societyType?.replace(/_/g, " ")})`
+    : user?.email || "Resident";
 
   const menuItems = [
     {
@@ -78,8 +89,14 @@ export default function ProfileScreen() {
             </View>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>Sunita Sharma</Text>
-            <Text style={styles.userFlat}>A-1203, Tower A</Text>
+            {isUserLoading ? (
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+            ) : (
+              <>
+                <Text style={styles.userName}>{fullName}</Text>
+                <Text style={styles.userFlat}>{userSubtext}</Text>
+              </>
+            )}
           </View>
           <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
         </TouchableOpacity>

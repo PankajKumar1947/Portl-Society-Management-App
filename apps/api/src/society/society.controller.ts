@@ -7,13 +7,14 @@ import {
   Param,
   UseGuards,
   UsePipes,
-  Request,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SocietyService } from './society.service';
 import { CreateSocietyDto } from './dto/create-society.dto';
 import { UpdateSocietyDto } from './dto/update-society.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 import {
   ApiCreateSociety,
@@ -21,30 +22,24 @@ import {
   ApiGetSocietyByUserId,
   ApiUpdateSociety,
 } from './society.docs';
-
-import { Request as ExpressRequest } from 'express';
-
-interface RequestWithUser extends ExpressRequest {
-  user: {
-    userId: string;
-    email: string;
-  };
-}
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { SocietyOwnershipGuard } from './guards/society-ownership.guard';
+import { UserRoles } from '@repo/schema';
 
 @ApiTags('societies')
 @Controller('societies')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @UsePipes(new ZodValidationPipe())
 export class SocietyController {
   constructor(private readonly societyService: SocietyService) {}
 
   @Post()
+  @Roles(UserRoles.ADMIN)
   @ApiCreateSociety()
   async create(
     @Body() createSocietyDto: CreateSocietyDto,
-    @Request() req: RequestWithUser,
+    @CurrentUser('userId') userId: string,
   ) {
-    const { userId } = req.user;
     const society = await this.societyService.create(createSocietyDto, userId);
     return {
       message: 'Society setup completed successfully',
@@ -54,18 +49,20 @@ export class SocietyController {
 
   @Get('me')
   @ApiGetSocietyByUserId()
-  async findMe(@Request() req: RequestWithUser) {
-    const { userId } = req.user;
+  async findMe(@CurrentUser('userId') userId: string) {
     return this.societyService.findByUserId(userId);
   }
 
   @Get(':societyId')
+  @UseGuards(SocietyOwnershipGuard)
   @ApiGetSociety()
   async findOne(@Param('societyId') societyId: string) {
     return this.societyService.findOne(societyId);
   }
 
   @Patch(':societyId')
+  @Roles(UserRoles.ADMIN)
+  @UseGuards(SocietyOwnershipGuard)
   @ApiUpdateSociety()
   async update(
     @Param('societyId') societyId: string,

@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity } from "react-native";
+import React, { useLayoutEffect, useEffect } from "react";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,10 +8,16 @@ import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
+import FormPhone from "@/components/ui/form-phone";
+import { UpdateUserBody } from "@repo/schema";
+import { useGetMe, useUpdateUser } from "@repo/operations";
+import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function EditProfileScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { data: user, isLoading: isFetching } = useGetMe();
+  const { mutate: updateUser, isPending: isUpdating } = useUpdateUser(user?.userId || "");
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -19,17 +25,54 @@ export default function EditProfileScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const methods = useForm({
+  const methods = useForm<UpdateUserBody>({
     defaultValues: {
-      name: "Sunita Sharma",
-      phone: "98765 43210",
-      email: "sunita@gmail.com",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      phoneNumber: user?.phoneNumber || "",
+      email: user?.email || "",
     },
   });
 
-  const onSubmit = () => {
-    router.replace(Routes.Profile.Index);
+  useEffect(() => {
+    if (user) {
+      methods.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phoneNumber: user.phoneNumber || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, methods]);
+
+  const onSubmit = (values: UpdateUserBody) => {
+    updateUser(
+      {
+        firstName: values.firstName,
+        lastName: values.lastName,
+      },
+      {
+        onSuccess: () => {
+          router.replace(Routes.Profile.Index);
+        },
+        onError: (err) => {
+          const apiError = err as unknown as ApiErrorResponse;
+          Alert.alert("Update Failed", apiError.message || "Failed to update profile");
+        },
+      }
+    );
   };
+
+  if (isFetching) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Edit Profile" onBack={() => router.back()} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,7 +80,7 @@ export default function EditProfileScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScreenHeader title="Edit Profile" onBack={() => router.back()} />
+        <ScreenHeader title="Edit Profile" onBack={() => router.replace(Routes.Profile.Index)} />
 
         <ScrollView
           contentContainerStyle={styles.content}
@@ -58,19 +101,28 @@ export default function EditProfileScreen() {
 
           <FormProvider {...methods}>
             <FormInput
-              name="name"
-              label="Full Name"
-              placeholder="Sunita Sharma"
+              name="firstName"
+              label="First Name"
+              placeholder="First Name"
               required
             />
 
             <View style={styles.fieldGap} />
 
             <FormInput
-              name="phone"
+              name="lastName"
+              label="Last Name"
+              placeholder="Last Name"
+              required
+            />
+
+            <View style={styles.fieldGap} />
+
+            <FormPhone
+              name="phoneNumber"
               label="Mobile Number"
-              placeholder="98765 43210"
-              keyboardType="phone-pad"
+              placeholder="Enter 10-digit phone number"
+              editable={false}
               required
             />
 
@@ -79,8 +131,9 @@ export default function EditProfileScreen() {
             <FormInput
               name="email"
               label="Email"
-              placeholder="sunita@gmail.com"
+              placeholder="email@domain.com"
               keyboardType="email-address"
+              editable={false}
               required
             />
           </FormProvider>
@@ -91,6 +144,8 @@ export default function EditProfileScreen() {
             variant="primary"
             style={styles.submitButton}
             onPress={methods.handleSubmit(onSubmit)}
+            disabled={isUpdating}
+            loading={isUpdating}
           >
             Save Changes
           </Button>
@@ -153,5 +208,10 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

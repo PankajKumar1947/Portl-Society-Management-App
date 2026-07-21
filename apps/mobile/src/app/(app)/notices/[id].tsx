@@ -1,5 +1,6 @@
 import React, { useLayoutEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
@@ -74,7 +75,7 @@ const NOTICES: Notice[] = [
     date: "05 Jul 2026",
     description: "New parking slots allocated for visitors. Please collect your parking sticker from the security office. Residents with multiple vehicles must register the additional vehicle details at the admin office.",
     isNew: false,
-    publishedBy: { name: "Anil Kumar", role: "Guard" },
+    publishedBy: { name: "Rajesh Patel", role: "Admin" },
   },
 ];
 
@@ -93,17 +94,17 @@ export default function NoticeDetailsScreen() {
 
   if (!notice) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <ScreenHeader title="Notice Details" />
         <View style={styles.centered}>
           <Text style={styles.errorText}>Notice not found</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScreenHeader
         title="Notice Details"
         onBack={() => router.back()}
@@ -152,7 +153,7 @@ export default function NoticeDetailsScreen() {
           )}
         </Card>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

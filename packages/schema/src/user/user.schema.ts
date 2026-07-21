@@ -1,6 +1,12 @@
 import z from "zod";
 
-export const USER_ROLES = ["ADMIN", "GUARD", "RESIDENTS"] as const;
+export const USER_ROLES = ["SUPER_ADMIN", "ADMIN", "GUARD", "RESIDENTS"] as const;
+export const UserRoles = {
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  GUARD: "GUARD",
+  RESIDENTS: "RESIDENTS",
+} as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 
 export const userSchema = z.object({

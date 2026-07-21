@@ -230,6 +230,7 @@ export class AuthService {
         await this.tokenService.generateTokens({
           userId: user.userId,
           email: user.email,
+          role: user.role,
         });
 
       return {
@@ -257,7 +258,7 @@ export class AuthService {
   }
 
   private async generateTokens(user: UserDocument) {
-    const payload = { userId: user.userId, email: user.email };
+    const payload = { userId: user.userId, email: user.email, role: user.role };
     const { accessToken, refreshToken } =
       await this.tokenService.generateTokens(payload);
 

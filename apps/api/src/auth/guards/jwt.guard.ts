@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TokenService } from '../../shared/token/token.service';
+import { TokenPayload, TokenService } from '../../shared/token/token.service';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
@@ -14,7 +14,7 @@ export class JwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user?: { userId: string; email: string } }>();
+      .getRequest<Request & { user?: TokenPayload }>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {

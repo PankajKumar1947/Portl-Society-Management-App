@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from '@repo/schema';
 
 export interface TokenPayload {
   userId: string;
   email: string;
+  role: UserRole;
 }
 
 const ACCESS_TOKEN_EXPIRY = '15m';
