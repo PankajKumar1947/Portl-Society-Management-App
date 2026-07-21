@@ -6,6 +6,8 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { SocietyModule } from './society/society.module';
+import { TowerModule } from './tower/tower.module';
+import { FlatModule } from './flat/flat.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { SocietyModule } from './society/society.module';
     UserModule,
     AuthModule,
     SocietyModule,
+    TowerModule,
+    FlatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
