@@ -98,6 +98,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Floor Number"
           placeholder="e.g. 1"
           keyboardType="number-pad"
+          type="number"
         />
 
         <View style={styles.fieldGap} />
@@ -107,6 +108,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Number of Rooms (BHK)"
           placeholder="e.g. 3"
           keyboardType="number-pad"
+          type="number"
         />
 
         <View style={styles.fieldGap} />
@@ -116,6 +118,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Number of Bathrooms"
           placeholder="e.g. 2"
           keyboardType="number-pad"
+          type="number"
         />
 
         <View style={styles.fieldGap} />
@@ -125,6 +128,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Kitchen Count"
           placeholder="e.g. 1"
           keyboardType="number-pad"
+          type="number"
         />
 
         <View style={styles.fieldGap} />
@@ -134,6 +138,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Balcony Count"
           placeholder="e.g. 2"
           keyboardType="number-pad"
+          type="number"
         />
 
         <View style={styles.fieldGap} />
@@ -143,6 +148,7 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
           label="Hall / Living Room Count"
           placeholder="e.g. 1"
           keyboardType="number-pad"
+          type="number"
         />
 
         <Button

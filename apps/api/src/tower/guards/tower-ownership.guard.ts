@@ -25,8 +25,8 @@ export class TowerOwnershipGuard implements CanActivate {
       return true;
     }
 
-    let societyId = request.body.societyId || request.query.societyId;
-    const towerId = request.params.towerId;
+    let societyId = request.body?.societyId || request.query?.societyId;
+    const towerId = request.params?.towerId;
 
     if (!societyId && towerId) {
       const tower = await this.towerRepository.findOne(towerId);

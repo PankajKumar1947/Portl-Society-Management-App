@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import Badge from "@/components/ui/badge";
 import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
 import ResidentCard, { Resident } from "./_components/resident-card";
+import { useGetFlatDetails, useGetTowerDetails } from "@repo/operations";
 
 const MOCK_RESIDENTS: Resident[] = [
   {
@@ -33,11 +34,22 @@ export default function FlatDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
 
+  const { data: flat, isLoading: isFlatLoading } = useGetFlatDetails(flatId || "", { enabled: !!flatId });
+  const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
+
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  const isLoading = isFlatLoading || isTowerLoading;
+
+  const getStatusVariant = (status?: string): "success" | "warning" | "danger" => {
+    if (status === "OCCUPIED") return "success";
+    if (status === "VACANT") return "warning";
+    return "danger";
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -54,46 +66,52 @@ export default function FlatDetailsScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Flat Summary Banner */}
-        <Card variant="flat" style={styles.headerCard}>
-          <View style={styles.iconWrapper}>
-            <Ionicons name="home-outline" size={32} color={theme.colors.primaryDark} />
-          </View>
-          <Text style={styles.flatTitle}>Flat 101</Text>
-          <Text style={styles.towerText}>Tower A (Sunflower)</Text>
-          <Badge variant="success" style={styles.statusBadge}>
-            OCCUPIED
-          </Badge>
-        </Card>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {/* Flat Summary Banner */}
+          <Card variant="flat" style={styles.headerCard}>
+            <View style={styles.iconWrapper}>
+              <Ionicons name="home-outline" size={32} color={theme.colors.primaryDark} />
+            </View>
+            <Text style={styles.flatTitle}>Flat {flat?.flatNumber}</Text>
+            <Text style={styles.towerText}>{tower?.towerName || "Tower Details"}</Text>
+            <Badge variant={getStatusVariant(flat?.status)} style={styles.statusBadge}>
+              {flat?.status || "VACANT"}
+            </Badge>
+          </Card>
 
-        {/* Structural Specifications */}
-        <Card variant="flat" style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Flat Specifications</Text>
-          <InfoRow icon="bed-outline" label="Bedrooms" value="3 Rooms" />
-          <InfoRow icon="water-outline" label="Bathrooms" value="2 Bathrooms" />
-          <InfoRow icon="restaurant-outline" label="Kitchen" value="1 Kitchen" />
-          <InfoRow icon="film-outline" label="Balconies" value="2 Balconies" />
-          <InfoRow icon="tv-outline" label="Living / Hall Room" value="1 Hall Room" />
-        </Card>
+          {/* Structural Specifications */}
+          <Card variant="flat" style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>Flat Specifications</Text>
+            <InfoRow icon="bed-outline" label="Bedrooms" value={`${flat?.numberOfRooms || 0} Rooms`} />
+            <InfoRow icon="water-outline" label="Bathrooms" value={`${flat?.numberOfBathrooms || 0} Bathrooms`} />
+            <InfoRow icon="restaurant-outline" label="Kitchen" value={`${flat?.kitchen || 0} Kitchen`} />
+            <InfoRow icon="film-outline" label="Balconies" value={`${flat?.balcony || 0} Balconies`} />
+            <InfoRow icon="tv-outline" label="Living / Hall Room" value={`${flat?.hallRoom || 0} Hall Room`} />
+          </Card>
 
-        {/* Residents List Card */}
-        <Card variant="flat" style={styles.infoCard}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.sectionTitle}>Residents & Members</Text>
-            <IconButton
-              onPress={() => {}}
-              icon={<Ionicons name="add-circle-outline" size={22} color={theme.colors.primaryDark} />}
-              variant="ghost"
-              size="sm"
-            />
-          </View>
+          {/* Residents List Card */}
+          <Card variant="flat" style={styles.infoCard}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.sectionTitle}>Residents & Members</Text>
+              <IconButton
+                onPress={() => {}}
+                icon={<Ionicons name="add-circle-outline" size={22} color={theme.colors.primaryDark} />}
+                variant="ghost"
+                size="sm"
+              />
+            </View>
 
-          {MOCK_RESIDENTS.map((resident) => (
-            <ResidentCard key={resident.id} resident={resident} />
-          ))}
-        </Card>
-      </ScrollView>
+            {MOCK_RESIDENTS.map((resident) => (
+              <ResidentCard key={resident.id} resident={resident} />
+            ))}
+          </Card>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -152,5 +170,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

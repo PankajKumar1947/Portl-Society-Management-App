@@ -7,5 +7,4 @@ export class CreateTowerDto extends createZodDto(createTowerSchema) {
   location?: string;
   appNumber?: string;
   totalFloors?: number;
-  totalFlats?: number;
 }

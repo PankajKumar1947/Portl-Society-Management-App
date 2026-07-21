@@ -21,6 +21,7 @@ export interface FormInputProps extends Omit<TextInputProps, "onChangeText" | "v
   containerStyle?: ViewStyle;
   labelStyle?: TextStyle;
   inputStyle?: TextStyle;
+  type?: "text" | "number";
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -33,6 +34,7 @@ export const FormInput: React.FC<FormInputProps> = ({
   inputStyle,
   secureTextEntry,
   placeholder,
+  type = "text",
   ...props
 }) => {
   const { control } = useFormContext();
@@ -67,8 +69,19 @@ export const FormInput: React.FC<FormInputProps> = ({
                 setIsFocused(false);
               }}
               onFocus={() => setIsFocused(true)}
-              onChangeText={onChange}
-              value={value ?? ""}
+              onChangeText={(text) => {
+                if (type === "number") {
+                  if (text === "") {
+                    onChange(undefined);
+                  } else {
+                    const parsed = Number(text);
+                    onChange(isNaN(parsed) ? text : parsed);
+                  }
+                } else {
+                  onChange(text);
+                }
+              }}
+              value={value !== undefined && value !== null ? String(value) : ""}
               placeholder={placeholder}
               placeholderTextColor={theme.colors.textMuted}
               secureTextEntry={shouldSecure}

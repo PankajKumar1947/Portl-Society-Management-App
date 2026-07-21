@@ -7,7 +7,6 @@ export const towerSchema = z.object({
   location: z.string().optional(),
   appNumber: z.string().optional(),
   totalFloors: z.number().nonnegative().optional(),
-  totalFlats: z.number().nonnegative().optional(),
 });
 
 export const createTowerSchema = towerSchema.omit({

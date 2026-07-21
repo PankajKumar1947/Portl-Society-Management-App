@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, FlatList, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,48 +8,24 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Card from "@/components/ui/card";
 import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
-import FlatCard, { FlatItem } from "./[id]/flats/_components/flat-card";
-
-const MOCK_FLATS: FlatItem[] = [
-  {
-    id: "flt_101",
-    flatNumber: "101",
-    floorNumber: 1,
-    rooms: 3,
-    bathrooms: 2,
-    status: "OCCUPIED",
-    residentsCount: 4,
-  },
-  {
-    id: "flt_102",
-    flatNumber: "102",
-    floorNumber: 1,
-    rooms: 2,
-    bathrooms: 2,
-    status: "VACANT",
-    residentsCount: 0,
-  },
-  {
-    id: "flt_201",
-    flatNumber: "201",
-    floorNumber: 2,
-    rooms: 3,
-    bathrooms: 3,
-    status: "OCCUPIED",
-    residentsCount: 3,
-  },
-];
+import FlatCard from "./_components/flat-card";
+import { useGetTowerDetails, useGetFlats } from "@repo/operations";
 
 export default function TowerDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
 
+  const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
+  const { data: flats, isLoading: isFlatsLoading } = useGetFlats(id || "", { enabled: !!id });
+
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  const isLoading = isTowerLoading || isFlatsLoading;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -66,26 +42,32 @@ export default function TowerDetailsScreen() {
         }
       />
 
-      <FlatList
-        data={MOCK_FLATS}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <FlatCard
-            item={item}
-            onPress={() => router.push(Routes.Towers.Flats.Details(id as string, item.id))}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <Card variant="flat" style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Tower A (Sunflower)</Text>
-            <InfoRow icon="location-outline" label="Location" value="North Block, Gate 1" />
-            <InfoRow icon="key-outline" label="App Reg No" value="TWR-A101" />
-            <InfoRow icon="home-outline" label="Total Units" value="24 Flats" />
-          </Card>
-        }
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={flats || []}
+          keyExtractor={(item) => item.flatId}
+          renderItem={({ item }) => (
+            <FlatCard
+              item={item}
+              onPress={() => router.push(Routes.Towers.Flats.Details(id as string, item.flatId))}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <Card variant="flat" style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>{tower?.towerName || "Tower Details"}</Text>
+              <InfoRow icon="location-outline" label="Location" value={tower?.location || "N/A"} />
+              <InfoRow icon="key-outline" label="App Reg No" value={tower?.appNumber || "N/A"} />
+              <InfoRow icon="home-outline" label="Total Units" value={`${flats?.length || 0} Flats`} />
+            </Card>
+          }
+        />
+      )}
 
       <TouchableOpacity
         activeOpacity={0.85}
@@ -142,5 +124,10 @@ const styles = StyleSheet.create({
     color: theme.colors.surface,
     fontSize: 15,
     fontWeight: theme.fontWeights.bold,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

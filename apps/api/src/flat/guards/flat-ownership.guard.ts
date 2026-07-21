@@ -27,9 +27,9 @@ export class FlatOwnershipGuard implements CanActivate {
       return true;
     }
 
-    let societyId = request.body.societyId || request.query.societyId;
-    const flatId = request.params.flatId;
-    const towerId = request.body.towerId || request.query.towerId;
+    let societyId = request.body?.societyId || request.query?.societyId;
+    const flatId = request.params?.flatId;
+    const towerId = request.body?.towerId || request.query?.towerId;
 
     // 1. Resolve from Flat
     if (!societyId && flatId) {

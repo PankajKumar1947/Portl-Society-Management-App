@@ -1,15 +1,19 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { theme, Routes } from "@/constants";
+import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "./_components/tower-form";
 import { CreateTowerBody } from "@repo/schema";
+import { useGetMySociety, useCreateTower } from "@repo/operations";
+import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function CreateTowerScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { data: society, isLoading } = useGetMySociety({ enabled: true });
+  const { mutate: createTower, isPending: isCreating } = useCreateTower();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -18,7 +22,25 @@ export default function CreateTowerScreen() {
   }, [navigation]);
 
   const handleSubmit = (values: CreateTowerBody) => {
-    router.back();
+    if (!society?.societyId) {
+      Alert.alert("Error", "Society context not loaded. Please try again.");
+      return;
+    }
+    createTower(
+      {
+        ...values,
+        societyId: society.societyId,
+      },
+      {
+        onSuccess: () => {
+          router.back();
+        },
+        onError: (err) => {
+          const apiError = err as unknown as ApiErrorResponse;
+          Alert.alert("Failed to create tower", apiError.message || "Unknown error");
+        },
+      },
+    );
   };
 
   return (
@@ -29,15 +51,23 @@ export default function CreateTowerScreen() {
       >
         <ScreenHeader title="Add New Tower" onBack={() => router.back()} />
 
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          <TowerForm
-            onSubmit={handleSubmit}
-            submitButtonText="Create Tower"
-          />
-        </ScrollView>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            <TowerForm
+              societyId={society?.societyId}
+              onSubmit={handleSubmit}
+              submitButtonText="Create Tower"
+              isSubmitting={isCreating}
+            />
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -50,5 +80,10 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

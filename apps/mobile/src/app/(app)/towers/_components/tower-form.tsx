@@ -39,8 +39,7 @@ export function TowerForm<T extends CreateTowerBody | UpdateTowerBody = CreateTo
       towerName: values?.towerName || "",
       location: values?.location || "",
       appNumber: values?.appNumber || "",
-      totalFloors: values?.totalFloors,
-      totalFlats: values?.totalFlats,
+      totalFloors: values?.totalFloors || 0,
     } as DefaultValues<T>,
   });
 
@@ -83,15 +82,7 @@ export function TowerForm<T extends CreateTowerBody | UpdateTowerBody = CreateTo
           label="Total Floors"
           placeholder="e.g. 12"
           keyboardType="number-pad"
-        />
-
-        <View style={styles.fieldGap} />
-
-        <FormInput
-          name="totalFlats"
-          label="Total Flats"
-          placeholder="e.g. 48"
-          keyboardType="number-pad"
+          type="number"
         />
 
         <Button

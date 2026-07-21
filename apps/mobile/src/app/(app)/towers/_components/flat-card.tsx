@@ -4,21 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
-import { FlatStatus } from "@repo/schema";
-
-export interface FlatItem {
-  id: string;
-  flatNumber: string;
-  floorNumber: number;
-  rooms: number;
-  bathrooms: number;
-  status: FlatStatus;
-  residentsCount: number;
-}
+import { Flat, FlatStatus } from "@repo/schema";
 
 interface FlatCardProps {
-  item: FlatItem;
+  item: Flat;
   onPress: () => void;
+  residentsCount?: number;
 }
 
 const STATUS_BADGE_VARIANT: Record<FlatStatus, "success" | "warning" | "danger"> = {
@@ -27,7 +18,7 @@ const STATUS_BADGE_VARIANT: Record<FlatStatus, "success" | "warning" | "danger">
   UNDER_MAINTENANCE: "danger",
 };
 
-export const FlatCard: React.FC<FlatCardProps> = ({ item, onPress }) => {
+export const FlatCard: React.FC<FlatCardProps> = ({ item, onPress, residentsCount = 0 }) => {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
       <Card variant="flat" style={styles.card}>
@@ -38,19 +29,19 @@ export const FlatCard: React.FC<FlatCardProps> = ({ item, onPress }) => {
           <View style={styles.headerInfo}>
             <Text style={styles.flatNumber}>Flat {item.flatNumber}</Text>
             <Text style={styles.floorText}>
-              Floor {item.floorNumber} • {item.rooms} BHK
+              Floor {item.floorNumber || 0} • {item.numberOfRooms || 0} BHK
             </Text>
           </View>
-          <Badge variant={STATUS_BADGE_VARIANT[item.status]}>
-            {item.status}
+          <Badge variant={STATUS_BADGE_VARIANT[item.status || "VACANT"]}>
+            {item.status || "VACANT"}
           </Badge>
         </View>
 
         <View style={styles.cardFooter}>
           <Text style={styles.amenitiesText}>
-            {item.rooms} Rooms • {item.bathrooms} Baths
+            {item.numberOfRooms || 0} Rooms • {item.numberOfBathrooms || 0} Baths
           </Text>
-          <Text style={styles.residentText}>{item.residentsCount} Residents</Text>
+          <Text style={styles.residentText}>{residentsCount} Residents</Text>
         </View>
       </Card>
     </TouchableOpacity>

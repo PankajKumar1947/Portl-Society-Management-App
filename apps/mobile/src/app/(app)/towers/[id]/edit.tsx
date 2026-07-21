@@ -1,16 +1,21 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "../_components/tower-form";
 import { UpdateTowerBody } from "@repo/schema";
+import { useGetTowerDetails, useUpdateTower } from "@repo/operations";
+import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function EditTowerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
+  const { mutate: updateTower, isPending: isUpdating } = useUpdateTower(id || "");
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -18,17 +23,28 @@ export default function EditTowerScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const mockTowerData = {
-    towerName: "Tower A (Sunflower)",
-    location: "North Block, Gate 1",
-    appNumber: "TWR-A101",
-    totalFloors: 12,
-    totalFlats: 24,
+  const handleSubmit = (values: UpdateTowerBody) => {
+    if (!id) return;
+    updateTower(values, {
+      onSuccess: () => {
+        router.back();
+      },
+      onError: (err) => {
+        const apiError = err as unknown as ApiErrorResponse;
+        Alert.alert("Failed to update tower", apiError.message || "Unknown error");
+      },
+    });
   };
 
-  const handleSubmit = (values: UpdateTowerBody) => {
-    router.back();
-  };
+  const initialValues = tower
+    ? {
+        societyId: tower.societyId,
+        towerName: tower.towerName,
+        location: tower.location,
+        appNumber: tower.appNumber,
+        totalFloors: tower.totalFloors,
+      }
+    : undefined;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -38,17 +54,24 @@ export default function EditTowerScreen() {
       >
         <ScreenHeader title="Edit Tower" onBack={() => router.back()} />
 
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          <TowerForm<UpdateTowerBody>
-            isEdit
-            initialValues={mockTowerData}
-            onSubmit={handleSubmit}
-            submitButtonText="Update Tower"
-          />
-        </ScrollView>
+        {isTowerLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            <TowerForm<UpdateTowerBody>
+              isEdit
+              initialValues={initialValues}
+              onSubmit={handleSubmit}
+              submitButtonText="Update Tower"
+              isSubmitting={isUpdating}
+            />
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -61,5 +84,10 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

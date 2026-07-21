@@ -4,6 +4,10 @@ export * from "./react-queries/society";
 export * from "./routes/society";
 export * from "./react-queries/user";
 export * from "./routes/user";
+export * from "./react-queries/tower";
+export * from "./routes/tower";
+export * from "./react-queries/flat";
+export * from "./routes/flat";
 export {
   setAccessToken,
   setRefreshToken,

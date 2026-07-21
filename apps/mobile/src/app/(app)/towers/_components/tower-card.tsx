@@ -4,17 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
-
-export interface TowerItem {
-  id: string;
-  towerName: string;
-  location: string;
-  appNumber: string;
-  flatsCount: number;
-}
+import { Tower } from "@repo/schema";
 
 interface TowerCardProps {
-  item: TowerItem;
+  item: Tower;
   onPress: () => void;
 }
 
@@ -31,7 +24,7 @@ export const TowerCard: React.FC<TowerCardProps> = ({ item, onPress }) => {
 
             <View style={styles.detailRow}>
               <Ionicons name="location-outline" size={14} color={theme.colors.textMuted} />
-              <Text style={styles.detailText}>{item.location}</Text>
+              <Text style={styles.detailText}>{item.location || "N/A"}</Text>
             </View>
           </View>
           <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
@@ -39,10 +32,10 @@ export const TowerCard: React.FC<TowerCardProps> = ({ item, onPress }) => {
 
         <View style={styles.cardFooter}>
           <View style={styles.badgeRow}>
-            <Text style={styles.appNumberText}>App No: {item.appNumber}</Text>
+            <Text style={styles.appNumberText}>App No: {item.appNumber || "N/A"}</Text>
           </View>
           <Badge variant="primary">
-            {`${item.flatsCount} Flats`}
+            {`${item.totalFloors || 0} Floors`}
           </Badge>
         </View>
       </Card>

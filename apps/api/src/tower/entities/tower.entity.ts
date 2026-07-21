@@ -30,9 +30,6 @@ export class Tower {
 
   @Prop()
   totalFloors?: number;
-
-  @Prop()
-  totalFlats?: number;
 }
 
 export const TowerSchema = SchemaFactory.createForClass(Tower);
