@@ -5,7 +5,10 @@ export const Routes = {
 
   App: app(""),
 
-  Onboarding: "/(onboarding)",
+  Onboarding: {
+    Index: "/(onboarding)",
+    SetupSociety: "/(onboarding)/setup-society",
+  },
 
   Auth: {
     Login: "/login",

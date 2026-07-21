@@ -25,7 +25,7 @@ export type LoginData = {
   message: string;
   accessToken: string;
   refreshToken: string;
-  onboardingCompleted: boolean;
+  isSocietyCreated: boolean;
   name?: string;
 };
 
@@ -38,7 +38,7 @@ export type VerifyOtpData = {
   message: string;
   accessToken: string;
   refreshToken: string;
-  onboardingCompleted: boolean;
+  isSocietyCreated: boolean;
   name?: string;
 };
 

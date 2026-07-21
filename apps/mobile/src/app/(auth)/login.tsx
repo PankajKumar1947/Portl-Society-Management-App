@@ -40,8 +40,12 @@ export default function LoginScreen() {
   const onSubmit = (data: LoginBody) => {
     login(data, {
       onSuccess: async (res) => {
-        await signIn(res.accessToken, res.refreshToken);
-        router.replace(Routes.Root);
+        await signIn(res.accessToken, res.refreshToken, res.isSocietyCreated);
+        if (res.isSocietyCreated) {
+          router.replace("/");
+        } else {
+          router.replace(Routes.Onboarding.SetupSociety);
+        }
       },
       onError: (err) => {
         const apiError = err as unknown as ApiErrorResponse;

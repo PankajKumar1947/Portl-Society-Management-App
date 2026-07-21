@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,12 +7,19 @@ import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import ProfileRow from "@/components/ui/profile-row";
+import { useAuth } from "@/context/auth-context";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    router.replace(Routes.Auth.Login);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.replace(Routes.Auth.Login);
+    } catch (error) {
+      Alert.alert("Logout Failed", "Failed to log out. Please try again.");
+    }
   };
 
   const menuItems = [

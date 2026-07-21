@@ -22,6 +22,8 @@ import {
   ResendOtpDto,
 } from './dto/auth.dto';
 
+import { SocietyRepository } from '../society/society.repository';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,7 +32,8 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
-  ) { }
+    private readonly societyRepository: SocietyRepository,
+  ) {}
 
   async register(registerDto: RegisterDto) {
     const { firstName, lastName, email, phone, password } = registerDto;
@@ -230,11 +233,15 @@ export class AuthService {
     const { accessToken, refreshToken } =
       await this.tokenService.generateTokens(payload);
 
+    const existingSociety = await this.societyRepository.findByUserId(
+      user.userId,
+    );
+
     return {
       message: 'Authentication successful',
       accessToken,
       refreshToken,
-      onboardingCompleted: true,
+      isSocietyCreated: !!existingSociety,
       name: `${user.firstName} ${user.lastName}`.trim(),
     };
   }

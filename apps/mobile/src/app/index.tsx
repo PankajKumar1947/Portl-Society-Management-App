@@ -1,10 +1,11 @@
-import { Redirect } from "expo-router";
-import { useAuth } from "../context/auth-context";
+import { Redirect, Href } from "expo-router";
+import { useAuth } from "@/context/auth-context";
 import { ActivityIndicator, View } from "react-native";
-import { theme } from "../constants";
+import { theme } from "@/constants";
+import { Routes } from "@/constants/routes";
 
 export default function Index() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isSocietyCreated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -15,7 +16,11 @@ export default function Index() {
   }
 
   if (!isAuthenticated) {
-    return <Redirect href="/(onboarding)" />;
+    return <Redirect href={Routes.Onboarding.Index as Href} />;
+  }
+
+  if (!isSocietyCreated) {
+    return <Redirect href={Routes.Onboarding.SetupSociety as Href} />;
   }
 
   return <Redirect href="/(app)" />;

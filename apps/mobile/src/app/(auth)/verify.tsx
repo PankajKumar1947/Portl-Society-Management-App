@@ -64,8 +64,12 @@ export default function VerifyScreen() {
       { email, otp: data.otp },
       {
         onSuccess: async (res) => {
-          await signIn(res.accessToken, res.refreshToken);
-          router.replace(Routes.Root);
+          await signIn(res.accessToken, res.refreshToken, res.isSocietyCreated);
+          if (res.isSocietyCreated) {
+            router.replace("/");
+          } else {
+            router.replace(Routes.Onboarding.SetupSociety);
+          }
         },
         onError: (err) => {
           Alert.alert("Verification Failed", err.message);

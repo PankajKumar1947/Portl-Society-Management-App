@@ -1,5 +1,7 @@
 export * from "./react-queries/auth";
 export * from "./routes/auth";
+export * from "./react-queries/society";
+export * from "./routes/society";
 export {
   setAccessToken,
   setRefreshToken,
