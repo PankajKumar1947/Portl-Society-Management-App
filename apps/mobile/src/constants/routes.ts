@@ -59,6 +59,33 @@ export const Routes = {
     Edit: app("/society/edit"),
   },
 
+  Towers: {
+    Index: app("/towers"),
+    Create: app("/towers/create"),
+    Details: (id: string) => ({
+      pathname: app("/towers/[id]"),
+      params: { id },
+    }),
+    Edit: (id: string) => ({
+      pathname: app("/towers/[id]/edit"),
+      params: { id },
+    }),
+    Flats: {
+      Create: (towerId: string) => ({
+        pathname: app("/towers/[id]/flats/create"),
+        params: { id: towerId },
+      }),
+      Details: (towerId: string, flatId: string) => ({
+        pathname: app("/towers/[id]/flats/[flatId]"),
+        params: { id: towerId, flatId },
+      }),
+      Edit: (towerId: string, flatId: string) => ({
+        pathname: app("/towers/[id]/flats/[flatId]/edit"),
+        params: { id: towerId, flatId },
+      }),
+    },
+  },
+
   Community: {
     Index: app("/community"),
   },

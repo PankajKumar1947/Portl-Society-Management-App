@@ -39,6 +39,7 @@ export default function HomeScreen() {
 
   const servicesGrid: GridItem[] = [
     { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index) },
+    { id: "towers", title: "Towers", icon: "cube-outline", route: () => router.push(Routes.Towers.Index) },
     { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index) },
     { id: "amenities", title: "Amenities", icon: "home-outline", route: () => router.push(Routes.Amenities.Index) },
     { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index) },

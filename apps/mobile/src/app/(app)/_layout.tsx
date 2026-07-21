@@ -59,6 +59,7 @@ export default function AppLayout() {
 
       <Tabs.Screen name="society/index" options={{ href: null }} />
       <Tabs.Screen name="society/edit" options={{ href: null }} />
+      <Tabs.Screen name="towers" options={{ href: null }} />
       <Tabs.Screen name="notices" options={{ href: null }} />
       <Tabs.Screen name="helpdesk" options={{ href: null }} />
       <Tabs.Screen name="polls" options={{ href: null }} />
