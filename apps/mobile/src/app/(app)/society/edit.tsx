@@ -79,7 +79,18 @@ export default function EditSocietyScreen() {
     primaryContactNumber: society.primaryContactNumber,
     primaryContactEmail: society.primaryContactEmail,
     establishedYear: society.establishedYear,
-    address: society.address,
+    addressLine: society.addressLine,
+    city: society.city,
+    state: society.state,
+    country: society.country,
+    pincode: society.pincode,
+    geoLocation: society.geoLocation,
+    supportMail: society.supportMail,
+    supportCall: society.supportCall,
+    website: society.website,
+    logo: society.logo,
+    coverImage: society.coverImage,
+    status: society.status,
   };
 
   return (

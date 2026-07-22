@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { createSocietySchema, SocietyType } from '@repo/schema';
+import { createSocietySchema, SocietyType, SocietyStatus } from '@repo/schema';
 
 export class CreateSocietyDto extends createZodDto(createSocietySchema) {
   societyName!: string;
@@ -8,5 +8,16 @@ export class CreateSocietyDto extends createZodDto(createSocietySchema) {
   primaryContactNumber!: string;
   primaryContactEmail!: string;
   establishedYear?: number;
-  address?: string;
+  addressLine!: string;
+  city!: string;
+  state!: string;
+  country!: string;
+  pincode!: string;
+  geoLocation?: string;
+  supportMail?: string;
+  supportCall?: string;
+  website?: string;
+  logo?: string;
+  coverImage?: string;
+  status!: SocietyStatus;
 }

@@ -112,11 +112,11 @@ export default function SocietyDetailsScreen() {
               value={society.establishedYear.toString()}
             />
           )}
-          {society.address && (
+          {society.addressLine && (
             <InfoRow
               icon="location-outline"
               label="Address"
-              value={society.address}
+              value={`${society.addressLine}, ${society.city}, ${society.state}, ${society.country} - ${society.pincode}`}
             />
           )}
         </Card>

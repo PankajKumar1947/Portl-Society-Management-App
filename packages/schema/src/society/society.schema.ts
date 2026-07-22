@@ -10,6 +10,9 @@ export const SOCIETY_TYPES = [
 
 export const societyTypeSchema = z.enum(SOCIETY_TYPES);
 
+export const SOCIETY_STATUSES = ["open", "closed"] as const;
+export const societyStatusSchema = z.enum(SOCIETY_STATUSES);
+
 export const societySchema = z.object({
   societyId: z.string().min(1, "Society ID is required"),
   userId: z.string().min(1, "User ID is required"),
@@ -28,7 +31,18 @@ export const societySchema = z.object({
     .min(1800, "Established year must be 1800 or later")
     .max(new Date().getFullYear(), "Established year cannot be in the future")
     .optional(),
-  address: z.string().min(5, "Address must be at least 5 characters").optional(),
+  addressLine: z.string().min(1, "Address line is required").max(200),
+  city: z.string().min(1, "City is required").max(100),
+  state: z.string().min(1, "State is required").max(100),
+  country: z.string().min(1, "Country is required").max(100),
+  pincode: z.string().min(6, "Pincode must be at least 6 characters").max(10),
+  geoLocation: z.string().optional(),
+  supportMail: z.string().email("Invalid support email").optional().or(z.literal("")),
+  supportCall: z.string().optional(),
+  website: z.string().url("Invalid website URL").optional().or(z.literal("")),
+  logo: z.string().optional(),
+  coverImage: z.string().optional(),
+  status: societyStatusSchema.default("open"),
 });
 
 export const createSocietySchema = societySchema.omit({
@@ -48,11 +62,16 @@ export const SOCIETY_TYPE_OPTIONS = [
   { label: "Mixed Use Building", value: "MIXED_USE" },
 ] as const;
 
+export const SOCIETY_STATUS_OPTIONS = [
+  { label: "Open / Active", value: "open" },
+  { label: "Closed / Inactive", value: "closed" },
+] as const;
+
 export const getEstablishedYearOptions = () => {
   const currentYear = new Date().getFullYear();
   return Array.from({ length: currentYear - 1800 + 1 }, (_, i) => {
     const year = currentYear - i;
-    return { label: year.toString(), value: year.toString() };
+    return { label: year.toString(), value: year };
   });
 };
 

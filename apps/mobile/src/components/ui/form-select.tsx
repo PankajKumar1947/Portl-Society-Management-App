@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export interface SelectOption {
   label: string;
-  value: string;
+  value: string | number;
 }
 
 export interface FormSelectProps {
@@ -48,7 +48,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
       render={({ field: { value }, fieldState: { error } }) => {
         const selectedOption = options.find((opt) => opt.value === value);
 
-        const handleSelect = (optionValue: string) => {
+        const handleSelect = (optionValue: string | number) => {
           setValue(name, optionValue, { shouldValidate: true });
           setModalVisible(false);
         };
@@ -106,7 +106,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
 
                       <FlatList
                         data={options}
-                        keyExtractor={(item) => item.value}
+                        keyExtractor={(item) => item.value.toString()}
                         contentContainerStyle={styles.listContent}
                         renderItem={({ item }) => {
                           const isSelected = item.value === value;

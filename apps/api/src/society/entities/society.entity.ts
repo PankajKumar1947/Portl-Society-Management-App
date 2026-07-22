@@ -44,8 +44,41 @@ export class Society {
   @Prop()
   establishedYear?: number;
 
+  @Prop({ required: true })
+  addressLine!: string;
+
+  @Prop({ required: true })
+  city!: string;
+
+  @Prop({ required: true })
+  state!: string;
+
+  @Prop({ required: true })
+  country!: string;
+
+  @Prop({ required: true })
+  pincode!: string;
+
   @Prop()
-  address?: string;
+  geoLocation?: string;
+
+  @Prop()
+  supportMail?: string;
+
+  @Prop()
+  supportCall?: string;
+
+  @Prop()
+  website?: string;
+
+  @Prop()
+  logo?: string;
+
+  @Prop()
+  coverImage?: string;
+
+  @Prop({ default: 'open', enum: ['open', 'closed'] })
+  status?: string;
 }
 
 export const SocietySchema = SchemaFactory.createForClass(Society);

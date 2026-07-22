@@ -8,6 +8,7 @@ import {
   CreateSocietyBody,
   UpdateSocietyBody,
   SOCIETY_TYPE_OPTIONS,
+  SOCIETY_STATUS_OPTIONS,
   ESTABLISHED_YEAR_OPTIONS,
 } from "@repo/schema";
 import FormInput from "@/components/ui/form-input";
@@ -43,7 +44,18 @@ export function SocietyForm<T extends CreateSocietyBody | UpdateSocietyBody = Cr
       primaryContactNumber: initialValues?.primaryContactNumber || "",
       primaryContactEmail: initialValues?.primaryContactEmail || "",
       establishedYear: initialValues?.establishedYear || new Date().getFullYear(),
-      address: initialValues?.address || "",
+      addressLine: initialValues?.addressLine || "",
+      city: initialValues?.city || "",
+      state: initialValues?.state || "",
+      country: initialValues?.country || "India",
+      pincode: initialValues?.pincode || "",
+      geoLocation: initialValues?.geoLocation || "",
+      supportMail: initialValues?.supportMail || "",
+      supportCall: initialValues?.supportCall || "",
+      website: initialValues?.website || "",
+      logo: initialValues?.logo || "",
+      coverImage: initialValues?.coverImage || "",
+      status: initialValues?.status || "open",
     } as DefaultValues<T>,
   });
 
@@ -101,12 +113,96 @@ export function SocietyForm<T extends CreateSocietyBody | UpdateSocietyBody = Cr
         />
 
         <FormInput
-          name="address"
-          label="Address"
-          placeholder="Full address of the society"
-          multiline
-          numberOfLines={3}
+          name="addressLine"
+          label="Address Line"
+          placeholder="Street address, building, suite"
+          required
         />
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <FormInput
+              name="city"
+              label="City"
+              placeholder="e.g. Bangalore"
+              required
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <FormInput
+              name="state"
+              label="State"
+              placeholder="e.g. Karnataka"
+              required
+            />
+          </View>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <FormInput
+              name="country"
+              label="Country"
+              placeholder="e.g. India"
+              required
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <FormInput
+              name="pincode"
+              label="Pincode"
+              placeholder="e.g. 560001"
+              required
+            />
+          </View>
+        </View>
+
+        <FormInput
+          name="geoLocation"
+          label="Geo-Location Coordinates"
+          placeholder="e.g. 12.9716, 77.5946"
+        />
+
+        <FormInput
+          name="supportMail"
+          label="Support Email Address"
+          placeholder="e.g. support@meadows.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <FormInput
+          name="supportCall"
+          label="Support Phone Number"
+          placeholder="e.g. +91 98765 43210"
+        />
+
+        <FormInput
+          name="website"
+          label="Society Website"
+          placeholder="e.g. https://greenmeadows.com"
+          autoCapitalize="none"
+        />
+
+        <FormInput
+          name="logo"
+          label="Logo Image URL"
+          placeholder="Logo image URL or local asset path"
+        />
+
+        <FormInput
+          name="coverImage"
+          label="Cover Image URL"
+          placeholder="Cover background image URL"
+        />
+
+        {isEdit && (
+          <FormSelect
+            name="status"
+            label="Society Operational Status"
+            options={SOCIETY_STATUS_OPTIONS}
+          />
+        )}
 
         <Button
           onPress={handleSubmit(handleFormSubmit)}
