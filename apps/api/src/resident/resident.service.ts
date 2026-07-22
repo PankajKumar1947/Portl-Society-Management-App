@@ -87,23 +87,47 @@ export class ResidentService {
     residentId: string,
     dto: ResidentVehicleDto,
   ): Promise<ResidentDocument> {
-    const data = {
-      vehicleType: dto.vehicleType,
-      vehicleNumber: dto.vehicleNumber,
-      vehicleBrand: dto.vehicleBrand,
-      vehicleModel: dto.vehicleModel,
-      vehicleColor: dto.vehicleColor,
-      parkingSlot: dto.parkingSlot,
-    };
-    const resident = await this.repository.update(residentId, data);
+    const resident = await this.repository.findOne(residentId);
     if (!resident) {
       throw new NotFoundException(`Resident with ID "${residentId}" not found`);
     }
-    return resident;
+
+    // Clear old vehicles and insert the new array of vehicles
+    await this.repository.vehicleModel.deleteMany({ residentId }).exec();
+
+    if (dto.vehicles && dto.vehicles.length > 0) {
+      const vehiclesToCreate = dto.vehicles.map((v) => ({
+        ...v,
+        residentId,
+      }));
+      await this.repository.vehicleModel.insertMany(vehiclesToCreate);
+    }
+
+    // Return populated resident document
+    const updatedResident = await this.repository.findOne(residentId);
+    if (!updatedResident) {
+      throw new NotFoundException(`Resident with ID "${residentId}" not found after update`);
+    }
+    return updatedResident;
   }
 
   async create(dto: CreateResidentDto): Promise<ResidentDocument> {
-    return this.repository.create(dto);
+    const { vehicles, ...residentData } = dto;
+    const resident = await this.repository.create(residentData);
+
+    if (vehicles && vehicles.length > 0) {
+      const vehiclesToCreate = vehicles.map((v) => ({
+        ...v,
+        residentId: resident.residentId,
+      }));
+      await this.repository.vehicleModel.insertMany(vehiclesToCreate);
+    }
+
+    const populated = await this.repository.findOne(resident.residentId);
+    if (!populated) {
+      throw new NotFoundException(`Resident with ID "${resident.residentId}" not found after create`);
+    }
+    return populated;
   }
 
   async findAll(

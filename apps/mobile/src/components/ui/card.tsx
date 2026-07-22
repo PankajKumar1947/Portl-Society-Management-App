@@ -1,11 +1,11 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle, Pressable, Platform } from "react-native";
+import { View, StyleSheet, ViewStyle, Pressable, Platform, StyleProp } from "react-native";
 import { theme } from "../../constants";
 
 export interface CardProps {
   children: React.ReactNode;
   onPress?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   variant?: "flat" | "elevated" | "outlined";
 }
 

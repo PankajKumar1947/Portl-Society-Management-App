@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { theme } from "../../constants";
 import { Button } from "./button";
+import { Ionicons } from "@expo/vector-icons";
 
 export interface ModalProps {
   visible: boolean;
@@ -47,6 +48,23 @@ export const Modal: React.FC<ModalProps> = ({
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={[styles.modalContainer, containerStyle]}>
+              {/* Status Icons at the top */}
+              {confirmVariant === "danger" && (
+                <View style={styles.iconContainer}>
+                  <Ionicons name="alert-circle" size={54} color={theme.colors.danger} />
+                </View>
+              )}
+              {confirmVariant === "success" && (
+                <View style={styles.iconContainer}>
+                  <Ionicons name="checkmark-circle" size={54} color={theme.colors.success} />
+                </View>
+              )}
+              {confirmVariant === "primary" && (
+                <View style={styles.iconContainer}>
+                  <Ionicons name="information-circle" size={54} color={theme.colors.primary} />
+                </View>
+              )}
+
               <Text style={styles.title}>{title}</Text>
 
               {description ? (
@@ -67,16 +85,16 @@ export const Modal: React.FC<ModalProps> = ({
                 ) : null}
                 {onConfirm ? (
                   <Button
-                    variant={confirmVariant === "danger" ? "outline" : "primary"}
+                    variant="primary"
                     onPress={onConfirm}
                     style={{
                       flex: 1,
                       height: 48,
-                      ...(confirmVariant === "danger" ? { borderColor: theme.colors.danger } : {}),
+                      ...(confirmVariant === "danger" ? { backgroundColor: theme.colors.danger } : {}),
                     }}
                     textStyle={
                       confirmVariant === "danger"
-                        ? { color: theme.colors.danger }
+                        ? { color: "#ffffff" }
                         : undefined
                     }
                   >
@@ -126,6 +144,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     textAlign: "center",
     marginBottom: theme.spacing.xs,
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: theme.spacing.sm,
   },
   description: {
     fontSize: 14,

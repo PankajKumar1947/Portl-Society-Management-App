@@ -11,6 +11,7 @@ import InfoRow from "@/components/ui/info-row";
 import Button from "@/components/ui/button";
 import Avatar from "@/components/ui/avatar";
 import { useGetResidentDetail, useDeleteResident } from "@repo/operations";
+import { useAlert } from "@/context/alert-context";
 
 export default function ResidentDetailsScreen() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ResidentDetailsScreen() {
 
   const { data: resident, isLoading } = useGetResidentDetail(id || "", { enabled: !!id });
   const { mutate: deleteResidentMutation } = useDeleteResident(id || "");
+  const { showAlert } = useAlert();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -71,27 +73,20 @@ export default function ResidentDetailsScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Remove Resident",
-      `Are you sure you want to remove ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => {
-            deleteResidentMutation(undefined, {
-              onSuccess: () => {
-                router.back();
-              },
-              onError: () => {
-                Alert.alert("Error", "Failed to remove resident");
-              },
-            });
+    showAlert({
+      title: "Remove Resident",
+      description: `Are you sure you want to remove ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}?`,
+      variant: "warning",
+      confirmLabel: "Remove",
+      cancelLabel: "Cancel",
+      onConfirm: () => {
+        deleteResidentMutation(undefined, {
+          onSuccess: () => {
+            router.back();
           },
-        },
-      ]
-    );
+        });
+      },
+    });
   };
 
   return (
@@ -121,7 +116,7 @@ export default function ResidentDetailsScreen() {
           <Text style={styles.userName}>
             {resident.userDetails?.firstName || ""} {resident.userDetails?.lastName || ""}
           </Text>
-          
+
           <View style={styles.badgeRow}>
             <Badge variant={resident.residentType === "OWNER" ? "success" : "info"}>
               {resident.residentType.replace("_", " ")}
@@ -190,39 +185,41 @@ export default function ResidentDetailsScreen() {
         </Card>
 
         {/* Vehicle Details */}
-        {resident.vehicleType !== "NONE" && (
+        {resident.vehicles && resident.vehicles.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Vehicle Details</Text>
-            <Card style={styles.detailsCard}>
-              <InfoRow
-                label="Type"
-                value={resident.vehicleType === "TWO_WHEELER" ? "2 Wheeler" : "4 Wheeler"}
-              />
-              {resident.vehicleNumber && (
+            {resident.vehicles.map((vhc: any, index: number) => (
+              <Card key={vhc.vehicleId || index} style={[styles.detailsCard, { marginBottom: theme.spacing.sm }]}>
                 <InfoRow
-                  label="Plate Number"
-                  value={resident.vehicleNumber}
+                  label="Type"
+                  value={vhc.vehicleType === "TWO_WHEELER" ? "2 Wheeler" : "4 Wheeler"}
                 />
-              )}
-              {resident.vehicleBrand && (
-                <InfoRow
-                  label="Make & Model"
-                  value={`${resident.vehicleBrand} ${resident.vehicleModel || ""}`}
-                />
-              )}
-              {resident.vehicleColor && (
-                <InfoRow
-                  label="Color"
-                  value={resident.vehicleColor}
-                />
-              )}
-              {resident.parkingSlot && (
-                <InfoRow
-                  label="Parking Lot Slot"
-                  value={resident.parkingSlot}
-                />
-              )}
-            </Card>
+                {vhc.vehicleNumber && (
+                  <InfoRow
+                    label="Plate Number"
+                    value={vhc.vehicleNumber}
+                  />
+                )}
+                {vhc.vehicleBrand && (
+                  <InfoRow
+                    label="Make & Model"
+                    value={`${vhc.vehicleBrand} ${vhc.vehicleModel || ""}`}
+                  />
+                )}
+                {vhc.vehicleColor && (
+                  <InfoRow
+                    label="Color"
+                    value={vhc.vehicleColor}
+                  />
+                )}
+                {vhc.parkingSlot && (
+                  <InfoRow
+                    label="Parking Lot Slot"
+                    value={vhc.parkingSlot}
+                  />
+                )}
+              </Card>
+            ))}
           </>
         )}
 
@@ -248,7 +245,7 @@ export default function ResidentDetailsScreen() {
         {/* Danger Zone */}
         <Button
           onPress={handleDelete}
-          variant="ghost"
+          variant="outline"
           style={styles.deleteButton}
           textStyle={{ color: theme.colors.danger }}
         >

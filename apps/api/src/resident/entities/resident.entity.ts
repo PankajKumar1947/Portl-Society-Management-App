@@ -20,53 +20,34 @@ export class Resident {
     unique: true,
     default: () => `res_${crypto.randomBytes(10).toString('hex')}`,
   })
-  residentId!: string;
+  residentId: string;
 
   @Prop({ required: true, index: true })
-  societyId!: string;
+  societyId: string;
 
   @Prop({ required: true, index: true })
-  userId!: string;
+  userId: string;
 
   @Prop({ required: true, enum: RESIDENT_TYPES })
-  residentType!: string;
+  residentType: string;
 
   @Prop({ enum: RELATIONSHIPS })
   relationship?: string;
 
   @Prop({ required: true, index: true })
-  towerId!: string;
+  towerId: string;
 
   @Prop({ required: true })
-  flatNumber!: string;
+  flatNumber: string;
 
   @Prop({ required: true })
-  moveInDate!: string;
+  moveInDate: string;
 
   @Prop({ required: true, enum: OWNERSHIP_STATUSES })
-  ownershipStatus!: string;
+  ownershipStatus: string;
 
   @Prop({ required: true, default: false })
-  isPrimary!: boolean;
-
-  // Vehicles
-  @Prop({ enum: VEHICLE_TYPES, default: 'NONE' })
-  vehicleType!: string;
-
-  @Prop()
-  vehicleNumber?: string;
-
-  @Prop()
-  vehicleBrand?: string;
-
-  @Prop()
-  vehicleModel?: string;
-
-  @Prop()
-  vehicleColor?: string;
-
-  @Prop()
-  parkingSlot?: string;
+  isPrimary: boolean;
 
   // Documents
   @Prop({ enum: DOC_TYPES, default: 'NONE' })
@@ -83,6 +64,13 @@ ResidentSchema.virtual('userDetails', {
   localField: 'userId',
   foreignField: 'userId',
   justOne: true,
+});
+
+ResidentSchema.virtual('vehicles', {
+  ref: 'Vehicle',
+  localField: 'residentId',
+  foreignField: 'residentId',
+  justOne: false,
 });
 
 ResidentSchema.set('toJSON', { virtuals: true });

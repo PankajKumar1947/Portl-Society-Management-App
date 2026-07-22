@@ -11,6 +11,7 @@ import {
   residentPersonalSchema,
   residentAllotmentSchema,
   residentVehicleSchema,
+  vehicleSchema,
 } from "./resident.schema";
 import { ApiResponse } from "../shared/api.type";
 
@@ -34,3 +35,4 @@ export type ResidentListResponse = ApiResponse<ResidentData[]>;
 export type ResidentPersonalInput = z.infer<typeof residentPersonalSchema>;
 export type ResidentAllotmentInput = z.infer<typeof residentAllotmentSchema>;
 export type ResidentVehicleInput = z.infer<typeof residentVehicleSchema>;
+export type VehicleInput = z.infer<typeof vehicleSchema>;

@@ -37,7 +37,7 @@ export default function EditResidentScreen() {
       {
         userId: resident.userId,
         ...values,
-      } as any,
+      },
       {
         onSuccess: () => {
           showAlert({
@@ -52,7 +52,7 @@ export default function EditResidentScreen() {
 
   const handleAllotmentSubmit = (values: Omit<ResidentAllotmentInput, "userId">) => {
     updateResidentMutation(
-      values as any,
+      values,
       {
         onSuccess: () => {
           showAlert({
@@ -67,7 +67,7 @@ export default function EditResidentScreen() {
 
   const handleVehicleSubmit = (values: ResidentVehicleInput) => {
     updateResidentMutation(
-      values as any,
+      values,
       {
         onSuccess: () => {
           showAlert({
@@ -131,12 +131,7 @@ export default function EditResidentScreen() {
   };
 
   const initialVehicleValues: ResidentVehicleInput = {
-    vehicleType: resident.vehicleType,
-    vehicleNumber: resident.vehicleNumber,
-    vehicleBrand: resident.vehicleBrand,
-    vehicleModel: resident.vehicleModel,
-    vehicleColor: resident.vehicleColor,
-    parkingSlot: resident.parkingSlot,
+    vehicles: (resident).vehicles || [],
   };
 
   return (

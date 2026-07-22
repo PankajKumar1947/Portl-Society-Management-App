@@ -4,8 +4,8 @@ import {
   ResidentKind,
   RelationshipType,
   OwnershipStatus,
-  VehicleType,
   DocType,
+  VehicleInput,
 } from '@repo/schema';
 
 export class CreateResidentDto extends createZodDto(createResidentSchema) {
@@ -18,12 +18,7 @@ export class CreateResidentDto extends createZodDto(createResidentSchema) {
   moveInDate!: string;
   ownershipStatus!: OwnershipStatus;
   isPrimary!: boolean;
-  vehicleType!: VehicleType;
-  vehicleNumber?: string;
-  vehicleBrand?: string;
-  vehicleModel?: string;
-  vehicleColor?: string;
-  parkingSlot?: string;
+  vehicles!: VehicleInput[];
   docType!: DocType;
   documentNumber?: string;
 }

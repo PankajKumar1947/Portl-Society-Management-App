@@ -14,6 +14,15 @@ export const vehicleTypeSchema = z.enum(VEHICLE_TYPES);
 export const DOC_TYPES = ["NONE", "AADHAR", "PAN", "PASSPORT", "VOTER_ID"] as const;
 export const docTypeSchema = z.enum(DOC_TYPES);
 
+export const vehicleSchema = z.object({
+  vehicleType: vehicleTypeSchema,
+  vehicleNumber: z.string().min(1, "Vehicle number is required"),
+  vehicleBrand: z.string().optional().or(z.literal("")),
+  vehicleModel: z.string().optional().or(z.literal("")),
+  vehicleColor: z.string().optional().or(z.literal("")),
+  parkingSlot: z.string().optional().or(z.literal("")),
+});
+
 export const residentSchema = z.object({
   residentId: z.string().min(1, "Resident ID is required"),
   societyId: z.string().min(1, "Society ID is required"),
@@ -27,12 +36,7 @@ export const residentSchema = z.object({
   isPrimary: z.boolean().default(false),
 
   // Vehicles
-  vehicleType: vehicleTypeSchema.default("NONE"),
-  vehicleNumber: z.string().optional().or(z.literal("")),
-  vehicleBrand: z.string().optional().or(z.literal("")),
-  vehicleModel: z.string().optional().or(z.literal("")),
-  vehicleColor: z.string().optional().or(z.literal("")),
-  parkingSlot: z.string().optional().or(z.literal("")),
+  vehicles: z.array(vehicleSchema).default([]),
 
   // Documents
   docType: docTypeSchema.default("NONE"),
@@ -83,11 +87,6 @@ export const residentAllotmentSchema = z.object({
 
 // Vehicle Details
 export const residentVehicleSchema = z.object({
-  vehicleType: vehicleTypeSchema.default("NONE"),
-  vehicleNumber: z.string().optional().or(z.literal("")),
-  vehicleBrand: z.string().optional().or(z.literal("")),
-  vehicleModel: z.string().optional().or(z.literal("")),
-  vehicleColor: z.string().optional().or(z.literal("")),
-  parkingSlot: z.string().optional().or(z.literal("")),
+  vehicles: z.array(vehicleSchema).default([]),
 });
 

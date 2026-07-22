@@ -83,7 +83,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     success: "success",
     error: "danger",
     info: "primary",
-    warning: "secondary",
+    warning: "danger",
   };
 
   return (
