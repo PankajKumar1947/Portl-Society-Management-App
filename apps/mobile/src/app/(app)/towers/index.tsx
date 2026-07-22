@@ -6,18 +6,14 @@ import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import IconButton from "@/components/ui/icon-button";
 import TowerCard from "./_components/tower-card";
-import { useGetMySociety, useGetTowers } from "@repo/operations";
+import { useGetTowers } from "@repo/operations";
 
 export default function TowersListScreen() {
   const router = useRouter();
-  const { data: society, isLoading: isSocietyLoading } = useGetMySociety({ enabled: true });
 
-  const { data: towers, isLoading: isTowersLoading } = useGetTowers(
-    society?.societyId || "",
-    { enabled: !!society?.societyId }
-  );
+  const { data: towers, isLoading: isTowersLoading } = useGetTowers();
 
-  const isLoading = isSocietyLoading || isTowersLoading;
+  const isLoading = isTowersLoading;
 
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -1,6 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createResident, updateResident, deleteResident, residentQueries } from "@repo/api-client";
-import { CreateResidentBody, UpdateResidentBody } from "@repo/schema";
+import {
+  createResident,
+  updateResident,
+  deleteResident,
+  residentQueries,
+  onboardResidentPersonal,
+  onboardResidentAllotment,
+  onboardResidentVehicle,
+} from "@repo/api-client";
+import {
+  CreateResidentBody,
+  UpdateResidentBody,
+  ResidentPersonalInput,
+  ResidentAllotmentInput,
+  ResidentVehicleInput,
+} from "@repo/schema";
 
 // Base prefix for all list queries — derived from the list key so there's no magic string
 const residentsListBaseKey = residentQueries.list("").key;
@@ -40,6 +54,43 @@ export const useDeleteResident = (residentId: string) => {
     mutationKey: residentQueries.delete(residentId).key,
     mutationFn: () => deleteResident(residentId),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: residentsListBaseKey,
+      });
+    },
+  });
+};
+
+export const useOnboardResidentPersonal = () => {
+  return useMutation({
+    mutationKey: residentQueries.onboardPersonal.key,
+    mutationFn: onboardResidentPersonal,
+  });
+};
+
+export const useOnboardResidentAllotment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: residentQueries.onboardAllotment.key,
+    mutationFn: onboardResidentAllotment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: residentsListBaseKey,
+      });
+    },
+  });
+};
+
+export const useOnboardResidentVehicle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["onboard-vehicle"],
+    mutationFn: ({ residentId, data }: { residentId: string; data: ResidentVehicleInput }) =>
+      onboardResidentVehicle(residentId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.details(variables.residentId).key,
+      });
       queryClient.invalidateQueries({
         queryKey: residentsListBaseKey,
       });

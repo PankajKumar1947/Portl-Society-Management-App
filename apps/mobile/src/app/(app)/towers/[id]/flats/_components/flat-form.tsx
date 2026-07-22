@@ -19,7 +19,6 @@ interface FlatFormProps<T extends CreateFlatBody | UpdateFlatBody> {
   isSubmitting?: boolean;
   submitButtonText?: string;
   isEdit?: boolean;
-  societyId?: string;
   towerId?: string;
   towerOptions?: { label: string; value: string }[];
 }
@@ -30,7 +29,6 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
   isSubmitting = false,
   submitButtonText = "Save Flat",
   isEdit = false,
-  societyId,
   towerId,
   towerOptions,
 }: FlatFormProps<T>) {
@@ -41,7 +39,6 @@ export function FlatForm<T extends CreateFlatBody | UpdateFlatBody = CreateFlatB
   const methods = useForm<T>({
     resolver: zodResolver(schema) as Resolver<T>,
     defaultValues: {
-      societyId: societyId || values?.societyId || "",
       towerId: towerId || values?.towerId || "",
       flatNumber: values?.flatNumber || "",
       floorNumber: values?.floorNumber,

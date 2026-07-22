@@ -17,10 +17,7 @@ export const docTypeSchema = z.enum(DOC_TYPES);
 export const residentSchema = z.object({
   residentId: z.string().min(1, "Resident ID is required"),
   societyId: z.string().min(1, "Society ID is required"),
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  mobileNumber: z.string().length(10, "Mobile number must be 10 digits"),
-  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  userId: z.string().min(1, "User ID is required"),
   residentType: _residentTypeSchema,
   relationship: relationshipSchema.optional().or(z.literal("")),
   towerId: z.string().min(1, "Tower is required"),
@@ -50,8 +47,47 @@ export const updateResidentSchema = createResidentSchema.partial().omit({
   societyId: true,
 });
 
-// Form schema used in the mobile app (no residentId or societyId — those are injected at submit time)
+// Form schema used in the mobile app - contains both personal and resident fields
 export const residentFormSchema = residentSchema.omit({
   residentId: true,
   societyId: true,
+  userId: true,
+}).extend({
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  mobileNumber: z.string().length(10, "Mobile number must be 10 digits"),
+  email: z.string().email("Invalid email address"),
 });
+
+// Personal Details
+export const residentPersonalSchema = z.object({
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  mobileNumber: z.string().length(10, "Mobile number must be 10 digits"),
+  email: z.string().email("Invalid email address"),
+});
+
+// Allotment Details
+export const residentAllotmentSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  residentType: _residentTypeSchema,
+  relationship: relationshipSchema.optional().or(z.literal("")),
+  towerId: z.string().min(1, "Tower is required"),
+  flatNumber: z.string().min(1, "Flat number is required"),
+  moveInDate: z.string().min(1, "Move-in date is required"),
+  ownershipStatus: ownershipStatusSchema,
+  isPrimary: z.boolean().default(false),
+  docType: docTypeSchema.default("NONE"),
+  documentNumber: z.string().optional().or(z.literal("")),
+});
+
+// Vehicle Details
+export const residentVehicleSchema = z.object({
+  vehicleType: vehicleTypeSchema.default("NONE"),
+  vehicleNumber: z.string().optional().or(z.literal("")),
+  vehicleBrand: z.string().optional().or(z.literal("")),
+  vehicleModel: z.string().optional().or(z.literal("")),
+  vehicleColor: z.string().optional().or(z.literal("")),
+  parkingSlot: z.string().optional().or(z.literal("")),
+});
+

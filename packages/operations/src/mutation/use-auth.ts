@@ -40,6 +40,13 @@ export const useVerifyOtp = () => {
   });
 };
 
+export const useVerifyResidentOtp = () => {
+  return useMutation({
+    mutationKey: ["verify-resident-otp"],
+    mutationFn: (data: { email: string; otp: string }) => verifyOtp(data),
+  });
+};
+
 export const useResendOtp = () => {
   return useMutation({
     mutationKey: authQueries.resendOtp.key,

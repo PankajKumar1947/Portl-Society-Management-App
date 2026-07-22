@@ -22,6 +22,7 @@ export const userSchema = z.object({
   dob: z.string().date().optional(),
   gender: z.string().optional(),
   profilePhoto: z.string().optional(),
+  societyId: z.string().optional(),
 });
 
 export const createUserSchema = userSchema.omit({

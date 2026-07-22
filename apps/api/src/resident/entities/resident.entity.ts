@@ -25,17 +25,8 @@ export class Resident {
   @Prop({ required: true, index: true })
   societyId!: string;
 
-  @Prop({ required: true })
-  firstName!: string;
-
-  @Prop({ required: true })
-  lastName!: string;
-
   @Prop({ required: true, index: true })
-  mobileNumber!: string;
-
-  @Prop()
-  email?: string;
+  userId!: string;
 
   @Prop({ required: true, enum: RESIDENT_TYPES })
   residentType!: string;
@@ -86,4 +77,15 @@ export class Resident {
 }
 
 export const ResidentSchema = SchemaFactory.createForClass(Resident);
+
+ResidentSchema.virtual('userDetails', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: 'userId',
+  justOne: true,
+});
+
+ResidentSchema.set('toJSON', { virtuals: true });
+ResidentSchema.set('toObject', { virtuals: true });
+
 export const ResidentEntity = ResidentSchema;

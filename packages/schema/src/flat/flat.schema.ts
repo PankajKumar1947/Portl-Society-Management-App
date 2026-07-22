@@ -19,10 +19,10 @@ export const flatSchema = z.object({
 
 export const createFlatSchema = flatSchema.omit({
   flatId: true,
+  societyId: true,
 });
 
 export const updateFlatSchema = createFlatSchema.partial().omit({
-  societyId: true,
   towerId: true,
 });
 

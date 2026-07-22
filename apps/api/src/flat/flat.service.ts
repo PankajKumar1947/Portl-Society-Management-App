@@ -12,17 +12,20 @@ export class FlatService {
     private readonly towerRepository: TowerRepository,
   ) {}
 
-  async create(createFlatDto: CreateFlatDto): Promise<FlatDocument> {
+  async create(createFlatDto: CreateFlatDto, societyId: string): Promise<FlatDocument> {
     // Verify tower exists and belongs to the same society
     const tower = await this.towerRepository.findOne(createFlatDto.towerId);
     if (!tower) {
       throw new NotFoundException(`Tower with ID "${createFlatDto.towerId}" not found`);
     }
-    if (tower.societyId !== createFlatDto.societyId) {
+    if (tower.societyId !== societyId) {
       throw new ForbiddenException('Tower does not belong to the specified society');
     }
 
-    return this.flatRepository.create(createFlatDto);
+    return this.flatRepository.create({
+      ...createFlatDto,
+      societyId,
+    });
   }
 
   async findOne(flatId: string): Promise<FlatDocument> {

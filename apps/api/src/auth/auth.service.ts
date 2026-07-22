@@ -226,11 +226,23 @@ export class AuthService {
         throw new UnauthorizedException('User no longer exists');
       }
 
+      let societyId = user.societyId;
+
+      if (!societyId) {
+        const existingSociety = await this.societyRepository.findByUserId(
+          user.userId,
+        );
+        if (existingSociety) {
+          societyId = existingSociety.societyId;
+        }
+      }
+
       const { accessToken, refreshToken: newRefreshToken } =
         await this.tokenService.generateTokens({
           userId: user.userId,
           email: user.email,
           role: user.role,
+          societyId: societyId || undefined,
         });
 
       return {
@@ -241,6 +253,13 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
+  }
+
+  async triggerOtpVerification(email: string): Promise<string> {
+    const otp = this.generateRandomOtp();
+    await this.saveOtp(email, otp);
+    await this.mailService.sendOtpMail(email, otp);
+    return otp;
   }
 
   private generateRandomOtp(): string {
@@ -258,19 +277,31 @@ export class AuthService {
   }
 
   private async generateTokens(user: UserDocument) {
-    const payload = { userId: user.userId, email: user.email, role: user.role };
+    let societyId = user.societyId;
+
+    if (!societyId) {
+      const existingSociety = await this.societyRepository.findByUserId(
+        user.userId,
+      );
+      if (existingSociety) {
+        societyId = existingSociety.societyId;
+      }
+    }
+
+    const payload = {
+      userId: user.userId,
+      email: user.email,
+      role: user.role,
+      societyId: societyId || undefined,
+    };
     const { accessToken, refreshToken } =
       await this.tokenService.generateTokens(payload);
-
-    const existingSociety = await this.societyRepository.findByUserId(
-      user.userId,
-    );
 
     return {
       message: 'Authentication successful',
       accessToken,
       refreshToken,
-      isSocietyCreated: !!existingSociety,
+      isSocietyCreated: !!societyId,
       name: `${user.firstName} ${user.lastName}`.trim(),
     };
   }

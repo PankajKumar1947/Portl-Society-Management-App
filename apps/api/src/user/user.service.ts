@@ -11,7 +11,7 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(public readonly userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const { email, role } = createUserDto;

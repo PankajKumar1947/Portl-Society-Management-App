@@ -7,8 +7,8 @@ export const createTower = async (data: CreateTowerBody): Promise<Tower> => {
   return res.data;
 };
 
-export const getTowers = async (societyId: string): Promise<Tower[]> => {
-  const res = await apiClient.get(towerQueries.list(societyId).endpoint);
+export const getTowers = async (): Promise<Tower[]> => {
+  const res = await apiClient.get(towerQueries.list.endpoint);
   return res.data;
 };
 

@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getTowers, getTowerDetails, towerQueries } from "@repo/api-client";
 
-export const useGetTowers = (societyId: string, options?: { enabled?: boolean }) => {
+export const useGetTowers = (options?: { enabled?: boolean }) => {
   return useQuery({
-    queryKey: towerQueries.list(societyId).key,
-    queryFn: () => getTowers(societyId),
-    enabled: !!societyId && options?.enabled,
+    queryKey: towerQueries.list.key,
+    queryFn: () => getTowers(),
+    enabled: options?.enabled ?? true,
   });
 };
 

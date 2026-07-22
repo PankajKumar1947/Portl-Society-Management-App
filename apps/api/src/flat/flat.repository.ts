@@ -12,8 +12,8 @@ export class FlatRepository {
     private readonly flatModel: Model<FlatDocument>,
   ) {}
 
-  async create(createFlatDto: CreateFlatDto): Promise<FlatDocument> {
-    const createdFlat = new this.flatModel(createFlatDto);
+  async create(flat: Omit<Flat, 'flatId'>): Promise<FlatDocument> {
+    const createdFlat = new this.flatModel(flat);
     return createdFlat.save();
   }
 

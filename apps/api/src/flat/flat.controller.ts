@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   UsePipes,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FlatService } from './flat.service';
@@ -19,7 +20,9 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 import { UserRoles } from '@repo/schema';
-import { FlatOwnershipGuard } from './guards/flat-ownership.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { TokenPayload } from '../shared/token/token.service';
 import {
   ApiCreateFlat,
   ApiGetFlats,
@@ -30,28 +33,31 @@ import {
 
 @ApiTags('flats')
 @Controller('flats')
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class FlatController {
   constructor(private readonly flatService: FlatService) {}
 
   @Post()
   @Roles(UserRoles.ADMIN)
-  @UseGuards(FlatOwnershipGuard)
   @ApiCreateFlat()
-  async create(@Body() createFlatDto: CreateFlatDto) {
-    return this.flatService.create(createFlatDto);
+  async create(
+    @CurrentUser() user: TokenPayload,
+    @Body() createFlatDto: CreateFlatDto,
+  ) {
+    if (!user.societyId) {
+      throw new ForbiddenException('Society context not found in session.');
+    }
+    return this.flatService.create(createFlatDto, user.societyId);
   }
 
   @Get()
-  @UseGuards(FlatOwnershipGuard)
   @ApiGetFlats()
   async findByTower(@Query('towerId') towerId: string) {
     return this.flatService.findByTowerId(towerId);
   }
 
   @Get(':flatId')
-  @UseGuards(FlatOwnershipGuard)
   @ApiGetFlat()
   async findOne(@Param('flatId') flatId: string) {
     return this.flatService.findOne(flatId);
@@ -59,7 +65,6 @@ export class FlatController {
 
   @Patch(':flatId')
   @Roles(UserRoles.ADMIN)
-  @UseGuards(FlatOwnershipGuard)
   @ApiUpdateFlat()
   async update(
     @Param('flatId') flatId: string,
@@ -70,7 +75,6 @@ export class FlatController {
 
   @Delete(':flatId')
   @Roles(UserRoles.ADMIN)
-  @UseGuards(FlatOwnershipGuard)
   @ApiDeleteFlat()
   async remove(@Param('flatId') flatId: string) {
     await this.flatService.remove(flatId);

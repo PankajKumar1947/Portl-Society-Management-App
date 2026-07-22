@@ -3,10 +3,10 @@ export const towerQueries = {
     key: ["create-tower"],
     endpoint: "/towers",
   },
-  list: (societyId: string) => ({
-    key: ["towers-list", societyId],
-    endpoint: `/towers?societyId=${societyId}`,
-  }),
+  list: {
+    key: ["towers-list"],
+    endpoint: '/towers',
+  },
   details: (towerId: string) => ({
     key: ["tower-details", towerId],
     endpoint: `/towers/${towerId}`,

@@ -16,6 +16,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../zod-validation.pipe';
+import { TenantGuard } from '../auth/guards/tenant.guard';
 import {
   ApiCreateSociety,
   ApiGetSociety,
@@ -23,12 +24,11 @@ import {
   ApiUpdateSociety,
 } from './society.docs';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { SocietyOwnershipGuard } from './guards/society-ownership.guard';
 import { UserRoles } from '@repo/schema';
 
 @ApiTags('societies')
 @Controller('societies')
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class SocietyController {
   constructor(private readonly societyService: SocietyService) {}
@@ -54,7 +54,6 @@ export class SocietyController {
   }
 
   @Get(':societyId')
-  @UseGuards(SocietyOwnershipGuard)
   @ApiGetSociety()
   async findOne(@Param('societyId') societyId: string) {
     return this.societyService.findOne(societyId);
@@ -62,7 +61,6 @@ export class SocietyController {
 
   @Patch(':societyId')
   @Roles(UserRoles.ADMIN)
-  @UseGuards(SocietyOwnershipGuard)
   @ApiUpdateSociety()
   async update(
     @Param('societyId') societyId: string,

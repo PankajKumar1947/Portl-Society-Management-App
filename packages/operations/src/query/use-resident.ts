@@ -3,7 +3,7 @@ import { getResidents, getResidentDetails, residentQueries } from "@repo/api-cli
 import { ResidentListResponse, ResidentResponse } from "@repo/schema";
 
 export const useGetResidents = (
-  societyId: string,
+  societyId?: string,
   params?: { type?: string; search?: string; enabled?: boolean }
 ) => {
   const { type, search, enabled = true } = params || {};
@@ -11,7 +11,7 @@ export const useGetResidents = (
     queryKey: [...residentQueries.list(societyId).key, type, search],
     queryFn: () => getResidents(societyId, type, search),
     select: (response: ResidentListResponse) => response.data,
-    enabled: !!societyId && enabled,
+    enabled: enabled,
   });
 };
 

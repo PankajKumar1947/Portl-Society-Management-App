@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Resident, ResidentDocument } from './entities/resident.entity';
-import { CreateResidentDto, UpdateResidentDto } from './dto/resident.dto';
+import { CreateResidentDto } from './dto/create-resident.dto';
+import { UpdateResidentDto } from './dto/update-resident.dto';
+import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 
 @Injectable()
 export class ResidentRepository {
@@ -11,17 +13,17 @@ export class ResidentRepository {
     private readonly model: Model<ResidentDocument>,
   ) {}
 
-  async create(dto: CreateResidentDto): Promise<ResidentDocument> {
+  async create(dto: CreateResidentDto | ResidentAllotmentDto): Promise<ResidentDocument> {
     const created = new this.model(dto);
     return created.save();
   }
 
   async find(filter: Record<string, any>): Promise<ResidentDocument[]> {
-    return this.model.find(filter).sort({ createdAt: -1 }).exec();
+    return this.model.find(filter).populate('userDetails').sort({ createdAt: -1 }).exec();
   }
 
   async findOne(residentId: string): Promise<ResidentDocument | null> {
-    return this.model.findOne({ residentId }).exec();
+    return this.model.findOne({ residentId }).populate('userDetails').exec();
   }
 
   async update(

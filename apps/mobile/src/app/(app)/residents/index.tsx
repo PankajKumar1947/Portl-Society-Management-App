@@ -9,22 +9,17 @@ import IconButton from "@/components/ui/icon-button";
 import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
-import { useGetMySociety, useGetResidents } from "@repo/operations";
+import { useGetResidents } from "@repo/operations";
 
 export default function ResidentsListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
 
-  const { data: society, isLoading: isSocietyLoading } = useGetMySociety({ enabled: true });
-  const societyId = society?.societyId || "";
-
-  const { data: residents, isLoading: isResidentsLoading } = useGetResidents(
-    societyId,
-    { type: activeTab, search: searchQuery, enabled: !!societyId }
+  const { data: residents, isLoading } = useGetResidents(
+    undefined,
+    { type: activeTab, search: searchQuery }
   );
-
-  const isLoading = isSocietyLoading || isResidentsLoading;
 
   const filterTabs = [
     { id: "ALL", label: "All" },
@@ -88,9 +83,9 @@ export default function ResidentsListScreen() {
           renderItem={({ item }) => (
             <View style={styles.listItemWrapper}>
               <PersonListItem
-                name={`${item.firstName} ${item.lastName}`}
+                name={`${item.userDetails?.firstName || ""} ${item.userDetails?.lastName || ""}`}
                 subtitle={`Flat ${item.flatNumber} • ${item.towerId.toUpperCase().replace("-", " ")}`}
-                meta={`Mobile: ${item.mobileNumber}`}
+                meta={`Mobile: ${item.userDetails?.phoneNumber || ""}`}
                 onPress={() => router.push(Routes.Residents.Details(item.residentId) as any)}
                 rightElement={
                   <View style={styles.rightContainer}>

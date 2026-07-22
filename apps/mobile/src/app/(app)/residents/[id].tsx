@@ -49,12 +49,12 @@ export default function ResidentDetailsScreen() {
   }
 
   const handleCall = () => {
-    Linking.openURL(`tel:${resident.mobileNumber}`);
+    Linking.openURL(`tel:${resident.userDetails?.phoneNumber || ""}`);
   };
 
   const handleEmail = () => {
-    if (resident.email) {
-      Linking.openURL(`mailto:${resident.email}`);
+    if (resident.userDetails?.email) {
+      Linking.openURL(`mailto:${resident.userDetails.email}`);
     } else {
       Alert.alert("Not Available", "Email address was not provided for this resident.");
     }
@@ -63,7 +63,7 @@ export default function ResidentDetailsScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Resident Contact Info:\nName: ${resident.firstName} ${resident.lastName}\nMobile: ${resident.mobileNumber}\nFlat: ${resident.flatNumber}, ${resident.towerId.toUpperCase()}`,
+        message: `Resident Contact Info:\nName: ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}\nMobile: ${resident.userDetails?.phoneNumber || ""}\nFlat: ${resident.flatNumber}, ${resident.towerId.toUpperCase()}`,
       });
     } catch (error) {
       Alert.alert("Error", "Failed to share contact info");
@@ -73,7 +73,7 @@ export default function ResidentDetailsScreen() {
   const handleDelete = () => {
     Alert.alert(
       "Remove Resident",
-      `Are you sure you want to remove ${resident.firstName} ${resident.lastName}?`,
+      `Are you sure you want to remove ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -114,12 +114,12 @@ export default function ResidentDetailsScreen() {
         {/* Banner Section */}
         <View style={styles.profileHeaderCard}>
           <Avatar
-            name={`${resident.firstName} ${resident.lastName}`}
+            name={`${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}`}
             size="lg"
             style={styles.avatar}
           />
           <Text style={styles.userName}>
-            {resident.firstName} {resident.lastName}
+            {resident.userDetails?.firstName || ""} {resident.userDetails?.lastName || ""}
           </Text>
           
           <View style={styles.badgeRow}>
@@ -181,11 +181,11 @@ export default function ResidentDetailsScreen() {
         <Card style={styles.detailsCard}>
           <InfoRow
             label="Mobile Phone"
-            value={resident.mobileNumber}
+            value={resident.userDetails?.phoneNumber || ""}
           />
           <InfoRow
             label="Email Address"
-            value={resident.email || "Not provided"}
+            value={resident.userDetails?.email || "Not provided"}
           />
         </Card>
 

@@ -55,6 +55,9 @@ export class User {
   @Prop()
   profilePhoto?: string;
 
+  @Prop({ index: true })
+  societyId?: string;
+
   comparePassword!: (password: string) => Promise<boolean>;
 }
 

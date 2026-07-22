@@ -6,7 +6,7 @@ import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "./_components/flat-form";
 import { CreateFlatBody } from "@repo/schema";
-import { useGetMySociety, useGetTowers, useCreateFlat } from "@repo/operations";
+import { useGetTowers, useCreateFlat } from "@repo/operations";
 import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function CreateFlatScreen() {
@@ -14,10 +14,7 @@ export default function CreateFlatScreen() {
   const router = useRouter();
   const navigation = useNavigation();
 
-  const { data: society, isLoading: isSocietyLoading } = useGetMySociety({ enabled: true });
-  const { data: towers, isLoading: isTowersLoading } = useGetTowers(society?.societyId || "", {
-    enabled: !!society?.societyId,
-  });
+  const { data: towers, isLoading: isTowersLoading } = useGetTowers();
   const { mutate: createFlat, isPending: isCreating } = useCreateFlat();
 
   useLayoutEffect(() => {
@@ -27,14 +24,9 @@ export default function CreateFlatScreen() {
   }, [navigation]);
 
   const handleSubmit = (values: CreateFlatBody) => {
-    if (!society?.societyId) {
-      Alert.alert("Error", "Society context not loaded. Please try again.");
-      return;
-    }
     createFlat(
       {
         ...values,
-        societyId: society.societyId,
         towerId: values.towerId || (id as string),
       },
       {
@@ -54,7 +46,7 @@ export default function CreateFlatScreen() {
     value: t.towerId,
   }));
 
-  const isLoading = isSocietyLoading || isTowersLoading;
+  const isLoading = isTowersLoading;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -74,7 +66,6 @@ export default function CreateFlatScreen() {
             showsVerticalScrollIndicator={false}
           >
             <FlatForm
-              societyId={society?.societyId}
               towerId={id}
               towerOptions={towerOptions}
               onSubmit={handleSubmit}

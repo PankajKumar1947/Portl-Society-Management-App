@@ -7,9 +7,9 @@ export const useCreateTower = () => {
   return useMutation({
     mutationKey: towerQueries.create.key,
     mutationFn: (data: CreateTowerBody) => createTower(data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: towerQueries.list(data.societyId).key,
+        queryKey: towerQueries.list.key,
       });
     },
   });
@@ -20,25 +20,25 @@ export const useUpdateTower = (towerId: string) => {
   return useMutation({
     mutationKey: towerQueries.update(towerId).key,
     mutationFn: (data: UpdateTowerBody) => updateTower(towerId, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: towerQueries.details(towerId).key,
       });
       queryClient.invalidateQueries({
-        queryKey: towerQueries.list(data.societyId).key,
+        queryKey: towerQueries.list.key,
       });
     },
   });
 };
 
-export const useDeleteTower = (towerId: string, societyId: string) => {
+export const useDeleteTower = (towerId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: towerQueries.delete(towerId).key,
     mutationFn: () => deleteTower(towerId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: towerQueries.list(societyId).key,
+        queryKey: towerQueries.list.key,
       });
     },
   });

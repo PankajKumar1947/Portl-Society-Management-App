@@ -19,7 +19,9 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 import { UserRoles } from '@repo/schema';
-import { TowerOwnershipGuard } from './guards/tower-ownership.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { TokenPayload } from '../shared/token/token.service';
+import { TenantGuard } from '../auth/guards/tenant.guard';
 import {
   ApiCreateTower,
   ApiGetTowers,
@@ -30,28 +32,32 @@ import {
 
 @ApiTags('towers')
 @Controller('towers')
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class TowerController {
   constructor(private readonly towerService: TowerService) {}
 
   @Post()
   @Roles(UserRoles.ADMIN)
-  @UseGuards(TowerOwnershipGuard)
   @ApiCreateTower()
   async create(@Body() createTowerDto: CreateTowerDto) {
     return this.towerService.create(createTowerDto);
   }
 
   @Get()
-  @UseGuards(TowerOwnershipGuard)
   @ApiGetTowers()
-  async findBySociety(@Query('societyId') societyId: string) {
+  async findBySociety(
+    @CurrentUser() user: TokenPayload,
+    @Query('societyId') querySocietyId?: string,
+  ) {
+    const societyId = querySocietyId || user.societyId;
+    if (!societyId) {
+      return [];
+    }
     return this.towerService.findBySocietyId(societyId);
   }
 
   @Get(':towerId')
-  @UseGuards(TowerOwnershipGuard)
   @ApiGetTower()
   async findOne(@Param('towerId') towerId: string) {
     return this.towerService.findOne(towerId);
@@ -59,7 +65,6 @@ export class TowerController {
 
   @Patch(':towerId')
   @Roles(UserRoles.ADMIN)
-  @UseGuards(TowerOwnershipGuard)
   @ApiUpdateTower()
   async update(
     @Param('towerId') towerId: string,
@@ -70,7 +75,6 @@ export class TowerController {
 
   @Delete(':towerId')
   @Roles(UserRoles.ADMIN)
-  @UseGuards(TowerOwnershipGuard)
   @ApiDeleteTower()
   async remove(@Param('towerId') towerId: string) {
     await this.towerService.remove(towerId);
