@@ -14,6 +14,7 @@ import { otpSchema, OtpBody } from "@repo/schema";
 import { useVerifyResidentOtp, useResendOtp } from "@repo/operations";
 import { theme } from "@/constants";
 import Button from "@/components/ui/button";
+import { showGlobalAlert } from "@/context/alert-context";
 
 interface OtpVerificationModalProps {
   visible: boolean;
@@ -65,11 +66,12 @@ export default function OtpVerificationModal({
       { email, otp: data.otp },
       {
         onSuccess: () => {
-          Alert.alert("Verified", "User verification successful!");
+          showGlobalAlert({
+            title: "Code Verified",
+            description: "User verification successful!",
+            variant: "success",
+          });
           onSuccess();
-        },
-        onError: (err) => {
-          Alert.alert("Verification Failed", err.message);
         },
       },
     );
@@ -82,10 +84,11 @@ export default function OtpVerificationModal({
       {
         onSuccess: () => {
           setTimerCount(60);
-          Alert.alert("Code Sent", "A new verification code has been sent to the resident's email.");
-        },
-        onError: (err) => {
-          Alert.alert("Error", err.message);
+          showGlobalAlert({
+            title: "Code Sent",
+            description: "A new verification code has been sent to the resident's email.",
+            variant: "success",
+          });
         },
       },
     );

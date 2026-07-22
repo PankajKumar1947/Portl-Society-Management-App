@@ -91,6 +91,7 @@ export default function AppLayout() {
 
       <Tabs.Screen name="society" options={{ href: null }} />
       <Tabs.Screen name="towers" options={{ href: null }} />
+      <Tabs.Screen name="residents" options={{ href: null }} />
       <Tabs.Screen name="notices" options={{ href: null }} />
       <Tabs.Screen name="helpdesk" options={{ href: null }} />
       <Tabs.Screen name="polls" options={{ href: null }} />
