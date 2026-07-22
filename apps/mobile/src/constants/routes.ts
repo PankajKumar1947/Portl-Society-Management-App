@@ -135,4 +135,17 @@ export const Routes = {
       }),
     },
   },
+
+  Residents: {
+    Index: app("/residents"),
+    Create: app("/residents/create"),
+    Details: (id: string) => ({
+      pathname: app("/residents/[id]"),
+      params: { id },
+    }),
+    Edit: (id: string) => ({
+      pathname: app("/residents/[id]/edit"),
+      params: { id },
+    }),
+  },
 } as const;
