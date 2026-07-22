@@ -14,9 +14,7 @@ export class SocietyRepository {
 
   async create(
     createSocietyDto: CreateSocietyDto & {
-      societyId: string;
       userId: string;
-      societyCode: string;
     },
   ): Promise<SocietyDocument> {
     const createdSociety = new this.societyModel(createSocietyDto);

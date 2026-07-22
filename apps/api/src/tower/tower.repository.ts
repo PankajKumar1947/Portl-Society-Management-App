@@ -12,11 +12,7 @@ export class TowerRepository {
     private readonly towerModel: Model<TowerDocument>,
   ) {}
 
-  async create(
-    createTowerDto: CreateTowerDto & {
-      towerId: string;
-    },
-  ): Promise<TowerDocument> {
+  async create(createTowerDto: CreateTowerDto): Promise<TowerDocument> {
     const createdTower = new this.towerModel(createTowerDto);
     return createdTower.save();
   }

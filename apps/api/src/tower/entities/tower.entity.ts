@@ -1,19 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import * as crypto from 'crypto';
 
 export type TowerDocument = HydratedDocument<Tower>;
 
 @Schema({
   timestamps: true,
-  toJSON: {
-    transform: (_, ret: Record<string, any>) => {
-      delete ret.__v;
-      return ret;
-    },
-  },
 })
 export class Tower {
-  @Prop({ required: true, unique: true })
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `twr_${crypto.randomBytes(10).toString('hex')}`,
+  })
   towerId!: string;
 
   @Prop({ required: true, index: true })

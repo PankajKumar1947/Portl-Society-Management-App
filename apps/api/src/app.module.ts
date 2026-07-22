@@ -8,11 +8,18 @@ import { AuthModule } from './auth/auth.module';
 import { SocietyModule } from './society/society.module';
 import { TowerModule } from './tower/tower.module';
 import { FlatModule } from './flat/flat.module';
+import { Connection } from 'mongoose';
+import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGODB_URI!),
+    MongooseModule.forRoot(process.env.MONGODB_URI!, {
+      connectionFactory: (connection: Connection) => {
+        connection.plugin(mongooseGlobalPlugin);
+        return connection;
+      },
+    }),
     UserModule,
     AuthModule,
     SocietyModule,
@@ -22,4 +29,4 @@ import { FlatModule } from './flat/flat.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

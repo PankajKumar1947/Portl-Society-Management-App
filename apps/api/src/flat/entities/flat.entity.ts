@@ -1,20 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { FLAT_STATUS, FlatStatus } from '@repo/schema';
+import * as crypto from 'crypto';
 
 export type FlatDocument = HydratedDocument<Flat>;
 
 @Schema({
   timestamps: true,
-  toJSON: {
-    transform: (_, ret: Record<string, any>) => {
-      delete ret.__v;
-      return ret;
-    },
-  },
 })
 export class Flat {
-  @Prop({ required: true, unique: true })
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `flt_${crypto.randomBytes(10).toString('hex')}`,
+  })
   flatId!: string;
 
   @Prop({ required: true, index: true })

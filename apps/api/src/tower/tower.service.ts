@@ -3,19 +3,13 @@ import { TowerRepository } from './tower.repository';
 import { CreateTowerDto } from './dto/create-tower.dto';
 import { UpdateTowerDto } from './dto/update-tower.dto';
 import { TowerDocument } from './entities/tower.entity';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class TowerService {
   constructor(private readonly towerRepository: TowerRepository) {}
 
   async create(createTowerDto: CreateTowerDto): Promise<TowerDocument> {
-    const towerId = `twr_${crypto.randomBytes(10).toString('hex')}`;
-
-    return this.towerRepository.create({
-      ...createTowerDto,
-      towerId,
-    });
+    return this.towerRepository.create(createTowerDto);
   }
 
   async findOne(towerId: string): Promise<TowerDocument> {

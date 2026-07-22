@@ -4,7 +4,6 @@ import { TowerRepository } from '../tower/tower.repository';
 import { CreateFlatDto } from './dto/create-flat.dto';
 import { UpdateFlatDto } from './dto/update-flat.dto';
 import { FlatDocument } from './entities/flat.entity';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class FlatService {
@@ -23,12 +22,7 @@ export class FlatService {
       throw new ForbiddenException('Tower does not belong to the specified society');
     }
 
-    const flatId = `flt_${crypto.randomBytes(10).toString('hex')}`;
-
-    return this.flatRepository.create({
-      ...createFlatDto,
-      flatId,
-    });
+    return this.flatRepository.create(createFlatDto);
   }
 
   async findOne(flatId: string): Promise<FlatDocument> {

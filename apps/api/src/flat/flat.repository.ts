@@ -12,11 +12,7 @@ export class FlatRepository {
     private readonly flatModel: Model<FlatDocument>,
   ) {}
 
-  async create(
-    createFlatDto: CreateFlatDto & {
-      flatId: string;
-    },
-  ): Promise<FlatDocument> {
+  async create(createFlatDto: CreateFlatDto): Promise<FlatDocument> {
     const createdFlat = new this.flatModel(createFlatDto);
     return createdFlat.save();
   }

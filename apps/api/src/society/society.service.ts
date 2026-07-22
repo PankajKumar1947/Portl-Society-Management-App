@@ -7,7 +7,6 @@ import { SocietyRepository } from './society.repository';
 import { CreateSocietyDto } from './dto/create-society.dto';
 import { UpdateSocietyDto } from './dto/update-society.dto';
 import { SocietyDocument } from './entities/society.entity';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class SocietyService {
@@ -23,26 +22,10 @@ export class SocietyService {
       throw new ConflictException('User already has a society registered');
     }
 
-    // 2. Generate unique societyId (Stripe style prefix 'soc_')
-    const societyId = `soc_${crypto.randomBytes(10).toString('hex')}`;
-
-    // 3. Generate a clean unique 6-character uppercase alphanumeric joining code
-    let societyCode = '';
-    let isUnique = false;
-    while (!isUnique) {
-      societyCode = crypto.randomBytes(3).toString('hex').toUpperCase();
-      const codeCheck = await this.societyRepository.findByCode(societyCode);
-      if (!codeCheck) {
-        isUnique = true;
-      }
-    }
-
-    // 4. Save to db
+    // 2. Save to db
     return this.societyRepository.create({
       ...createSocietyDto,
-      societyId,
       userId,
-      societyCode,
     });
   }
 

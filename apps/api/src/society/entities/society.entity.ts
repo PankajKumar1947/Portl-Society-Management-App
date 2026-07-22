@@ -1,20 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { SOCIETY_TYPES, SocietyType } from '@repo/schema';
+import * as crypto from 'crypto';
 
 export type SocietyDocument = HydratedDocument<Society>;
 
 @Schema({
   timestamps: true,
-  toJSON: {
-    transform: (_, ret: Record<string, any>) => {
-      delete ret.__v;
-      return ret;
-    },
-  },
 })
 export class Society {
-  @Prop({ required: true, unique: true })
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `soc_${crypto.randomBytes(10).toString('hex')}`,
+  })
   societyId: string;
 
   @Prop({ required: true })
@@ -23,7 +22,11 @@ export class Society {
   @Prop({ required: true })
   societyName: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => crypto.randomBytes(3).toString('hex').toUpperCase(),
+  })
   societyCode: string;
 
   @Prop({ required: true, enum: SOCIETY_TYPES })
