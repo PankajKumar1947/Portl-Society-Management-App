@@ -26,6 +26,12 @@ export const setOnAuthError = (callback: () => void) => {
   onAuthError = callback;
 };
 
+let onApiError: ((message: string) => void) | null = null;
+
+export const setOnApiError = (callback: (message: string) => void) => {
+  onApiError = callback;
+};
+
 export const apiClient = axios.create({
   baseURL:
     process.env.EXPO_PUBLIC_API_URL ||
@@ -87,7 +93,14 @@ apiClient.interceptors.response.use(
     }
 
     if (axios.isAxiosError(error)) {
-      return Promise.reject(ApiErrorHandler.handle(error));
+      const apiError = ApiErrorHandler.handle(error);
+      if (onApiError) {
+        onApiError(apiError.message);
+      }
+      return Promise.reject(apiError);
+    }
+    if (onApiError) {
+      onApiError(error.message || "An unexpected error occurred");
     }
     return Promise.reject(error);
   },

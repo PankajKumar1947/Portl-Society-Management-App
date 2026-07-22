@@ -7,7 +7,6 @@ import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "../_components/tower-form";
 import { UpdateTowerBody } from "@repo/schema";
 import { useGetTowerDetails, useUpdateTower } from "@repo/operations";
-import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function EditTowerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,21 +28,17 @@ export default function EditTowerScreen() {
       onSuccess: () => {
         router.back();
       },
-      onError: (err) => {
-        const apiError = err as unknown as ApiErrorResponse;
-        Alert.alert("Failed to update tower", apiError.message || "Unknown error");
-      },
     });
   };
 
   const initialValues = tower
     ? {
-        societyId: tower.societyId,
-        towerName: tower.towerName,
-        location: tower.location,
-        appNumber: tower.appNumber,
-        totalFloors: tower.totalFloors,
-      }
+      societyId: tower.societyId,
+      towerName: tower.towerName,
+      location: tower.location,
+      appNumber: tower.appNumber,
+      totalFloors: tower.totalFloors,
+    }
     : undefined;
 
   return (

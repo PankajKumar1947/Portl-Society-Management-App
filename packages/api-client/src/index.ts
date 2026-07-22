@@ -15,6 +15,7 @@ export {
   setRefreshToken,
   setOnTokenRefresh,
   setOnAuthError,
+  setOnApiError,
   apiClient,
 } from "./services/axios-instance";
 export type { ApiErrorResponse } from "./services/api-error-handler";

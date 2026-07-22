@@ -55,11 +55,7 @@ export default function CreateResidentScreen() {
       setTempUserId(userId);
       setIsOtpVisible(true);
     } catch (err: any) {
-      showAlert({
-        title: "Step 1 Failed",
-        description: err.message || "Failed to submit personal details.",
-        variant: "error",
-      });
+      // Handled globally by ApiErrorHandler
     }
   };
 
@@ -94,11 +90,7 @@ export default function CreateResidentScreen() {
       setCreatedResidentId(residentId);
       setCurrentStep("vehicle");
     } catch (err: any) {
-      showAlert({
-        title: "Step 2 Failed",
-        description: err.message || "Failed to submit allotment details.",
-        variant: "error",
-      });
+      // Handled globally by ApiErrorHandler
     }
   };
 
@@ -123,11 +115,7 @@ export default function CreateResidentScreen() {
         onConfirm: () => router.back(),
       });
     } catch (err: any) {
-      showAlert({
-        title: "Step 3 Failed",
-        description: err.message || "Failed to submit vehicle details.",
-        variant: "error",
-      });
+      // Handled globally by ApiErrorHandler
     }
   };
 

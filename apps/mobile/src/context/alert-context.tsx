@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { Modal } from "../components/ui/modal";
+import { setOnApiError } from "@repo/api-client";
 
 export type AlertVariant = "success" | "error" | "info" | "warning";
 
@@ -19,6 +20,14 @@ interface AlertContextProps {
 }
 
 const AlertContext = createContext<AlertContextProps | undefined>(undefined);
+
+let globalShowAlert: ((options: AlertOptions) => void) | null = null;
+
+export const showGlobalAlert = (options: AlertOptions) => {
+  if (globalShowAlert) {
+    globalShowAlert(options);
+  }
+};
 
 export const useAlert = () => {
   const context = useContext(AlertContext);
@@ -40,6 +49,23 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setOptions(opts);
     setVisible(true);
   }, []);
+
+  React.useEffect(() => {
+    globalShowAlert = showAlert;
+
+    setOnApiError((message: string) => {
+      showAlert({
+        title: "Request Failed",
+        description: message,
+        variant: "error",
+      });
+    });
+
+    return () => {
+      globalShowAlert = null;
+      setOnApiError(() => { });
+    };
+  }, [showAlert]);
 
   const hideAlert = useCallback(() => {
     setVisible(false);

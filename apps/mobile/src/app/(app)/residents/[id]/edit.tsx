@@ -46,13 +46,6 @@ export default function EditResidentScreen() {
             variant: "success",
           });
         },
-        onError: (err: Error) => {
-          showAlert({
-            title: "Error",
-            description: err.message || "Failed to update personal details",
-            variant: "error",
-          });
-        },
       }
     );
   };
@@ -66,13 +59,6 @@ export default function EditResidentScreen() {
             title: "Success",
             description: "Allotment details updated successfully!",
             variant: "success",
-          });
-        },
-        onError: (err: Error) => {
-          showAlert({
-            title: "Error",
-            description: err.message || "Failed to update allotment details",
-            variant: "error",
           });
         },
       }
@@ -89,13 +75,6 @@ export default function EditResidentScreen() {
             description: "Vehicle details updated successfully!",
             variant: "success",
             onConfirm: () => router.back(),
-          });
-        },
-        onError: (err: Error) => {
-          showAlert({
-            title: "Error",
-            description: err.message || "Failed to update vehicle details",
-            variant: "error",
           });
         },
       }

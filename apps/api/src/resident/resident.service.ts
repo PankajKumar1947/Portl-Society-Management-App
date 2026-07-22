@@ -24,6 +24,11 @@ export class ResidentService {
   ): Promise<{ userId: string; email: string }> {
     const existingUser = await this.userService.userRepository.findOne(dto.email);
     if (existingUser) {
+      // If the existing user is not a resident (e.g. an ADMIN), throw conflict immediately
+      if (existingUser.role !== UserRoles.RESIDENTS) {
+        throw new ConflictException('User with this email already exists');
+      }
+
       const residents = await this.repository.find({ userId: existingUser.userId });
       if (residents.length > 0) {
         throw new ConflictException('User with this email already exists and is fully onboarded');

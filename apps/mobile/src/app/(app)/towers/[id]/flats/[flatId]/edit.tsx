@@ -7,7 +7,6 @@ import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "../_components/flat-form";
 import { UpdateFlatBody } from "@repo/schema";
 import { useGetFlatDetails, useUpdateFlat } from "@repo/operations";
-import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function EditFlatScreen() {
   const { id, flatId } = useLocalSearchParams<{ id: string; flatId: string }>();
@@ -29,26 +28,22 @@ export default function EditFlatScreen() {
       onSuccess: () => {
         router.back();
       },
-      onError: (err) => {
-        const apiError = err as unknown as ApiErrorResponse;
-        Alert.alert("Failed to update flat", apiError.message || "Unknown error");
-      },
     });
   };
 
   const initialValues = flat
     ? {
-        societyId: flat.societyId,
-        towerId: flat.towerId,
-        flatNumber: flat.flatNumber,
-        floorNumber: flat.floorNumber,
-        numberOfRooms: flat.numberOfRooms,
-        numberOfBathrooms: flat.numberOfBathrooms,
-        kitchen: flat.kitchen,
-        balcony: flat.balcony,
-        hallRoom: flat.hallRoom,
-        status: flat.status,
-      }
+      societyId: flat.societyId,
+      towerId: flat.towerId,
+      flatNumber: flat.flatNumber,
+      floorNumber: flat.floorNumber,
+      numberOfRooms: flat.numberOfRooms,
+      numberOfBathrooms: flat.numberOfBathrooms,
+      kitchen: flat.kitchen,
+      balcony: flat.balcony,
+      hallRoom: flat.hallRoom,
+      status: flat.status,
+    }
     : undefined;
 
   return (

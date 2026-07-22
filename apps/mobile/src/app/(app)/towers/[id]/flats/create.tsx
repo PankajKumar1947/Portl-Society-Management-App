@@ -7,7 +7,6 @@ import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "./_components/flat-form";
 import { CreateFlatBody } from "@repo/schema";
 import { useGetTowers, useCreateFlat } from "@repo/operations";
-import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function CreateFlatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,10 +31,6 @@ export default function CreateFlatScreen() {
       {
         onSuccess: () => {
           router.back();
-        },
-        onError: (err) => {
-          const apiError = err as unknown as ApiErrorResponse;
-          Alert.alert("Failed to create flat", apiError.message || "Unknown error");
         },
       },
     );

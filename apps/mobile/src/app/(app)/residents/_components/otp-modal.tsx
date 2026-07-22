@@ -6,8 +6,7 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
-  Alert,
-  Platform,
+  Alert
 } from "react-native";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -240,10 +239,15 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   hiddenInput: {
+    opacity: 0.01,
     position: "absolute",
-    width: 1,
-    height: 1,
-    opacity: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: "100%",
+    height: "100%",
+    zIndex: 1,
   },
   boxesContainer: {
     flexDirection: "row",
