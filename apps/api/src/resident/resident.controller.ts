@@ -38,7 +38,7 @@ import {
 @UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class ResidentController {
-  constructor(private readonly service: ResidentService) {}
+  constructor(private readonly service: ResidentService) { }
 
   @Post()
   @Roles(UserRoles.ADMIN)
@@ -111,6 +111,7 @@ export class ResidentController {
   }
 
   @Get()
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
   @ApiGetResidents()
   async findAll(
     @CurrentUser() user: TokenPayload,

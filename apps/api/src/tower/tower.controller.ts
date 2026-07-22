@@ -35,7 +35,7 @@ import {
 @UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class TowerController {
-  constructor(private readonly towerService: TowerService) {}
+  constructor(private readonly towerService: TowerService) { }
 
   @Post()
   @Roles(UserRoles.ADMIN)
@@ -46,6 +46,7 @@ export class TowerController {
 
   @Get()
   @ApiGetTowers()
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
   async findBySociety(
     @CurrentUser() user: TokenPayload,
     @Query('societyId') querySocietyId?: string,

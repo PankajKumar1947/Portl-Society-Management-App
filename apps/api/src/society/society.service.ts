@@ -39,12 +39,27 @@ export class SocietyService {
 
   async findByUserId(userId: string): Promise<SocietyDocument> {
     const society = await this.societyRepository.findByUserId(userId);
-    if (!society) {
-      throw new NotFoundException(
-        `No society registered for user ID "${userId}"`,
-      );
+    if (society) {
+      return society;
     }
-    return society;
+
+    // If no society is owned directly by this user (e.g. they are a resident),
+    // look up their profile and resolve using their associated societyId.
+    const user = await this.societyRepository.societyModel.db
+      .model('User')
+      .findOne({ userId })
+      .exec();
+
+    if (user?.societyId) {
+      const associatedSociety = await this.societyRepository.findOne(user.societyId);
+      if (associatedSociety) {
+        return associatedSociety;
+      }
+    }
+
+    throw new NotFoundException(
+      `No society registered for user ID "${userId}"`,
+    );
   }
 
   async update(

@@ -36,7 +36,7 @@ import {
 @UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class FlatController {
-  constructor(private readonly flatService: FlatService) {}
+  constructor(private readonly flatService: FlatService) { }
 
   @Post()
   @Roles(UserRoles.ADMIN)
@@ -52,12 +52,14 @@ export class FlatController {
   }
 
   @Get()
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
   @ApiGetFlats()
   async findByTower(@Query('towerId') towerId: string) {
     return this.flatService.findByTowerId(towerId);
   }
 
   @Get(':flatId')
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
   @ApiGetFlat()
   async findOne(@Param('flatId') flatId: string) {
     return this.flatService.findOne(flatId);

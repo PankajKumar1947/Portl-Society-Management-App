@@ -9,7 +9,7 @@ import { UpdateSocietyDto } from './dto/update-society.dto';
 export class SocietyRepository {
   constructor(
     @InjectModel(Society.name)
-    private readonly societyModel: Model<SocietyDocument>,
+    public readonly societyModel: Model<SocietyDocument>,
   ) {}
 
   async create(
