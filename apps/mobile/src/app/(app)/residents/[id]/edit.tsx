@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -7,6 +7,7 @@ import ScreenHeader from "@/components/ui/screen-header";
 import StepPersonal from "../_components/step-personal";
 import StepAllotment from "../_components/step-allotment";
 import StepVehicle from "../_components/step-vehicle";
+import { useAlert } from "@/context/alert-context";
 import { useGetTowers, useGetResidentDetail, useUpdateResident } from "@repo/operations";
 import { ResidentPersonalInput, ResidentAllotmentInput, ResidentVehicleInput } from "@repo/schema";
 
@@ -17,6 +18,7 @@ export default function EditResidentScreen() {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [currentStep, setCurrentStep] = useState<EditStep>("personal");
+  const { showAlert } = useAlert();
 
   const { data: towersData, isLoading: isTowersLoading } = useGetTowers();
 
@@ -34,16 +36,22 @@ export default function EditResidentScreen() {
     updateResidentMutation(
       {
         userId: resident.userId,
-        // Since backend update handles User collections virtual join update,
-        // we can pass these details to complete the mutation.
         ...values,
       } as any,
       {
         onSuccess: () => {
-          Alert.alert("Success", "Personal details updated successfully!");
+          showAlert({
+            title: "Success",
+            description: "Personal details updated successfully!",
+            variant: "success",
+          });
         },
         onError: (err: Error) => {
-          Alert.alert("Error", err.message || "Failed to update personal details");
+          showAlert({
+            title: "Error",
+            description: err.message || "Failed to update personal details",
+            variant: "error",
+          });
         },
       }
     );
@@ -54,10 +62,18 @@ export default function EditResidentScreen() {
       values as any,
       {
         onSuccess: () => {
-          Alert.alert("Success", "Allotment details updated successfully!");
+          showAlert({
+            title: "Success",
+            description: "Allotment details updated successfully!",
+            variant: "success",
+          });
         },
         onError: (err: Error) => {
-          Alert.alert("Error", err.message || "Failed to update allotment details");
+          showAlert({
+            title: "Error",
+            description: err.message || "Failed to update allotment details",
+            variant: "error",
+          });
         },
       }
     );
@@ -68,15 +84,19 @@ export default function EditResidentScreen() {
       values as any,
       {
         onSuccess: () => {
-          Alert.alert("Success", "Vehicle details updated successfully!", [
-            {
-              text: "OK",
-              onPress: () => router.back(),
-            },
-          ]);
+          showAlert({
+            title: "Success",
+            description: "Vehicle details updated successfully!",
+            variant: "success",
+            onConfirm: () => router.back(),
+          });
         },
         onError: (err: Error) => {
-          Alert.alert("Error", err.message || "Failed to update vehicle details");
+          showAlert({
+            title: "Error",
+            description: err.message || "Failed to update vehicle details",
+            variant: "error",
+          });
         },
       }
     );
@@ -154,7 +174,6 @@ export default function EditResidentScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Step Indicator Header */}
           <View style={styles.stepperContainer}>
             <TouchableOpacity
               style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}
@@ -185,12 +204,12 @@ export default function EditResidentScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Form Step Rendering */}
           {currentStep === "personal" && (
             <StepPersonal
               initialValues={initialPersonalValues}
               onSubmit={handlePersonalSubmit}
               isSubmitting={isUpdating}
+              submitButtonText="Save Changes"
             />
           )}
 
@@ -200,6 +219,7 @@ export default function EditResidentScreen() {
               towers={towersOptions}
               onSubmit={handleAllotmentSubmit}
               isSubmitting={isUpdating}
+              submitButtonText="Save Changes"
             />
           )}
 

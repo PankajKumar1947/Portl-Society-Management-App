@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, View, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, ActivityIndicator, Text } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -8,6 +8,7 @@ import StepPersonal from "./_components/step-personal";
 import StepAllotment from "./_components/step-allotment";
 import StepVehicle from "./_components/step-vehicle";
 import OtpVerificationModal from "./_components/otp-modal";
+import { useAlert } from "@/context/alert-context";
 import {
   useGetTowers,
   useOnboardResidentPersonal,
@@ -21,6 +22,7 @@ type OnboardingStep = "personal" | "allotment" | "vehicle";
 export default function CreateResidentScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { showAlert } = useAlert();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("personal");
   const [isOtpVisible, setIsOtpVisible] = useState(false);
   const [tempUserId, setTempUserId] = useState<string | null>(null);
@@ -53,7 +55,11 @@ export default function CreateResidentScreen() {
       setTempUserId(userId);
       setIsOtpVisible(true);
     } catch (err: any) {
-      Alert.alert("Step 1 Failed", err.message || "Failed to submit personal details.");
+      showAlert({
+        title: "Step 1 Failed",
+        description: err.message || "Failed to submit personal details.",
+        variant: "error",
+      });
     }
   };
 
@@ -67,7 +73,11 @@ export default function CreateResidentScreen() {
 
   const handleAllotmentSubmit = async (values: Omit<ResidentAllotmentInput, "userId">) => {
     if (!createdUserId) {
-      Alert.alert("Error", "Please complete step 1 first.");
+      showAlert({
+        title: "Error",
+        description: "Please complete step 1 first.",
+        variant: "error",
+      });
       return;
     }
     try {
@@ -84,13 +94,21 @@ export default function CreateResidentScreen() {
       setCreatedResidentId(residentId);
       setCurrentStep("vehicle");
     } catch (err: any) {
-      Alert.alert("Step 2 Failed", err.message || "Failed to submit allotment details.");
+      showAlert({
+        title: "Step 2 Failed",
+        description: err.message || "Failed to submit allotment details.",
+        variant: "error",
+      });
     }
   };
 
   const handleVehicleSubmit = async (values: ResidentVehicleInput) => {
     if (!createdResidentId) {
-      Alert.alert("Error", "Please complete previous steps first.");
+      showAlert({
+        title: "Error",
+        description: "Please complete previous steps first.",
+        variant: "error",
+      });
       return;
     }
     try {
@@ -98,14 +116,18 @@ export default function CreateResidentScreen() {
         residentId: createdResidentId,
         data: values,
       });
-      Alert.alert("Success", "Resident registered successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      showAlert({
+        title: "Success",
+        description: "Resident registered successfully!",
+        variant: "success",
+        onConfirm: () => router.back(),
+      });
     } catch (err: any) {
-      Alert.alert("Step 3 Failed", err.message || "Failed to submit vehicle details.");
+      showAlert({
+        title: "Step 3 Failed",
+        description: err.message || "Failed to submit vehicle details.",
+        variant: "error",
+      });
     }
   };
 

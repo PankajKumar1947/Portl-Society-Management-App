@@ -12,12 +12,14 @@ interface StepPersonalProps {
   initialValues?: Partial<ResidentPersonalInput>;
   onSubmit: (values: ResidentPersonalInput) => void;
   isSubmitting?: boolean;
+  submitButtonText?: string;
 }
 
 export default function StepPersonal({
   initialValues,
   onSubmit,
   isSubmitting = false,
+  submitButtonText = "Next",
 }: StepPersonalProps) {
   const methods = useForm<ResidentPersonalInput>({
     resolver: zodResolver(residentPersonalSchema),
@@ -67,7 +69,7 @@ export default function StepPersonal({
           loading={isSubmitting}
           style={styles.submitButton}
         >
-          Next
+          {submitButtonText}
         </Button>
       </View>
     </FormProvider>

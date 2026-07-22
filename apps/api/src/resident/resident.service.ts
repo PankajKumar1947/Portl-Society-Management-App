@@ -8,6 +8,7 @@ import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 import { ResidentVehicleDto } from './dto/resident-vehicle.dto';
 import { AuthService } from '../auth/auth.service';
+import { UserRoles } from '@repo/schema';
 
 @Injectable()
 export class ResidentService {
@@ -20,7 +21,7 @@ export class ResidentService {
   async onboardPersonal(
     dto: ResidentPersonalDto,
     societyId: string,
-  ): Promise<any> {
+  ): Promise<{ userId: string; email: string }> {
     const existingUser = await this.userService.userRepository.findOne(dto.email);
     if (existingUser) {
       const residents = await this.repository.find({ userId: existingUser.userId });
@@ -44,7 +45,7 @@ export class ResidentService {
       lastName: dto.lastName,
       email: dto.email,
       phoneNumber: dto.mobileNumber,
-      role: 'RESIDENTS',
+      role: UserRoles.RESIDENTS,
       password,
       societyId,
     });

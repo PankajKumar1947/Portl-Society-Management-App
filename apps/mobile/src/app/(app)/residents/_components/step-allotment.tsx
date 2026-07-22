@@ -23,6 +23,7 @@ interface StepAllotmentProps {
   onSubmit: (values: ResidentAllotmentInput) => void;
   onBack?: () => void;
   isSubmitting?: boolean;
+  submitButtonText?: string;
 }
 
 export default function StepAllotment({
@@ -31,6 +32,7 @@ export default function StepAllotment({
   onSubmit,
   onBack,
   isSubmitting = false,
+  submitButtonText = "Next",
 }: StepAllotmentProps) {
   const methods = useForm<ResidentAllotmentInput>({
     resolver: zodResolver(residentAllotmentSchema) as any,
@@ -143,7 +145,7 @@ export default function StepAllotment({
             loading={isSubmitting}
             style={styles.flexButton}
           >
-            Next
+            {submitButtonText}
           </Button>
         </View>
       </View>

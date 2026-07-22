@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   ViewStyle,
-  TextStyle,
   Platform,
 } from "react-native";
 import { theme } from "../../constants";
@@ -49,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
           <TouchableWithoutFeedback>
             <View style={[styles.modalContainer, containerStyle]}>
               <Text style={styles.title}>{title}</Text>
-              
+
               {description ? (
                 <Text style={styles.description}>{description}</Text>
               ) : null}
@@ -57,13 +56,15 @@ export const Modal: React.FC<ModalProps> = ({
               {children ? <View style={styles.content}>{children}</View> : null}
 
               <View style={styles.actionRow}>
-                <Button
-                  variant="outline"
-                  onPress={onClose}
-                  style={styles.actionBtn}
-                >
-                  {cancelLabel}
-                </Button>
+                {cancelLabel ? (
+                  <Button
+                    variant="outline"
+                    onPress={onClose}
+                    style={styles.actionBtn}
+                  >
+                    {cancelLabel}
+                  </Button>
+                ) : null}
                 {onConfirm ? (
                   <Button
                     variant={confirmVariant === "danger" ? "outline" : "primary"}
