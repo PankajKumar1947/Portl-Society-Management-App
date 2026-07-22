@@ -8,6 +8,8 @@ export * from "./react-queries/tower";
 export * from "./routes/tower";
 export * from "./react-queries/flat";
 export * from "./routes/flat";
+export * from "./react-queries/resident";
+export * from "./routes/resident";
 export {
   setAccessToken,
   setRefreshToken,

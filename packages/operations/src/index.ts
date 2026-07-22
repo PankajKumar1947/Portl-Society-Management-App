@@ -8,3 +8,5 @@ export * from "./mutation/use-tower";
 export * from "./query/use-tower";
 export * from "./mutation/use-flat";
 export * from "./query/use-flat";
+export * from "./mutation/use-resident";
+export * from "./query/use-resident";

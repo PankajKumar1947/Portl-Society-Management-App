@@ -1,29 +1,41 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, View, Text, ScrollView, Alert, Linking, Share, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Alert, Linking, Share, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
-import { mockResidents, deleteResident } from "./_components/mock-data";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import InfoRow from "@/components/ui/info-row";
 import Button from "@/components/ui/button";
 import Avatar from "@/components/ui/avatar";
+import { useGetResidentDetail, useDeleteResident } from "@repo/operations";
 
 export default function ResidentDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const resident = mockResidents.find((r) => r.id === id);
+  const { data: resident, isLoading } = useGetResidentDetail(id || "", { enabled: !!id });
+  const { mutate: deleteResidentMutation } = useDeleteResident(id || "");
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Resident Details" onBack={() => router.back()} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!resident) {
     return (
@@ -68,8 +80,14 @@ export default function ResidentDetailsScreen() {
           text: "Remove",
           style: "destructive",
           onPress: () => {
-            deleteResident(resident.id);
-            router.back();
+            deleteResidentMutation(undefined, {
+              onSuccess: () => {
+                router.back();
+              },
+              onError: () => {
+                Alert.alert("Error", "Failed to remove resident");
+              },
+            });
           },
         },
       ]
@@ -86,7 +104,7 @@ export default function ResidentDetailsScreen() {
             name="create-outline"
             size={22}
             color={theme.colors.text}
-            onPress={() => router.push(Routes.Residents.Edit(resident.id) as any)}
+            onPress={() => router.push(Routes.Residents.Edit(resident.residentId) as any)}
             style={styles.headerEditIcon}
           />
         }
@@ -326,5 +344,10 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginTop: theme.spacing.md,
     borderColor: theme.colors.danger,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

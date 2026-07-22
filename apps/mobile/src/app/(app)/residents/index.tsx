@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity } from "react-native";
-import { useRouter, useNavigation } from "expo-router";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
@@ -9,22 +9,22 @@ import IconButton from "@/components/ui/icon-button";
 import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
-import { mockResidents, Resident } from "./_components/mock-data";
+import { useGetMySociety, useGetResidents } from "@repo/operations";
 
 export default function ResidentsListScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
-  const [residents, setResidents] = useState<Resident[]>(mockResidents);
 
-  // Re-fetch/sync residents whenever screen focuses
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      setResidents([...mockResidents]);
-    });
-    return unsubscribe;
-  }, [navigation]);
+  const { data: society, isLoading: isSocietyLoading } = useGetMySociety({ enabled: true });
+  const societyId = society?.societyId || "";
+
+  const { data: residents, isLoading: isResidentsLoading } = useGetResidents(
+    societyId,
+    { type: activeTab, search: searchQuery, enabled: !!societyId }
+  );
+
+  const isLoading = isSocietyLoading || isResidentsLoading;
 
   const filterTabs = [
     { id: "ALL", label: "All" },
@@ -33,21 +33,7 @@ export default function ResidentsListScreen() {
     { id: "FAMILY_MEMBER", label: "Family" },
   ];
 
-  const filteredResidents = residents.filter((res) => {
-    // Filter by tab
-    if (activeTab !== "ALL" && res.residentType !== activeTab) {
-      return false;
-    }
-    // Filter by search query
-    const fullName = `${res.firstName} ${res.lastName}`.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return (
-      fullName.includes(query) ||
-      res.flatNumber.toLowerCase().includes(query) ||
-      res.mobileNumber.includes(query) ||
-      res.towerId.toLowerCase().includes(query)
-    );
-  });
+  const filteredResidents = residents || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -91,36 +77,41 @@ export default function ResidentsListScreen() {
         style={styles.tabs}
       />
 
-      {/* Residents List */}
-      <FlatList
-        data={filteredResidents}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.listItemWrapper}>
-            <PersonListItem
-              name={`${item.firstName} ${item.lastName}`}
-              subtitle={`Flat ${item.flatNumber} • ${item.towerId.toUpperCase().replace("-", " ")}`}
-              meta={`Mobile: ${item.mobileNumber}`}
-              onPress={() => router.push(Routes.Residents.Details(item.id) as any)}
-              rightElement={
-                <View style={styles.rightContainer}>
-                  <Badge variant={item.residentType === "OWNER" ? "success" : item.residentType === "TENANT" ? "info" : "warning"}>
-                    {item.residentType === "FAMILY_MEMBER" ? "Family" : item.residentType.toLowerCase()}
-                  </Badge>
-                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} style={styles.chevron} />
-                </View>
-              }
-            />
-          </View>
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={48} color={theme.colors.textMuted} />
-            <Text style={styles.emptyText}>No residents found matching criteria</Text>
-          </View>
-        }
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredResidents}
+          keyExtractor={(item) => item.residentId}
+          renderItem={({ item }) => (
+            <View style={styles.listItemWrapper}>
+              <PersonListItem
+                name={`${item.firstName} ${item.lastName}`}
+                subtitle={`Flat ${item.flatNumber} • ${item.towerId.toUpperCase().replace("-", " ")}`}
+                meta={`Mobile: ${item.mobileNumber}`}
+                onPress={() => router.push(Routes.Residents.Details(item.residentId) as any)}
+                rightElement={
+                  <View style={styles.rightContainer}>
+                    <Badge variant={item.residentType === "OWNER" ? "success" : item.residentType === "TENANT" ? "info" : "warning"}>
+                      {item.residentType === "FAMILY_MEMBER" ? "Family" : item.residentType.toLowerCase()}
+                    </Badge>
+                    <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} style={styles.chevron} />
+                  </View>
+                }
+              />
+            </View>
+          )}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="people-outline" size={48} color={theme.colors.textMuted} />
+              <Text style={styles.emptyText}>No residents found matching criteria</Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -186,5 +177,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     fontWeight: theme.fontWeights.medium,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

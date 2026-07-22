@@ -1,8 +1,16 @@
 import React from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import { useForm, FormProvider, SubmitHandler, Controller } from "react-hook-form";
+import { View, StyleSheet } from "react-native";
+import { useForm, FormProvider, Controller, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
+import {
+  residentFormSchema,
+  ResidentFormValues,
+  RESIDENT_TYPE_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+  OWNERSHIP_OPTIONS,
+  VEHICLE_TYPE_OPTIONS,
+  DOC_TYPE_OPTIONS,
+} from "@repo/schema";
 import { theme } from "@/constants";
 import FormInput from "@/components/ui/form-input";
 import FormPhone from "@/components/ui/form-phone";
@@ -10,35 +18,6 @@ import FormSelect from "@/components/ui/form-select";
 import FormDate from "@/components/ui/form-date";
 import ToggleSwitch from "@/components/ui/toggle-switch";
 import Button from "@/components/ui/button";
-
-// Define the validation schema
-export const residentFormSchema = z.object({
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  mobileNumber: z.string().length(10, "Mobile number must be 10 digits"),
-  email: z.string().email("Invalid email address").optional().or(z.literal("")),
-  residentType: z.enum(["OWNER", "TENANT", "FAMILY_MEMBER"]),
-  relationship: z.enum(["SPOUSE", "SON", "DAUGHTER", "FATHER", "MOTHER", "BROTHER", "SISTER", "OTHER"]).optional().or(z.literal("")),
-  towerId: z.string().min(1, "Tower selection is required"),
-  flatNumber: z.string().min(1, "Flat number is required"),
-  moveInDate: z.string().min(1, "Move-in date is required"),
-  ownershipStatus: z.enum(["OWNER", "TENANT", "CO-OWNER"]),
-  isPrimary: z.boolean().default(false),
-  
-  // Vehicles
-  vehicleType: z.enum(["TWO_WHEELER", "FOUR_WHEELER", "NONE"]).default("NONE"),
-  vehicleNumber: z.string().optional().or(z.literal("")),
-  vehicleBrand: z.string().optional().or(z.literal("")),
-  vehicleModel: z.string().optional().or(z.literal("")),
-  vehicleColor: z.string().optional().or(z.literal("")),
-  parkingSlot: z.string().optional().or(z.literal("")),
-
-  // Documents
-  docType: z.enum(["AADHAR", "PAN", "PASSPORT", "VOTER_ID", "NONE"]).default("NONE"),
-  documentNumber: z.string().optional().or(z.literal("")),
-});
-
-export type ResidentFormValues = z.infer<typeof residentFormSchema>;
 
 interface ResidentFormProps {
   initialValues?: Partial<ResidentFormValues>;
@@ -48,56 +27,15 @@ interface ResidentFormProps {
   towers?: { label: string; value: string }[];
 }
 
-const RESIDENT_TYPE_OPTIONS = [
-  { label: "Owner", value: "OWNER" },
-  { label: "Tenant", value: "TENANT" },
-  { label: "Family Member", value: "FAMILY_MEMBER" },
-];
-
-const RELATIONSHIP_OPTIONS = [
-  { label: "Spouse", value: "SPOUSE" },
-  { label: "Son", value: "SON" },
-  { label: "Daughter", value: "DAUGHTER" },
-  { label: "Father", value: "FATHER" },
-  { label: "Mother", value: "MOTHER" },
-  { label: "Brother", value: "BROTHER" },
-  { label: "Sister", value: "SISTER" },
-  { label: "Other", value: "OTHER" },
-];
-
-const OWNERSHIP_OPTIONS = [
-  { label: "Owner", value: "OWNER" },
-  { label: "Tenant", value: "TENANT" },
-  { label: "Co-Owner", value: "CO-OWNER" },
-];
-
-const VEHICLE_TYPE_OPTIONS = [
-  { label: "None", value: "NONE" },
-  { label: "2 Wheeler", value: "TWO_WHEELER" },
-  { label: "4 Wheeler", value: "FOUR_WHEELER" },
-];
-
-const DOC_TYPE_OPTIONS = [
-  { label: "None", value: "NONE" },
-  { label: "Aadhar Card", value: "AADHAR" },
-  { label: "PAN Card", value: "PAN" },
-  { label: "Passport", value: "PASSPORT" },
-  { label: "Voter ID", value: "VOTER_ID" },
-];
-
 export default function ResidentForm({
   initialValues,
   onSubmit,
   isSubmitting = false,
   submitButtonText = "Save Resident",
-  towers = [
-    { label: "Tower A", value: "tower-a" },
-    { label: "Tower B", value: "tower-b" },
-    { label: "Tower C", value: "tower-c" },
-  ],
+  towers = [],
 }: ResidentFormProps) {
   const methods = useForm<ResidentFormValues>({
-    resolver: zodResolver(residentFormSchema) as any,
+    resolver: zodResolver(residentFormSchema) as unknown as Resolver<ResidentFormValues>,
     defaultValues: {
       firstName: initialValues?.firstName || "",
       lastName: initialValues?.lastName || "",
@@ -126,7 +64,7 @@ export default function ResidentForm({
   const vehicleType = watch("vehicleType");
   const docType = watch("docType");
 
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = (data: ResidentFormValues) => {
     onSubmit(data);
   };
 

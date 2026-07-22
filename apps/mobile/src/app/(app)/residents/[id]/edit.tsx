@@ -1,24 +1,66 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, View, Text } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, View, Text, ActivityIndicator } from "react-native";
 import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
-import ResidentForm, { ResidentFormValues } from "../_components/resident-form";
-import { mockResidents, updateResident } from "../_components/mock-data";
+import ResidentForm from "../_components/resident-form";
+import { ResidentFormValues } from "@repo/schema";
+import { useGetMySociety, useGetTowers, useGetResidentDetail, useUpdateResident } from "@repo/operations";
 
 export default function EditResidentScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const resident = mockResidents.find((r) => r.id === id);
+  const { data: society, isLoading: isSocietyLoading } = useGetMySociety({ enabled: true });
+  const societyId = society?.societyId || "";
+
+  const { data: towersData, isLoading: isTowersLoading } = useGetTowers(
+    societyId,
+    { enabled: !!societyId }
+  );
+
+  const { data: resident, isLoading: isResidentLoading } = useGetResidentDetail(id || "", { enabled: !!id });
+  const { mutate: updateResidentMutation, isPending: isUpdating } = useUpdateResident(id || "");
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  const handleSubmit = (values: ResidentFormValues) => {
+    updateResidentMutation(
+      values,
+      {
+        onSuccess: () => {
+          Alert.alert("Success", "Resident updated successfully!", [
+            {
+              text: "OK",
+              onPress: () => router.back(),
+            },
+          ]);
+        },
+        onError: (err: Error) => {
+          Alert.alert("Error", err.message || "Failed to update resident");
+        },
+      }
+    );
+  };
+
+  const isLoading = isSocietyLoading || isTowersLoading || isResidentLoading;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Edit Resident" onBack={() => router.back()} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!resident) {
     return (
@@ -31,19 +73,10 @@ export default function EditResidentScreen() {
     );
   }
 
-  const handleSubmit = (values: ResidentFormValues) => {
-    try {
-      updateResident(id, values);
-      Alert.alert("Success", "Resident updated successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
-    } catch (error) {
-      Alert.alert("Error", "Failed to update resident");
-    }
-  };
+  const towersOptions = towersData?.map((t) => ({
+    label: t.towerName,
+    value: t.towerId,
+  })) || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -61,6 +94,8 @@ export default function EditResidentScreen() {
             initialValues={resident}
             onSubmit={handleSubmit}
             submitButtonText="Save Changes"
+            isSubmitting={isUpdating}
+            towers={towersOptions}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -85,5 +120,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.danger,
     fontWeight: theme.fontWeights.medium,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

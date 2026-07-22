@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { SocietyModule } from './society/society.module';
 import { TowerModule } from './tower/tower.module';
 import { FlatModule } from './flat/flat.module';
+import { ResidentModule } from './resident/resident.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -25,6 +26,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     SocietyModule,
     TowerModule,
     FlatModule,
+    ResidentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

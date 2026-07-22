@@ -4,3 +4,4 @@ export * from "./user";
 export * from "./society";
 export * from "./tower";
 export * from "./flat";
+export * from "./resident";
