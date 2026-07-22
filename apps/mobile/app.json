@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "portl",
+    "name": "PortL",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "splash": {
-      "image": "./assets/images/get-start-splash.png",
-      "resizeMode": "cover",
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
       "backgroundColor": "#FAF9F5"
     },
     "scheme": "mobile",
@@ -33,11 +33,11 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FAF9F5",
-          "image": "./assets/images/get-start-splash.png",
-          "resizeMode": "cover",
+          "image": "./assets/images/logo.png",
+          "resizeMode": "contain",
           "android": {
-            "image": "./assets/images/get-start-splash.png",
-            "resizeMode": "cover"
+            "image": "./assets/images/logo.png",
+            "resizeMode": "contain"
           }
         }
       ],

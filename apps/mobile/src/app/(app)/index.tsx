@@ -57,7 +57,7 @@ export default function HomeScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.header}>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   scrollContent: {
-    paddingBottom: 112,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",
