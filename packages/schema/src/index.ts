@@ -8,3 +8,4 @@ export * from "./resident";
 export * from "./guard";
 export * from "./notice";
 export * from "./poll";
+export * from "./media";

@@ -12,6 +12,7 @@ import { ResidentModule } from './resident/resident.module';
 import { GuardModule } from './guard/guard.module';
 import { NoticeModule } from './notice/notice.module';
 import { PollModule } from './poll/poll.module';
+import { MediaModule } from './media/media.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -33,6 +34,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     GuardModule,
     NoticeModule,
     PollModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
