@@ -25,10 +25,12 @@ export function ApiOnboardGuardDuty() {
   );
 }
 
+import { SHIFT_TYPES } from '@repo/schema';
+
 export function ApiGetGuards() {
   return applyDecorators(
     ApiOperation({ summary: 'Get list of registered security guards' }),
-    ApiQuery({ name: 'type', required: false, description: 'Filter by Shift: DAY, NIGHT, ROUTINE' }),
+    ApiQuery({ name: 'type', required: false, description: 'Filter by Shift', enum: SHIFT_TYPES }),
     ApiQuery({ name: 'search', required: false, description: 'Search name, phone, or gate' }),
     ApiResponse({ status: 200, description: 'List retrieved successfully.' }),
   );

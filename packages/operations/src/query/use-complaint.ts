@@ -4,7 +4,7 @@ import { ComplaintData, ComplaintFilterOptions } from "@repo/schema";
 
 export const useGetComplaints = (params?: ComplaintFilterOptions) => {
   return useQuery<ComplaintData[]>({
-    queryKey: complaintQueries.list.key,
+    queryKey: [...complaintQueries.list.key, params],
     queryFn: () => getComplaints(params),
   });
 };

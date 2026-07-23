@@ -1,6 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
+import { POLL_STATUSES, POLL_RECIPIENTS } from '@repo/schema';
+
 export function ApiCreatePoll() {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new poll (draft or publish)' }),
@@ -12,8 +14,8 @@ export function ApiGetPolls() {
   return applyDecorators(
     ApiOperation({ summary: 'Get all polls for the society' }),
     ApiQuery({ name: 'search', required: false }),
-    ApiQuery({ name: 'status', required: false }),
-    ApiQuery({ name: 'recipient', required: false }),
+    ApiQuery({ name: 'status', required: false, enum: POLL_STATUSES }),
+    ApiQuery({ name: 'recipient', required: false, enum: POLL_RECIPIENTS }),
     ApiResponse({ status: 200, description: 'Polls retrieved successfully.' }),
   );
 }

@@ -1,6 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
+import { NOTICE_STATUSES, NOTICE_RECIPIENTS } from '@repo/schema';
+
 export function ApiCreateNotice() {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new notice (draft or publish)' }),
@@ -12,8 +14,8 @@ export function ApiGetNotices() {
   return applyDecorators(
     ApiOperation({ summary: 'Get all notices for the society' }),
     ApiQuery({ name: 'search', required: false, description: 'Search by title or description' }),
-    ApiQuery({ name: 'status', required: false, description: 'Filter by status: draft, published, all' }),
-    ApiQuery({ name: 'recipient', required: false, description: 'Filter by recipient: guard, residents, all' }),
+    ApiQuery({ name: 'status', required: false, description: 'Filter by status', enum: NOTICE_STATUSES }),
+    ApiQuery({ name: 'recipient', required: false, description: 'Filter by recipient', enum: NOTICE_RECIPIENTS }),
     ApiResponse({ status: 200, description: 'Notices retrieved successfully.' }),
   );
 }

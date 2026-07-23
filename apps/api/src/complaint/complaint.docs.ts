@@ -1,6 +1,8 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 
+import { COMPLAINT_CATEGORIES, COMPLAINT_STATUSES } from "@repo/schema";
+
 export function ApiComplaintController() {
   return applyDecorators(ApiTags("Complaints"), ApiBearerAuth(), ApiResponse({ status: 401, description: "Unauthorized" }));
 }
@@ -17,8 +19,8 @@ export function ApiGetComplaints() {
   return applyDecorators(
     ApiOperation({ summary: "Retrieve all complaints for the current society" }),
     ApiQuery({ name: "search", required: false, description: "Search by subject or description" }),
-    ApiQuery({ name: "status", required: false, description: "Filter by status" }),
-    ApiQuery({ name: "category", required: false, description: "Filter by category" }),
+    ApiQuery({ name: "status", required: false, description: "Filter by status", enum: COMPLAINT_STATUSES }),
+    ApiQuery({ name: "category", required: false, description: "Filter by category", enum: COMPLAINT_CATEGORIES }),
     ApiResponse({ status: 200, description: "List of complaints returned successfully" }),
   );
 }
