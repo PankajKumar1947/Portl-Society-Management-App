@@ -18,6 +18,8 @@ export * from "./react-queries/poll";
 export * from "./routes/poll";
 export * from "./react-queries/media";
 export * from "./routes/media";
+export * from "./react-queries/amenity";
+export * from "./routes/amenity";
 export {
   setAccessToken,
   setRefreshToken,

@@ -9,13 +9,17 @@ import {
   AMENITY_STATUSES,
 } from "./amenity.schema";
 import { ApiResponse } from "../shared/api.type";
+import { MediaData } from "../media/media.type";
 
 export type AmenityCategory = (typeof AMENITY_CATEGORIES)[number];
 export type AmenityType = (typeof AMENITY_TYPES)[number];
 export type AmenityStatus = (typeof AMENITY_STATUSES)[number];
 
 export type OperatingHour = z.infer<typeof operatingHourSchema>;
-export type AmenityData = z.infer<typeof amenitySchema>;
+export type AmenityData = z.infer<typeof amenitySchema> & {
+  thumbnailFile?: MediaData;
+  galleryFiles?: MediaData[];
+};
 
 export type CreateAmenityBody = z.infer<typeof createAmenitySchema>;
 export type UpdateAmenityBody = z.infer<typeof updateAmenitySchema>;

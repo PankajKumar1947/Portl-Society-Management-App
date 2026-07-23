@@ -25,6 +25,7 @@ export interface AttachmentPickerProps {
   onAdd: (item: AttachmentItem) => void;
   onRemove: (index: number) => void;
   maxAttachments?: number;
+  acceptImagesOnly?: boolean;
 }
 
 function formatSize(bytes: number): string {
@@ -38,6 +39,7 @@ export const AttachmentPicker: React.FC<AttachmentPickerProps> = ({
   onAdd,
   onRemove,
   maxAttachments = 5,
+  acceptImagesOnly = false,
 }) => {
   const handleLaunchCamera = useCallback(async () => {
     if (attachments.length >= maxAttachments) {
@@ -145,9 +147,11 @@ export const AttachmentPicker: React.FC<AttachmentPickerProps> = ({
         <TouchableOpacity style={styles.photoButton} activeOpacity={0.7} onPress={handlePickLibrary}>
           <Ionicons name="image-outline" size={28} color={theme.colors.textSecondary} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.photoButton} activeOpacity={0.7} onPress={handlePickDocument}>
-          <Ionicons name="document-text-outline" size={28} color={theme.colors.textSecondary} />
-        </TouchableOpacity>
+        {!acceptImagesOnly && (
+          <TouchableOpacity style={styles.photoButton} activeOpacity={0.7} onPress={handlePickDocument}>
+            <Ionicons name="document-text-outline" size={28} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Attachments preview list */}

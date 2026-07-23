@@ -123,6 +123,10 @@ export const Routes = {
       pathname: app("/amenities/[id]"),
       params: { id },
     }),
+    Edit: (id: string) => ({
+      pathname: app("/amenities/[id]/edit"),
+      params: { id },
+    }),
     Book: (id: string, name: string) => ({
       pathname: app("/amenities/[id]/book"),
       params: { id, name },

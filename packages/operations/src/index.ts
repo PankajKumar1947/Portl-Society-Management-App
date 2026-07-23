@@ -18,3 +18,6 @@ export * from "./query/use-poll";
 export * from "./mutation/use-poll";
 export * from "./mutation/use-media";
 export * from "./query/use-media";
+export * from "./query/use-amenity";
+export * from "./mutation/use-amenity";
+

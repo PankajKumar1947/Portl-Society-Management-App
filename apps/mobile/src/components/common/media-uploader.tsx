@@ -12,6 +12,7 @@ export interface MediaUploaderProps {
   initialMedia?: MediaData[];
   onChange?: (mediaIds: string[]) => void;
   maxFiles?: number;
+  acceptImagesOnly?: boolean;
 }
 
 interface UploadingState {
@@ -26,6 +27,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   initialMedia = [],
   onChange,
   maxFiles = 5,
+  acceptImagesOnly = false,
 }) => {
   const [uploadedMedia, setUploadedMedia] = useState<MediaData[]>(initialMedia);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingState[]>([]);
@@ -91,6 +93,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         onAdd={handleAddAttachment}
         onRemove={handleRemoveAttachment}
         maxAttachments={maxFiles}
+        acceptImagesOnly={acceptImagesOnly}
       />
 
       {uploadingFiles.length > 0 && (
