@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { SHIFT_TYPES, GUARD_STATUSES } from '@repo/schema';
+import { SHIFT_TYPES, GUARD_STATUSES, POLICE_VERIFICATION_STATUSES } from '@repo/schema';
 import * as crypto from 'crypto';
 
 export type GuardDocument = HydratedDocument<Guard>;
@@ -36,6 +36,30 @@ export class Guard {
 
   @Prop()
   agencyName?: string;
+
+  @Prop({ required: true, unique: true, index: true })
+  aadharNumber: string;
+
+  @Prop({ required: true })
+  streetAddress: string;
+
+  @Prop({ required: true })
+  city: string;
+
+  @Prop({ required: true })
+  state: string;
+
+  @Prop({ required: true })
+  country: string;
+
+  @Prop({ required: true })
+  zipCode: string;
+
+  @Prop({ required: true })
+  emergencyContact: string;
+
+  @Prop({ required: true, enum: POLICE_VERIFICATION_STATUSES, default: 'PENDING' })
+  policeVerificationStatus: string;
 }
 
 export const GuardSchema = SchemaFactory.createForClass(Guard);

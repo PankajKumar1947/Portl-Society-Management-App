@@ -11,4 +11,6 @@
 - **Frontend Design & Aesthetics**: You must use the `frontend-design` skill when designing new interfaces, choosing layouts, establishing typography, or ensuring high-quality, non-templated visual design.
 - **Backend API Creation**: You must use the `nest-api-flow` skill when creating new NestJS REST endpoints, modules, services, repositories, DTOs, entities, or Swagger documentation.
 - **Mobile API Integration**: You must use the `mobile-api-integration` skill when connecting a mobile screen to a backend API, adding API route functions, creating React Query mutation/query hooks in the operations package, or wiring screens with the mutate pattern.
-
+## General Coding Guidelines
+- **Strict Typing (TypeScript)**: Always use strong, correct TypeScript types. Never use `any` as a type under any circumstances.
+- **Code Comments**: Do not add garbage, placeholder, or obvious boilerplate comments (e.g. "// Populate formValues once guard details load", "// Stepper indicator"). Only write clean, explanatory comments for non-obvious business logic.

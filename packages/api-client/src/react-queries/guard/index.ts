@@ -3,6 +3,10 @@ export const guardQueries = {
     key: ["onboard-guard-personal"],
     endpoint: "/guards/onboard/personal",
   },
+  onboardIdentity: {
+    key: ["onboard-guard-identity"],
+    endpoint: "/guards/onboard/identity",
+  },
   onboardDuty: {
     key: ["onboard-guard-duty"],
     endpoint: "/guards/onboard/duty",

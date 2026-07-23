@@ -9,11 +9,19 @@ export function ApiOnboardGuardPersonal() {
   );
 }
 
+export function ApiOnboardGuardIdentity() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Onboard guard step 2: Identity registration (Aadhar, Address, Emergency Contact)' }),
+    ApiResponse({ status: 201, description: 'Identity registered. Proceed to duty allocation.' }),
+    ApiResponse({ status: 409, description: 'Guard profile already exists.' }),
+  );
+}
+
 export function ApiOnboardGuardDuty() {
   return applyDecorators(
-    ApiOperation({ summary: 'Onboard guard step 2: Duty details allocation' }),
-    ApiResponse({ status: 201, description: 'Guard onboarding complete.' }),
-    ApiResponse({ status: 409, description: 'Guard is already onboarded.' }),
+    ApiOperation({ summary: 'Onboard guard step 3: Shift and Duty allocation' }),
+    ApiResponse({ status: 200, description: 'Guard onboarding complete.' }),
+    ApiResponse({ status: 404, description: 'Guard profile not found.' }),
   );
 }
 

@@ -101,6 +101,9 @@ export default function GuardDetailsScreen() {
             <Badge variant={guard.status === "ACTIVE" ? "success" : "danger"}>
               {guard.status === "ACTIVE" ? "Active duty" : "Inactive"}
             </Badge>
+            <Badge variant={guard.policeVerificationStatus === "VERIFIED" ? "success" : guard.policeVerificationStatus === "PENDING" ? "warning" : "danger"}>
+              {guard.policeVerificationStatus === "VERIFIED" ? "Verified" : guard.policeVerificationStatus === "PENDING" ? "Verification Pending" : "Verification Failed"}
+            </Badge>
             <Badge variant="info">
               {guard.shiftType === "DAY" ? "Day shift" : "Night shift"}
             </Badge>
@@ -125,6 +128,14 @@ export default function GuardDetailsScreen() {
           <InfoRow label="Shift Schedule" value={guard.shiftType === "DAY" ? "08:00 AM - 08:00 PM" : "08:00 PM - 08:00 AM"} />
           <InfoRow label="Security Agency" value={guard.agencyName || "None"} />
           <InfoRow label="Joining Date" value={guard.joiningDate ? new Date(guard.joiningDate).toLocaleDateString() : "N/A"} />
+        </Card>
+
+        {/* Verification & Identification Details */}
+        <Text style={styles.sectionTitle}>Verification & Identification</Text>
+        <Card style={styles.detailsCard}>
+          <InfoRow label="Aadhar Card" value={guard.aadharNumber || "N/A"} />
+          <InfoRow label="Emergency Phone" value={guard.emergencyContact || "N/A"} />
+          <InfoRow label="Home Address" value={`${guard.streetAddress || ""}, ${guard.city || ""}, ${guard.state || ""}, ${guard.country || ""} - ${guard.zipCode || ""}`} />
         </Card>
 
         {/* Contact details */}

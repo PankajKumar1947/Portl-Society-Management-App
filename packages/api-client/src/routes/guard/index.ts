@@ -1,6 +1,7 @@
 import {
   GuardPersonalInput,
   GuardDutyInput,
+  GuardIdentificationInput,
   UpdateGuardBody,
   GuardResponse,
   GuardListResponse,
@@ -14,6 +15,13 @@ export const onboardGuardPersonal = async (
   data: GuardPersonalInput
 ): Promise<{ userId: string; email: string }> => {
   const res = await apiClient.post(guardQueries.onboardPersonal.endpoint, data);
+  return res.data;
+};
+
+export const onboardGuardIdentity = async (
+  data: GuardIdentificationInput & { userId: string }
+): Promise<GuardResponse> => {
+  const res = await apiClient.post(guardQueries.onboardIdentity.endpoint, data);
   return res.data;
 };
 

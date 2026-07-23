@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   onboardGuardPersonal,
+  onboardGuardIdentity,
   onboardGuardDuty,
   updateGuard,
   deleteGuard,
@@ -8,6 +9,7 @@ import {
 } from "@repo/api-client";
 import {
   GuardPersonalInput,
+  GuardIdentificationInput,
   GuardDutyInput,
   UpdateGuardBody,
 } from "@repo/schema";
@@ -16,6 +18,13 @@ export const useOnboardGuardPersonal = () => {
   return useMutation({
     mutationKey: guardQueries.onboardPersonal.key,
     mutationFn: (data: GuardPersonalInput) => onboardGuardPersonal(data),
+  });
+};
+
+export const useOnboardGuardIdentity = () => {
+  return useMutation({
+    mutationKey: guardQueries.onboardIdentity.key,
+    mutationFn: (data: GuardIdentificationInput & { userId: string }) => onboardGuardIdentity(data),
   });
 };
 

@@ -4,68 +4,100 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAvoidingView, Platform, StyleSheet, View, Text, ScrollView } from "react-native";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
-import GuardForm, { GuardFormValues } from "./_components/guard-form";
+import StepPersonal from "./_components/step-personal";
+import StepIdentity from "./_components/step-identity";
+import StepDuty from "./_components/step-duty";
 import OtpVerificationModal from "../residents/_components/otp-modal";
 import { useAlert } from "@/context/alert-context";
-import { useOnboardGuardPersonal, useOnboardGuardDuty } from "@repo/operations";
+import { useOnboardGuardPersonal, useOnboardGuardIdentity, useOnboardGuardDuty } from "@repo/operations";
+import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput } from "@repo/schema";
 
 export default function CreateGuardScreen() {
   const router = useRouter();
   const { showAlert } = useAlert();
-  const [currentStep, setCurrentStep] = useState<"personal" | "duty">("personal");
+  const [currentStep, setCurrentStep] = useState<"personal" | "identification" | "duty">("personal");
   const [isOtpVisible, setIsOtpVisible] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
-  const [personalDetails, setPersonalDetails] = useState<GuardFormValues | null>(null);
+
+  // Buffer state to keep values during steps transitions
+  const [personalValues, setPersonalValues] = useState<Partial<GuardPersonalInput>>({});
+  const [identityValues, setIdentityValues] = useState<Partial<GuardIdentificationInput>>({});
+  const [dutyValues, setDutyValues] = useState<Partial<Omit<GuardDutyInput, "userId">>>({});
 
   const { mutate: onboardPersonal, isPending: isStep1Pending } = useOnboardGuardPersonal();
-  const { mutate: onboardDuty, isPending: isStep2Pending } = useOnboardGuardDuty();
+  const { mutate: onboardIdentity, isPending: isStep2Pending } = useOnboardGuardIdentity();
+  const { mutate: onboardDuty, isPending: isStep3Pending } = useOnboardGuardDuty();
 
-  const handleFormSubmit = (values: GuardFormValues) => {
-    if (currentStep === "personal") {
-      setPersonalDetails(values);
-      onboardPersonal(values, {
-        onSuccess: (res) => {
-          setCreatedUserId(res.userId);
-          setIsOtpVisible(true);
-        },
+  const handleStep1Submit = (values: GuardPersonalInput) => {
+    setPersonalValues(values);
+    onboardPersonal(values, {
+      onSuccess: (res) => {
+        setCreatedUserId(res.userId);
+        setIsOtpVisible(true);
+      },
+    });
+  };
+
+  const handleStep2Submit = (values: GuardIdentificationInput) => {
+    if (!createdUserId) {
+      showAlert({
+        title: "Error",
+        description: "Missing user credentials. Please complete step 1 first.",
+        variant: "error",
       });
-    } else {
-      if (!createdUserId) {
-        showAlert({
-          title: "Error",
-          description: "Missing user credentials. Please complete step 1 first.",
-          variant: "error",
-        });
-        return;
-      }
-      onboardDuty(
-        {
-          userId: createdUserId,
-          shiftType: values.shiftType,
-          gateNumber: values.gateNumber,
-          agencyName: values.agencyName,
-        },
-        {
-          onSuccess: () => {
-            showAlert({
-              title: "Guard Registered",
-              description: `Security guard ${personalDetails?.firstName || ""} has been successfully added.`,
-              variant: "success",
-              onConfirm: () => router.back(),
-            });
-          },
-        }
-      );
+      return;
     }
+    setIdentityValues(values);
+    onboardIdentity(
+      {
+        userId: createdUserId,
+        ...values,
+      },
+      {
+        onSuccess: () => {
+          setCurrentStep("duty");
+        },
+      }
+    );
+  };
+
+  const handleStep3Submit = (values: Omit<GuardDutyInput, "userId">) => {
+    if (!createdUserId) {
+      showAlert({
+        title: "Error",
+        description: "Missing user credentials. Please complete step 1 first.",
+        variant: "error",
+      });
+      return;
+    }
+    setDutyValues(values);
+    onboardDuty(
+      {
+        userId: createdUserId,
+        ...values,
+      },
+      {
+        onSuccess: () => {
+          showAlert({
+            title: "Guard Registered",
+            description: `Security guard ${personalValues.firstName || ""} has been successfully added.`,
+            variant: "success",
+            onConfirm: () => router.back(),
+          });
+        },
+      }
+    );
   };
 
   const handleOtpSuccess = () => {
     setIsOtpVisible(false);
-    setCurrentStep("duty");
+    setCurrentStep("identification");
   };
 
   const handleBack = () => {
     if (currentStep === "duty") {
+      setCurrentStep("identification");
+    } else if (currentStep === "identification") {
       setCurrentStep("personal");
     } else {
       router.back();
@@ -76,11 +108,15 @@ export default function CreateGuardScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScreenHeader title="Register Guard" onBack={handleBack} />
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Stepper indicator */}
           <View style={styles.stepperContainer}>
             <View style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}>
@@ -90,25 +126,50 @@ export default function CreateGuardScreen() {
 
             <View style={styles.stepDivider} />
 
+            <View style={[styles.stepItem, currentStep === "identification" && styles.stepItemActive]}>
+              <Text style={[styles.stepNumber, currentStep === "identification" && styles.stepNumberActive]}>2</Text>
+              <Text style={[styles.stepLabel, currentStep === "identification" && styles.stepLabelActive]}>Identity</Text>
+            </View>
+
+            <View style={styles.stepDivider} />
+
             <View style={[styles.stepItem, currentStep === "duty" && styles.stepItemActive]}>
-              <Text style={[styles.stepNumber, currentStep === "duty" && styles.stepNumberActive]}>2</Text>
+              <Text style={[styles.stepNumber, currentStep === "duty" && styles.stepNumberActive]}>3</Text>
               <Text style={[styles.stepLabel, currentStep === "duty" && styles.stepLabelActive]}>Duty Info</Text>
             </View>
           </View>
 
-          <GuardForm
-            initialValues={personalDetails || undefined}
-            currentStep={currentStep}
-            onStepChange={setCurrentStep}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isStep1Pending || isStep2Pending}
-            submitButtonText="Register Guard"
-          />
+          {currentStep === "personal" && (
+            <StepPersonal
+              initialValues={personalValues}
+              onSubmit={handleStep1Submit}
+              isSubmitting={isStep1Pending}
+              submitButtonText="Next"
+            />
+          )}
+
+          {currentStep === "identification" && (
+            <StepIdentity
+              initialValues={identityValues}
+              onSubmit={handleStep2Submit}
+              isSubmitting={isStep2Pending}
+              submitButtonText="Next"
+            />
+          )}
+
+          {currentStep === "duty" && (
+            <StepDuty
+              initialValues={dutyValues}
+              onSubmit={handleStep3Submit}
+              isSubmitting={isStep3Pending}
+              submitButtonText="Register Guard"
+            />
+          )}
         </ScrollView>
 
         <OtpVerificationModal
           visible={isOtpVisible}
-          email={personalDetails?.email || ""}
+          email={personalValues.email || ""}
           onSuccess={handleOtpSuccess}
           onClose={() => setIsOtpVisible(false)}
         />
@@ -124,6 +185,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
+    paddingBottom: 80,
     gap: theme.spacing.lg,
   },
   stepperContainer: {

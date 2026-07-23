@@ -5,6 +5,7 @@ import { UserService } from '../user/user.service';
 import { UpdateGuardDto } from './dto/update-guard.dto';
 import { OnboardGuardPersonalDto } from './dto/onboard-guard-personal.dto';
 import { OnboardGuardDutyDto } from './dto/onboard-guard-duty.dto';
+import { OnboardGuardIdentityDto } from './dto/onboard-guard-identity.dto';
 import { AuthService } from '../auth/auth.service';
 import { UserRoles, GuardData } from '@repo/schema';
 
@@ -60,8 +61,8 @@ export class GuardService {
     };
   }
 
-  async onboardDuty(
-    dto: OnboardGuardDutyDto,
+  async onboardIdentity(
+    dto: OnboardGuardIdentityDto,
     societyId: string,
   ): Promise<GuardDocument> {
     const existingGuard = await this.repository.find({ userId: dto.userId });
@@ -72,17 +73,47 @@ export class GuardService {
     const guard = await this.repository.create({
       userId: dto.userId,
       societyId,
-      shiftType: dto.shiftType,
-      gateNumber: dto.gateNumber,
-      agencyName: dto.agencyName,
+      aadharNumber: dto.aadharNumber,
+      streetAddress: dto.streetAddress,
+      city: dto.city,
+      state: dto.state,
+      country: dto.country,
+      zipCode: dto.zipCode,
+      emergencyContact: dto.emergencyContact,
+      shiftType: 'DAY', // Placeholder until step 3
+      gateNumber: 'Gate 1', // Placeholder until step 3
+      policeVerificationStatus: 'PENDING',
       status: 'ACTIVE',
     });
 
     const populated = await this.repository.findOne(guard.guardId);
     if (!populated) {
-      throw new NotFoundException('Guard was not successfully registered.');
+      throw new NotFoundException('Guard registration failed in database.');
     }
     return populated;
+  }
+
+  async onboardDuty(
+    dto: OnboardGuardDutyDto,
+    societyId: string,
+  ): Promise<GuardDocument> {
+    const existingGuard = await this.repository.find({ userId: dto.userId });
+    if (existingGuard.length === 0) {
+      throw new NotFoundException('Guard record not found. Please complete Step 2 first.');
+    }
+
+    const guard = existingGuard[0];
+    const updated = await this.repository.update(guard.guardId, {
+      shiftType: dto.shiftType,
+      gateNumber: dto.gateNumber,
+      agencyName: dto.agencyName,
+      policeVerificationStatus: dto.policeVerificationStatus || guard.policeVerificationStatus,
+    });
+
+    if (!updated) {
+      throw new NotFoundException('Guard duty assignment failed.');
+    }
+    return updated;
   }
 
   async findAll(

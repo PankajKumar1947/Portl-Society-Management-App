@@ -18,12 +18,14 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { OnboardGuardPersonalDto } from './dto/onboard-guard-personal.dto';
 import { OnboardGuardDutyDto } from './dto/onboard-guard-duty.dto';
+import { OnboardGuardIdentityDto } from './dto/onboard-guard-identity.dto';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 import { TenantGuard } from '../auth/guards/tenant.guard';
 import { UserRoles } from '@repo/schema';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import {
   ApiOnboardGuardPersonal,
+  ApiOnboardGuardIdentity,
   ApiOnboardGuardDuty,
   ApiGetGuards,
   ApiGetGuard,
@@ -49,6 +51,20 @@ export class GuardController {
     return {
       message: 'OTP triggered. Verify email address.',
       ...result,
+    };
+  }
+
+  @Post('onboard/identity')
+  @Roles(UserRoles.ADMIN)
+  @ApiOnboardGuardIdentity()
+  async onboardIdentity(
+    @Body() dto: OnboardGuardIdentityDto,
+    @CurrentUser('societyId') societyId: string,
+  ) {
+    const guard = await this.service.onboardIdentity(dto, societyId);
+    return {
+      message: 'Identity registered successfully.',
+      guard,
     };
   }
 
