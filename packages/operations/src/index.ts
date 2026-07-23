@@ -16,3 +16,5 @@ export * from "./query/use-notice";
 export * from "./mutation/use-notice";
 export * from "./query/use-poll";
 export * from "./mutation/use-poll";
+export * from "./mutation/use-media";
+export * from "./query/use-media";

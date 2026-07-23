@@ -16,6 +16,8 @@ export * from "./react-queries/notice";
 export * from "./routes/notice";
 export * from "./react-queries/poll";
 export * from "./routes/poll";
+export * from "./react-queries/media";
+export * from "./routes/media";
 export {
   setAccessToken,
   setRefreshToken,
