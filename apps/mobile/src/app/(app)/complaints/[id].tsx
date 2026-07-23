@@ -1,137 +1,37 @@
-import React, { useLayoutEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
-import ScreenHeader from "@/components/ui/screen-header";
-import Card from "@/components/ui/card";
-import Badge from "@/components/ui/badge";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useGetComplaintDetail } from "@repo/operations";
+import LoadingScreen from "@/components/layout/loading-screen";
+import NotFoundScreen from "@/components/layout/not-found-screen";
 
-interface ComplaintDetail {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  date: string;
-  status: "pending" | "in_progress" | "resolved";
-  timeline: {
-    title: string;
-    description: string;
-    time: string;
-    completed: boolean;
-  }[];
-}
+const STATUS_VARIANTS: Record<string, "warning" | "info" | "success" | "danger"> = {
+  PENDING: "warning",
+  IN_PROGRESS: "info",
+  RESOLVED: "success",
+  REJECTED: "danger",
+};
 
-const DETAILS_MOCK: Record<string, ComplaintDetail> = {
-  CP101: {
-    id: "CP101",
-    title: "Neighbor playing loud music repeatedly",
-    category: "Noisy Neighbor",
-    description: "Flat B-302 plays extremely loud music past 11 PM on weekdays. This is violating society noise regulations.",
-    date: "16 Jul 2026",
-    status: "pending",
-    timeline: [
-      {
-        title: "Complaint Registered",
-        description: "Complaint successfully lodged by resident Sunita Sharma.",
-        time: "16 Jul 2026, 11:30 AM",
-        completed: true,
-      },
-      {
-        title: "Awaiting Review",
-        description: "Society administrator has received the grievance alert.",
-        time: "Pending",
-        completed: false,
-      },
-    ],
-  },
-  CP102: {
-    id: "CP102",
-    title: "Housekeeping not cleaning common areas",
-    category: "Housekeeping",
-    description: "Lobby elevator floors on Tower A have trash piled up since last two days. No cleanup staff has cleaned it despite repeated reminders.",
-    date: "14 Jul 2026",
-    status: "in_progress",
-    timeline: [
-      {
-        title: "Complaint Registered",
-        description: "Complaint successfully lodged by resident Sunita Sharma.",
-        time: "14 Jul 2026, 09:30 AM",
-        completed: true,
-      },
-      {
-        title: "Assigned to Supervisor",
-        description: "Assigned to housekeeping head to coordinate lobby cleanup.",
-        time: "15 Jul 2026, 02:00 PM",
-        completed: true,
-      },
-      {
-        title: "Under Resolution",
-        description: "Housekeeping crew dispatching to Tower A elevator lobby.",
-        time: "In Progress",
-        completed: false,
-      },
-    ],
-  },
-  CP103: {
-    id: "CP103",
-    title: "Security staff misbehaving at main gate",
-    category: "Security Behavior",
-    description: "Night shift guard misbehaved with visitor guest delivery partners and did not cooperate with the app verification process.",
-    date: "10 Jul 2026",
-    status: "resolved",
-    timeline: [
-      {
-        title: "Complaint Registered",
-        description: "Complaint successfully lodged by resident Sunita Sharma.",
-        time: "10 Jul 2026, 08:30 AM",
-        completed: true,
-      },
-      {
-        title: "Assigned to Security Supervisor",
-        description: "Security chief notified to query gate security logs.",
-        time: "11 Jul 2026, 10:00 AM",
-        completed: true,
-      },
-      {
-        title: "Warning Issued",
-        description: "Gate guard reprimanded and re-trained on society visitor processing.",
-        time: "12 Jul 2026, 04:00 PM",
-        completed: true,
-      },
-      {
-        title: "Resolved",
-        description: "Issue closed successfully.",
-        time: "12 Jul 2026, 04:15 PM",
-        completed: true,
-      },
-    ],
-  },
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Pending",
+  IN_PROGRESS: "In Progress",
+  RESOLVED: "Resolved",
+  REJECTED: "Rejected",
 };
 
 export default function ComplaintDetailsScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const detail = DETAILS_MOCK[id || "CP101"] || DETAILS_MOCK.CP101;
+  const { data: detail, isLoading } = useGetComplaintDetail(id || "");
 
-  useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => parent?.setOptions({ tabBarStyle: undefined });
-  }, [navigation]);
-
-  const getStatusBadge = (status: ComplaintDetail["status"]) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="warning">Pending</Badge>;
-      case "in_progress":
-        return <Badge variant="info">In Progress</Badge>;
-      case "resolved":
-        return <Badge variant="success">Resolved</Badge>;
-    }
-  };
+  if (isLoading) return <LoadingScreen title="Complaint Details" />;
+  if (!detail) return <NotFoundScreen title="Complaint" message="Complaint not found" />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -139,54 +39,84 @@ export default function ComplaintDetailsScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Info Card */}
-        <Card variant="flat" style={styles.card}>
+        <Card variant="flat" style={styles.infoCard}>
           <View style={styles.cardHeader}>
             <View style={styles.categoryWrapper}>
-              <Text style={styles.categoryText}>{detail.category}</Text>
+              <Text style={styles.categoryText}>
+                {detail.category.replace(/_/g, " ")}
+              </Text>
             </View>
-            {getStatusBadge(detail.status)}
+            <Badge variant={STATUS_VARIANTS[detail.status] || "secondary"}>
+              {STATUS_LABELS[detail.status] || detail.status}
+            </Badge>
           </View>
-          <Text style={styles.title}>{detail.title}</Text>
+          <Text style={styles.title}>{detail.subject}</Text>
           <Text style={styles.desc}>{detail.description}</Text>
-          <Text style={styles.date}>Registered on {detail.date}</Text>
+          <Text style={styles.date}>
+            Registered on{" "}
+            {detail.createdAt
+              ? new Date(detail.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
+              : ""}
+          </Text>
+          {detail.reportedByUser && (
+            <Text style={styles.reportedBy}>
+              Reported by: {detail.reportedByUser.firstName} {detail.reportedByUser.lastName}
+            </Text>
+          )}
         </Card>
 
-        {/* Timeline Status */}
-        <Text style={styles.sectionHeader}>Complaint Progress</Text>
-        <Card variant="flat" style={styles.timelineCard}>
-          {detail.timeline.map((step, index) => (
-            <View key={index} style={styles.timelineItem}>
-              {/* Left Column (Line & Dot Indicator) */}
-              <View style={styles.leftColumn}>
-                <View
-                  style={[
-                    styles.dot,
-                    step.completed ? styles.dotCompleted : styles.dotPending,
-                  ]}
-                >
-                  {step.completed && (
-                    <Ionicons name="checkmark" size={10} color={theme.colors.surface} />
-                  )}
+        {/* Timeline */}
+        {detail.timeline && detail.timeline.length > 0 && (
+          <>
+            <Text style={styles.sectionHeader}>Complaint Progress</Text>
+            <Card variant="flat" style={styles.timelineCard}>
+              {detail.timeline.map((step, index) => (
+                <View key={index} style={styles.timelineItem}>
+                  <View style={styles.leftColumn}>
+                    <View
+                      style={[
+                        styles.dot,
+                        step.status !== "PENDING" ? styles.dotCompleted : styles.dotPending,
+                      ]}
+                    >
+                      {step.status !== "PENDING" && (
+                        <Ionicons name="checkmark" size={10} color={theme.colors.surface} />
+                      )}
+                    </View>
+                    {index < detail.timeline.length - 1 && (
+                      <View
+                        style={[
+                          styles.line,
+                          step.status !== "PENDING" ? styles.lineCompleted : styles.linePending,
+                        ]}
+                      />
+                    )}
+                  </View>
+
+                  <View style={styles.rightColumn}>
+                    <Text style={styles.stepTitle}>{step.title}</Text>
+                    <Text style={styles.stepDesc}>{step.description}</Text>
+                    <Text style={styles.stepTime}>
+                      {step.createdAt
+                        ? new Date(step.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ""}
+                    </Text>
+                  </View>
                 </View>
-                {index < detail.timeline.length - 1 && (
-                  <View
-                    style={[
-                      styles.line,
-                      step.completed ? styles.lineCompleted : styles.linePending,
-                    ]}
-                  />
-                )}
-              </View>
-
-              {/* Right Column (Texts) */}
-              <View style={styles.rightColumn}>
-                <Text style={styles.stepTitle}>{step.title}</Text>
-                <Text style={styles.stepDesc}>{step.description}</Text>
-                <Text style={styles.stepTime}>{step.time}</Text>
-              </View>
-            </View>
-          ))}
-        </Card>
+              ))}
+            </Card>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -200,8 +130,9 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.lg,
+    paddingBottom: theme.spacing.xxl * 2,
   },
-  card: {
+  infoCard: {
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -235,11 +166,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     lineHeight: 20,
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   date: {
     fontSize: 12,
     color: theme.colors.textMuted,
+  },
+  reportedBy: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.xs,
   },
   sectionHeader: {
     fontSize: 16,

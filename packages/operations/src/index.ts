@@ -20,4 +20,6 @@ export * from "./mutation/use-media";
 export * from "./query/use-media";
 export * from "./query/use-amenity";
 export * from "./mutation/use-amenity";
+export * from "./query/use-complaint";
+export * from "./mutation/use-complaint";
 

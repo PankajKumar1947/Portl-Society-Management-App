@@ -20,6 +20,8 @@ export * from "./react-queries/media";
 export * from "./routes/media";
 export * from "./react-queries/amenity";
 export * from "./routes/amenity";
+export * from "./react-queries/complaint";
+export * from "./routes/complaint";
 export {
   setAccessToken,
   setRefreshToken,

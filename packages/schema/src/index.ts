@@ -10,3 +10,4 @@ export * from "./notice";
 export * from "./poll";
 export * from "./media";
 export * from "./amenity";
+export * from "./complaint";

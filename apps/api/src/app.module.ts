@@ -14,6 +14,7 @@ import { NoticeModule } from './notice/notice.module';
 import { PollModule } from './poll/poll.module';
 import { MediaModule } from './media/media.module';
 import { AmenityModule } from './amenity/amenity.module';
+import { ComplaintModule } from './complaint/complaint.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -37,6 +38,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     PollModule,
     MediaModule,
     AmenityModule,
+    ComplaintModule,
   ],
   controllers: [AppController],
   providers: [AppService],

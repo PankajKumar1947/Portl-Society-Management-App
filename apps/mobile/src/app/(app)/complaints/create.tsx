@@ -1,6 +1,6 @@
-import React, { useLayoutEffect, useState } from "react";
+import React from "react";
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
@@ -9,36 +9,29 @@ import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
 import FormTextArea from "@/components/ui/form-textarea";
 import FormSelect from "@/components/ui/form-select";
-import AttachmentPicker, { AttachmentItem } from "@/components/ui/attachment-picker";
+import { useCreateComplaint } from "@repo/operations";
+import { COMPLAINT_CATEGORIES, COMPLAINT_PRIORITY, CreateComplaintBody } from "@repo/schema";
 
-const CATEGORY_OPTIONS = [
-  { label: "Noisy Neighbor", value: "Noisy Neighbor" },
-  { label: "Security Behavior", value: "Security Behavior" },
-  { label: "Housekeeping Issue", value: "Housekeeping Issue" },
-  { label: "Builder Defect", value: "Builder Defect" },
-  { label: "Other", value: "Other" },
-];
+const CATEGORY_OPTIONS = COMPLAINT_CATEGORIES.map((c) => ({
+  label: c.replace(/_/g, " "),
+  value: c,
+}));
 
 export default function CreateComplaintScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
-  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
+  const { mutateAsync: createComplaint, isPending } = useCreateComplaint();
 
-  useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => parent?.setOptions({ tabBarStyle: undefined });
-  }, [navigation]);
-
-  const methods = useForm({
+  const methods = useForm<CreateComplaintBody>({
     defaultValues: {
-      category: "",
+      category: "" as CreateComplaintBody["category"],
       subject: "",
       description: "",
+      priority: COMPLAINT_PRIORITY.MEDIUM,
     },
   });
 
-  const onSubmit = () => {
+  const onSubmit = async (values: CreateComplaintBody) => {
+    await createComplaint(values);
     router.replace(Routes.Complaints.Index);
   };
 
@@ -46,13 +39,14 @@ export default function CreateComplaintScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScreenHeader title="Raise a Complaint" onBack={() => router.back()} />
 
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           <FormProvider {...methods}>
             <FormSelect
@@ -67,7 +61,7 @@ export default function CreateComplaintScreen() {
             <FormInput
               name="subject"
               label="Subject"
-              placeholder="e.g. Neighbor playing loud music repeatedly"
+              placeholder="e.g. Noise complaint"
               required
             />
 
@@ -76,30 +70,23 @@ export default function CreateComplaintScreen() {
             <FormTextArea
               name="description"
               label="Detailed Description"
-              placeholder="Provide details about the neighbor, security staff behavior, area location, or building defect..."
+              placeholder="Provide details about the issue..."
               required
             />
 
-            <View style={styles.fieldGap} />
+            <View style={styles.bottomGap} />
 
-            <AttachmentPicker
-              attachments={attachments}
-              onAdd={(item) => setAttachments((prev) => [...prev, item])}
-              onRemove={(index) => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-              maxAttachments={3}
-            />
+            <Button
+              variant="primary"
+              style={styles.submitButton}
+              onPress={methods.handleSubmit(onSubmit)}
+              disabled={isPending}
+              loading={isPending}
+            >
+              Submit Complaint
+            </Button>
           </FormProvider>
         </ScrollView>
-
-        <View style={styles.bottomContainer}>
-          <Button
-            variant="primary"
-            style={styles.submitButton}
-            onPress={methods.handleSubmit(onSubmit)}
-          >
-            Submit Complaint
-          </Button>
-        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -112,20 +99,13 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: theme.spacing.xxl,
   },
   fieldGap: {
     height: theme.spacing.md,
   },
-  bottomContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
-    backgroundColor: theme.colors.background,
+  bottomGap: {
+    height: theme.spacing.xl,
   },
   submitButton: {
     width: "100%",
