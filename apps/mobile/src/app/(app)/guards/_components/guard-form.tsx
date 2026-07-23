@@ -112,17 +112,8 @@ export default function GuardForm({
         )}
 
         <View style={styles.buttonRow}>
-          {currentStep === "duty" && (
-            <Button
-              onPress={() => onStepChange("personal")}
-              variant="outline"
-              style={styles.flexButton}
-            >
-              Back
-            </Button>
-          )}
           <Button
-            onPress={currentStep === "personal" ? () => onStepChange("duty") : handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
             style={styles.flexButton}
           >

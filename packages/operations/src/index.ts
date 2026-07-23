@@ -10,3 +10,5 @@ export * from "./mutation/use-flat";
 export * from "./query/use-flat";
 export * from "./mutation/use-resident";
 export * from "./query/use-resident";
+export * from "./mutation/use-guards";
+export * from "./query/use-guards";

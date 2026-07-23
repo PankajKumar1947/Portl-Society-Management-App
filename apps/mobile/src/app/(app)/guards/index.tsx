@@ -9,45 +9,17 @@ import IconButton from "@/components/ui/icon-button";
 import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
-
-// Temporary Mock Data for UI verification
-const MOCK_GUARDS = [
-  {
-    guardId: "grd_1",
-    name: "David Chen",
-    email: "david.chen@security.com",
-    phoneNumber: "9876543210",
-    shiftType: "DAY",
-    gateNumber: "Gate 1",
-    status: "ACTIVE",
-    agencyName: "Swift Security",
-  },
-  {
-    guardId: "grd_2",
-    name: "Emma Wilson",
-    email: "emma.wilson@security.com",
-    phoneNumber: "9876543211",
-    shiftType: "NIGHT",
-    gateNumber: "Gate 3",
-    status: "ACTIVE",
-    agencyName: "Swift Security",
-  },
-  {
-    guardId: "grd_3",
-    name: "Michael Brown",
-    email: "michael.brown@security.com",
-    phoneNumber: "9876543212",
-    shiftType: "DAY",
-    gateNumber: "Gate 2",
-    status: "INACTIVE",
-    agencyName: "Guardian Force",
-  },
-];
+import { useGetGuards } from "@repo/operations";
 
 export default function GuardsListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
+
+  const { data: guards, isLoading } = useGetGuards({
+    type: activeTab,
+    search: searchQuery,
+  });
 
   const filterTabs = [
     { id: "ALL", label: "All Shifts" },
@@ -55,17 +27,7 @@ export default function GuardsListScreen() {
     { id: "NIGHT", label: "Night Shift" },
   ];
 
-  // Client-side filtering of mockup data
-  const filteredGuards = MOCK_GUARDS.filter((g) => {
-    const matchesSearch =
-      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.phoneNumber.includes(searchQuery) ||
-      g.gateNumber.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesShift = activeTab === "ALL" || g.shiftType === activeTab;
-
-    return matchesSearch && matchesShift;
-  });
+  const filteredGuards = guards || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -74,7 +36,7 @@ export default function GuardsListScreen() {
         onBack={() => router.replace(Routes.Root)}
         rightElement={
           <IconButton
-            onPress={() => router.push(Routes.Guards.Create as any)}
+            onPress={() => router.push(Routes.Guards.Create)}
             icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
             variant="ghost"
             size="md"
@@ -112,24 +74,27 @@ export default function GuardsListScreen() {
       <FlatList
         data={filteredGuards}
         keyExtractor={(item) => item.guardId}
-        renderItem={({ item }) => (
-          <View style={styles.listItemWrapper}>
-            <PersonListItem
-              name={item.name}
-              subtitle={`${item.shiftType === "DAY" ? "Day Shift" : "Night Shift"} • ${item.gateNumber}`}
-              meta={`Phone: ${item.phoneNumber} • ${item.agencyName}`}
-              onPress={() => router.push(Routes.Guards.Details(item.guardId) as any)}
-              rightElement={
-                <View style={styles.rightContainer}>
-                  <Badge variant={item.status === "ACTIVE" ? "success" : "danger"}>
-                    {item.status === "ACTIVE" ? "Active" : "Inactive"}
-                  </Badge>
-                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} style={styles.chevron} />
-                </View>
-              }
-            />
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const userDetails = item.userDetails;
+          return (
+            <View style={styles.listItemWrapper}>
+              <PersonListItem
+                name={`${userDetails?.firstName || ""} ${userDetails?.lastName || ""}`}
+                subtitle={`${item.shiftType === "DAY" ? "Day Shift" : "Night Shift"} • ${item.gateNumber}`}
+                meta={`Phone: ${userDetails?.phoneNumber || ""} • ${item.agencyName || ""}`}
+                onPress={() => router.push(Routes.Guards.Details(item.guardId))}
+                rightElement={
+                  <View style={styles.rightContainer}>
+                    <Badge variant={item.status === "ACTIVE" ? "success" : "danger"}>
+                      {item.status === "ACTIVE" ? "Active" : "Inactive"}
+                    </Badge>
+                    <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} style={styles.chevron} />
+                  </View>
+                }
+              />
+            </View>
+          );
+        }}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

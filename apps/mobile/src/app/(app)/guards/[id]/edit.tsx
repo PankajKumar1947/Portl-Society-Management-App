@@ -1,66 +1,37 @@
 import React, { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { KeyboardAvoidingView, Platform, StyleSheet, View, Text, ScrollView } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import GuardForm, { GuardFormValues } from "../_components/guard-form";
 import { useAlert } from "@/context/alert-context";
-
-// Temporary Mock Data Lookup
-const MOCK_GUARDS: Record<string, any> = {
-  grd_1: {
-    firstName: "David",
-    lastName: "Chen",
-    email: "david.chen@security.com",
-    phoneNumber: "9876543210",
-    shiftType: "DAY",
-    gateNumber: "Gate 1",
-    agencyName: "Swift Security",
-  },
-  grd_2: {
-    firstName: "Emma",
-    lastName: "Wilson",
-    email: "emma.wilson@security.com",
-    phoneNumber: "9876543211",
-    shiftType: "NIGHT",
-    gateNumber: "Gate 3",
-    agencyName: "Swift Security",
-  },
-  grd_3: {
-    firstName: "Michael",
-    lastName: "Brown",
-    email: "michael.brown@security.com",
-    phoneNumber: "9876543212",
-    shiftType: "DAY",
-    gateNumber: "Gate 2",
-    agencyName: "Guardian Force",
-  },
-};
+import { useGetGuardDetail, useUpdateGuard } from "@repo/operations";
+import { ActivityIndicator } from "react-native";
 
 export default function EditGuardScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { showAlert } = useAlert();
   const [currentStep, setCurrentStep] = useState<"personal" | "duty">("personal");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const guard = MOCK_GUARDS[id || ""] || MOCK_GUARDS.grd_1;
+  const { data: guard, isLoading } = useGetGuardDetail(id || "", { enabled: !!id });
+  const { mutate: updateGuardMutation, isPending: isSubmitting } = useUpdateGuard(id || "");
 
-  const handleFormSubmit = async (values: GuardFormValues) => {
-    setIsSubmitting(true);
-    try {
-      setTimeout(() => {
-        setIsSubmitting(false);
-        showAlert({
-          title: "Guard Details Updated",
-          description: `Security guard ${values.firstName} ${values.lastName} details have been updated.`,
-          variant: "success",
-          onConfirm: () => router.back(),
-        });
-      }, 1000);
-    } catch (error) {
-      setIsSubmitting(false);
+  const handleFormSubmit = (values: GuardFormValues) => {
+    if (currentStep === "personal") {
+      setCurrentStep("duty");
+    } else {
+      updateGuardMutation(values, {
+        onSuccess: () => {
+          showAlert({
+            title: "Guard Details Updated",
+            description: `Security guard ${values.firstName} ${values.lastName} details have been updated.`,
+            variant: "success",
+            onConfirm: () => router.back(),
+          });
+        },
+      });
     }
   };
 
@@ -71,6 +42,28 @@ export default function EditGuardScreen() {
       router.back();
     }
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Edit Guard" onBack={() => router.back()} />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const userDetails = guard?.userDetails;
+  const initialValues = guard ? {
+    firstName: userDetails?.firstName || "",
+    lastName: userDetails?.lastName || "",
+    email: userDetails?.email || "",
+    phoneNumber: userDetails?.phoneNumber || "",
+    shiftType: guard.shiftType as "DAY" | "NIGHT",
+    gateNumber: guard.gateNumber,
+    agencyName: guard.agencyName,
+  } : undefined;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -83,21 +76,27 @@ export default function EditGuardScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Stepper indicator */}
           <View style={styles.stepperContainer}>
-            <View style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}>
+            <TouchableOpacity
+              onPress={() => setCurrentStep("personal")}
+              style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}
+            >
               <Text style={[styles.stepNumber, currentStep === "personal" && styles.stepNumberActive]}>1</Text>
               <Text style={[styles.stepLabel, currentStep === "personal" && styles.stepLabelActive]}>Personal</Text>
-            </View>
+            </TouchableOpacity>
 
             <View style={styles.stepDivider} />
 
-            <View style={[styles.stepItem, currentStep === "duty" && styles.stepItemActive]}>
+            <TouchableOpacity
+              onPress={() => setCurrentStep("duty")}
+              style={[styles.stepItem, currentStep === "duty" && styles.stepItemActive]}
+            >
               <Text style={[styles.stepNumber, currentStep === "duty" && styles.stepNumberActive]}>2</Text>
               <Text style={[styles.stepLabel, currentStep === "duty" && styles.stepLabelActive]}>Duty Info</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <GuardForm
-            initialValues={guard}
+            initialValues={initialValues}
             currentStep={currentStep}
             onStepChange={setCurrentStep}
             onSubmit={handleFormSubmit}

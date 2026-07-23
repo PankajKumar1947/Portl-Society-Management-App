@@ -5,29 +5,63 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View, Text, ScrollView } fr
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import GuardForm, { GuardFormValues } from "./_components/guard-form";
+import OtpVerificationModal from "../residents/_components/otp-modal";
 import { useAlert } from "@/context/alert-context";
+import { useOnboardGuardPersonal, useOnboardGuardDuty } from "@repo/operations";
 
 export default function CreateGuardScreen() {
   const router = useRouter();
   const { showAlert } = useAlert();
   const [currentStep, setCurrentStep] = useState<"personal" | "duty">("personal");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOtpVisible, setIsOtpVisible] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState<string | null>(null);
+  const [personalDetails, setPersonalDetails] = useState<GuardFormValues | null>(null);
 
-  const handleFormSubmit = async (values: GuardFormValues) => {
-    setIsSubmitting(true);
-    try {
-      setTimeout(() => {
-        setIsSubmitting(false);
+  const { mutate: onboardPersonal, isPending: isStep1Pending } = useOnboardGuardPersonal();
+  const { mutate: onboardDuty, isPending: isStep2Pending } = useOnboardGuardDuty();
+
+  const handleFormSubmit = (values: GuardFormValues) => {
+    if (currentStep === "personal") {
+      setPersonalDetails(values);
+      onboardPersonal(values, {
+        onSuccess: (res) => {
+          setCreatedUserId(res.userId);
+          setIsOtpVisible(true);
+        },
+      });
+    } else {
+      if (!createdUserId) {
         showAlert({
-          title: "Guard Registered",
-          description: `Security guard ${values.firstName} ${values.lastName} has been successfully added.`,
-          variant: "success",
-          onConfirm: () => router.back(),
+          title: "Error",
+          description: "Missing user credentials. Please complete step 1 first.",
+          variant: "error",
         });
-      }, 1000);
-    } catch (error) {
-      setIsSubmitting(false);
+        return;
+      }
+      onboardDuty(
+        {
+          userId: createdUserId,
+          shiftType: values.shiftType,
+          gateNumber: values.gateNumber,
+          agencyName: values.agencyName,
+        },
+        {
+          onSuccess: () => {
+            showAlert({
+              title: "Guard Registered",
+              description: `Security guard ${personalDetails?.firstName || ""} has been successfully added.`,
+              variant: "success",
+              onConfirm: () => router.back(),
+            });
+          },
+        }
+      );
     }
+  };
+
+  const handleOtpSuccess = () => {
+    setIsOtpVisible(false);
+    setCurrentStep("duty");
   };
 
   const handleBack = () => {
@@ -63,13 +97,21 @@ export default function CreateGuardScreen() {
           </View>
 
           <GuardForm
+            initialValues={personalDetails || undefined}
             currentStep={currentStep}
             onStepChange={setCurrentStep}
             onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={isStep1Pending || isStep2Pending}
             submitButtonText="Register Guard"
           />
         </ScrollView>
+
+        <OtpVerificationModal
+          visible={isOtpVisible}
+          email={personalDetails?.email || ""}
+          onSuccess={handleOtpSuccess}
+          onClose={() => setIsOtpVisible(false)}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

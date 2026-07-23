@@ -10,6 +10,8 @@ export * from "./react-queries/flat";
 export * from "./routes/flat";
 export * from "./react-queries/resident";
 export * from "./routes/resident";
+export * from "./react-queries/guard";
+export * from "./routes/guard";
 export {
   setAccessToken,
   setRefreshToken,

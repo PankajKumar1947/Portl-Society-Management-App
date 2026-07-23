@@ -12,63 +12,61 @@ import Button from "@/components/ui/button";
 import Avatar from "@/components/ui/avatar";
 import { useAlert } from "@/context/alert-context";
 
-// Temporary Mock Data Lookup
-const MOCK_GUARDS: Record<string, any> = {
-  grd_1: {
-    guardId: "grd_1",
-    name: "David Chen",
-    email: "david.chen@security.com",
-    phoneNumber: "9876543210",
-    shiftType: "DAY",
-    gateNumber: "Gate 1",
-    status: "ACTIVE",
-    agencyName: "Swift Security",
-    joiningDate: "2025-01-15",
-  },
-  grd_2: {
-    guardId: "grd_2",
-    name: "Emma Wilson",
-    email: "emma.wilson@security.com",
-    phoneNumber: "9876543211",
-    shiftType: "NIGHT",
-    gateNumber: "Gate 3",
-    status: "ACTIVE",
-    agencyName: "Swift Security",
-    joiningDate: "2025-03-20",
-  },
-  grd_3: {
-    guardId: "grd_3",
-    name: "Michael Brown",
-    email: "michael.brown@security.com",
-    phoneNumber: "9876543212",
-    shiftType: "DAY",
-    gateNumber: "Gate 2",
-    status: "INACTIVE",
-    agencyName: "Guardian Force",
-    joiningDate: "2024-11-01",
-  },
-};
+import { useGetGuardDetail, useDeleteGuard } from "@repo/operations";
+import { ActivityIndicator } from "react-native";
 
 export default function GuardDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { showAlert } = useAlert();
 
-  const guard = MOCK_GUARDS[id || ""] || MOCK_GUARDS.grd_1;
+  const { data: guard, isLoading } = useGetGuardDetail(id || "", { enabled: !!id });
+  const { mutate: deleteGuardMutation } = useDeleteGuard(id || "");
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Guard Profile" onBack={() => router.back()} />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!guard) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Guard Profile" onBack={() => router.back()} />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text style={{ color: theme.colors.textSecondary }}>Guard profile not found</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const userDetails = guard.userDetails;
+  const guardName = `${userDetails?.firstName || ""} ${userDetails?.lastName || ""}`;
 
   const handleCall = () => {
-    Linking.openURL(`tel:${guard.phoneNumber}`);
+    if (userDetails?.phoneNumber) {
+      Linking.openURL(`tel:${userDetails.phoneNumber}`);
+    }
   };
 
   const handleDelete = () => {
     showAlert({
       title: "Remove Security Guard",
-      description: `Are you sure you want to remove ${guard.name} from active duty logs?`,
+      description: `Are you sure you want to remove ${guardName} from active duty logs?`,
       variant: "warning",
       confirmLabel: "Remove",
       cancelLabel: "Cancel",
       onConfirm: () => {
-        router.back();
+        deleteGuardMutation(undefined, {
+          onSuccess: () => {
+            router.back();
+          },
+        });
       },
     });
   };
@@ -83,7 +81,7 @@ export default function GuardDetailsScreen() {
             name="create-outline"
             size={22}
             color={theme.colors.text}
-            onPress={() => router.push(Routes.Guards.Edit(guard.guardId) as any)}
+            onPress={() => router.push(Routes.Guards.Edit(guard.guardId))}
             style={{ marginRight: theme.spacing.sm }}
           />
         }
@@ -93,11 +91,11 @@ export default function GuardDetailsScreen() {
         {/* Avatar Profile Section */}
         <View style={styles.avatarSection}>
           <Avatar
-            name={guard.name}
+            name={guardName}
             size="xl"
             style={styles.avatar}
           />
-          <Text style={styles.userName}>{guard.name}</Text>
+          <Text style={styles.userName}>{guardName}</Text>
 
           <View style={styles.badgeRow}>
             <Badge variant={guard.status === "ACTIVE" ? "success" : "danger"}>
@@ -125,15 +123,15 @@ export default function GuardDetailsScreen() {
         <Card style={styles.detailsCard}>
           <InfoRow label="Assigned Gate" value={guard.gateNumber} />
           <InfoRow label="Shift Schedule" value={guard.shiftType === "DAY" ? "08:00 AM - 08:00 PM" : "08:00 PM - 08:00 AM"} />
-          <InfoRow label="Security Agency" value={guard.agencyName} />
-          <InfoRow label="Joining Date" value={guard.joiningDate} />
+          <InfoRow label="Security Agency" value={guard.agencyName || "None"} />
+          <InfoRow label="Joining Date" value={guard.joiningDate ? new Date(guard.joiningDate).toLocaleDateString() : "N/A"} />
         </Card>
 
         {/* Contact details */}
         <Text style={styles.sectionTitle}>Contact Details</Text>
         <Card style={styles.detailsCard}>
-          <InfoRow label="Phone Number" value={guard.phoneNumber} />
-          <InfoRow label="Email Address" value={guard.email} />
+          <InfoRow label="Phone Number" value={userDetails?.phoneNumber || ""} />
+          <InfoRow label="Email Address" value={userDetails?.email || ""} />
         </Card>
 
         {/* Delete Area */}
