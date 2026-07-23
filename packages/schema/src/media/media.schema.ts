@@ -9,6 +9,15 @@ export const MEDIA_PURPOSES = [
   "SOCIETY_LOGO",
 ] as const;
 
+export const MediaPurposes = {
+  NOTICE_ATTACHMENT: "NOTICE_ATTACHMENT",
+  COMPLAINT_ATTACHMENT: "COMPLAINT_ATTACHMENT",
+  AMENITY_GALLERY: "AMENITY_GALLERY",
+  PROFILE_PICTURE: "PROFILE_PICTURE",
+  USER_VERIFICATION_DOC: "USER_VERIFICATION_DOC",
+  SOCIETY_LOGO: "SOCIETY_LOGO",
+} as const;
+
 export const mediaPurposeSchema = z.enum(MEDIA_PURPOSES);
 
 export const ENTITY_TYPES = [
@@ -18,6 +27,14 @@ export const ENTITY_TYPES = [
   "users",
   "societies",
 ] as const;
+
+export const EntityTypes = {
+  NOTICES: "notices",
+  COMPLAINTS: "complaints",
+  AMENITIES: "amenities",
+  USERS: "users",
+  SOCIETIES: "societies",
+} as const;
 
 export const entityTypeSchema = z.enum(ENTITY_TYPES);
 

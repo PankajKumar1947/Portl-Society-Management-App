@@ -14,7 +14,7 @@ export const noticeSchema = z.object({
   recipient: noticeRecipientSchema,
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  attachment: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
   status: noticeStatusSchema.default("draft"),
   createdBy: z.string().min(1),
   createdAt: z.string().optional(),

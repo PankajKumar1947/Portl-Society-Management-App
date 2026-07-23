@@ -17,17 +17,27 @@ export class NoticeRepository {
   }
 
   async find(filter: Record<string, unknown>): Promise<NoticeDocument[]> {
-    return this.model.find(filter).populate('publisher').sort({ createdAt: -1 }).exec();
+    return this.model
+      .find(filter)
+      .populate('publisher')
+      .populate('attachmentList')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   async findOne(noticeId: string): Promise<NoticeDocument | null> {
-    return this.model.findOne({ noticeId }).populate('publisher').exec();
+    return this.model
+      .findOne({ noticeId })
+      .populate('publisher')
+      .populate('attachmentList')
+      .exec();
   }
 
   async update(noticeId: string, dto: UpdateNoticeDto): Promise<NoticeDocument | null> {
     return this.model
       .findOneAndUpdate({ noticeId }, dto, { new: true })
       .populate('publisher')
+      .populate('attachmentList')
       .exec();
   }
 

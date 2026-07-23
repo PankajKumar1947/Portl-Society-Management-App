@@ -9,6 +9,7 @@ export interface FileCardProps {
   title: string;
   size: string;
   icon?: keyof typeof Ionicons.glyphMap;
+  onPress?: () => void;
   onMorePress?: () => void;
 }
 
@@ -16,10 +17,11 @@ export const FileCard: React.FC<FileCardProps> = ({
   title,
   size,
   icon = "document-text-outline",
+  onPress,
   onMorePress,
 }) => {
   return (
-    <Card variant="flat" style={styles.card}>
+    <Card variant="flat" style={styles.card} onPress={onPress}>
       <View style={styles.iconWrapper}>
         <Ionicons name={icon} size={20} color={theme.colors.primaryDark} />
       </View>
@@ -27,12 +29,14 @@ export const FileCard: React.FC<FileCardProps> = ({
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
         <Text style={styles.size}>{size}</Text>
       </View>
-      <IconButton
-        onPress={onMorePress ?? (() => {})}
-        icon={<Ionicons name="ellipsis-vertical" size={18} color={theme.colors.textMuted} />}
-        variant="ghost"
-        size="sm"
-      />
+      {onMorePress && (
+        <IconButton
+          onPress={onMorePress}
+          icon={<Ionicons name="ellipsis-vertical" size={18} color={theme.colors.textMuted} />}
+          variant="ghost"
+          size="sm"
+        />
+      )}
     </Card>
   );
 };

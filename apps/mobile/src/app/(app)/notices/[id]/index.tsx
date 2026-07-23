@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -12,8 +12,10 @@ import { Card } from "@/components/ui/card";
 import { FileCard } from "@/components/ui/file-card";
 import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
+import { DocumentPreviewModal } from "@/components/common/document-preview-modal";
 import { useGetNoticeDetail, usePublishNotice } from "@repo/operations";
 import { formatDate, roleLabel } from "@/utils/notice";
+import { MediaData } from "@repo/schema";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
   residents: { label: "Residents", variant: "success" },
@@ -26,6 +28,9 @@ export default function NoticeDetailsScreen() {
   const router = useRouter();
   const { data: notice, isLoading } = useGetNoticeDetail(id ?? "", { enabled: !!id });
   const { mutate: publishNotice, isPending: isPublishing } = usePublishNotice(id ?? "");
+
+  const [selectedFile, setSelectedFile] = useState<MediaData | null>(null);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -47,8 +52,13 @@ export default function NoticeDetailsScreen() {
     : "";
   const publisherRole = roleLabel(notice.publisher?.role);
 
+  const handlePreviewFile = (file: MediaData) => {
+    setSelectedFile(file);
+    setIsPreviewVisible(true);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Notice Details"
         onBack={() => router.back()}
@@ -61,21 +71,20 @@ export default function NoticeDetailsScreen() {
           />
         }
       />
-
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={14} color={theme.colors.textMuted} />
-          <Text style={styles.date}>{displayDate}</Text>
-        </View>
-
-        <Card variant="outlined" style={styles.detailCard}>
-          <View style={styles.headerRow}>
-            {notice.status === "published" && <View style={styles.newDot} />}
-            <Text style={styles.title}>{notice.title}</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Card variant="flat" style={styles.card}>
+          <View style={styles.header}>
+            <View style={styles.titleContainer}>
+              <View style={styles.badgeRow}>
+                <View style={styles.statusDot} />
+                <Text style={styles.title}>{notice.title}</Text>
+              </View>
+              <Text style={styles.date}>{displayDate}</Text>
+            </View>
           </View>
+
+          <View style={styles.divider} />
+
           <View style={styles.publisherRow}>
             <View style={styles.publisherAvatar}>
               <Ionicons name="person" size={16} color={theme.colors.primaryDark} />
@@ -98,15 +107,19 @@ export default function NoticeDetailsScreen() {
           <View style={styles.divider} />
           <Text style={styles.description}>{notice.description}</Text>
 
-          {notice.attachment && (
+          {notice.attachmentList && notice.attachmentList.length > 0 && (
             <>
               <View style={styles.divider} />
               <Text style={styles.sectionTitle}>Attachments</Text>
-              <FileCard
-                title={notice.attachment}
-                size=""
-                icon="document-text-outline"
-              />
+              {notice.attachmentList.map((file: MediaData) => (
+                <FileCard
+                  key={file.mediaId}
+                  title={file.fileName}
+                  size={file.sizeBytes ? `${(file.sizeBytes / 1024).toFixed(1)} KB` : ""}
+                  icon="document-text-outline"
+                  onPress={() => handlePreviewFile(file)}
+                />
+              ))}
             </>
           )}
 
@@ -125,46 +138,66 @@ export default function NoticeDetailsScreen() {
           )}
         </Card>
       </ScrollView>
+
+      {selectedFile && (
+        <DocumentPreviewModal
+          visible={isPreviewVisible}
+          onClose={() => setIsPreviewVisible(false)}
+          fileUrl={selectedFile.url}
+          fileName={selectedFile.fileName}
+          mimeType={selectedFile.mimeType}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
   content: {
     padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl * 2,
   },
-  detailCard: {
+  card: {
     padding: theme.spacing.lg,
     gap: theme.spacing.md,
   },
-  headerRow: {
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  titleContainer: {
+    flex: 1,
+    gap: theme.spacing.xs,
+  },
+  badgeRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing.sm,
   },
-  newDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: theme.colors.primary,
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.colors.success,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
     flex: 1,
   },
-  dateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: theme.spacing.xs,
-    paddingBottom: theme.spacing.md,
+  date: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginLeft: theme.spacing.sm,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
   },
   publisherRow: {
     flexDirection: "row",
@@ -172,9 +205,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
   },
   publisherAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: theme.colors.primaryLight,
     justifyContent: "center",
     alignItems: "center",
@@ -190,28 +223,23 @@ const styles = StyleSheet.create({
   publisherRole: {
     fontSize: 12,
     color: theme.colors.textMuted,
-  },
-  date: {
-    fontSize: 13,
-    color: theme.colors.textMuted,
+    marginTop: 1,
   },
   recipientRow: {
     flexDirection: "row",
     gap: theme.spacing.xs,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.border,
+    marginTop: theme.spacing.xs,
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     color: theme.colors.textSecondary,
-    lineHeight: 24,
+    lineHeight: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
   },
   publishButton: {
     marginTop: theme.spacing.sm,

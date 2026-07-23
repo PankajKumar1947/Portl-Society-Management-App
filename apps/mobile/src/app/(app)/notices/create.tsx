@@ -1,45 +1,18 @@
-import React, { useLayoutEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useLayoutEffect } from "react";
+import { KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRouter } from "expo-router";
-import { useForm, FormProvider } from "react-hook-form";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { Button } from "@/components/ui/button";
-import { FormInput } from "@/components/ui/form-input";
-import { FormMultiSelect } from "@/components/ui/form-multi-select";
-import { FormTextArea } from "@/components/ui/form-textarea";
-import { DocumentPicker } from "@/components/ui/document-picker";
-import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { useCreateNotice, useGetTowers } from "@repo/operations";
-import { CreateNoticeBody, RECIPIENT_OPTIONS } from "@repo/schema";
-
-interface FileAttachment {
-  title: string;
-  size: string;
-}
+import NoticeForm from "./_components/notice-form";
+import { useCreateNotice } from "@repo/operations";
+import { CreateNoticeBody } from "@repo/schema";
 
 export default function CreateNoticeScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
-  const [allTowers, setAllTowers] = useState(true);
+
   const { mutate: createNotice, isPending } = useCreateNotice();
-  const { data: towers } = useGetTowers();
-
-  const towerOptions = useMemo(() => {
-    if (!towers) return [];
-    return towers.map((t) => ({ label: t.towerName, value: t.towerId }));
-  }, [towers]);
-
-  const methods = useForm<CreateNoticeBody>({
-    defaultValues: {
-      title: "",
-      recipient: [],
-      description: "",
-      towerIds: [],
-    },
-  });
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -47,28 +20,16 @@ export default function CreateNoticeScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const buildPayload = (values: CreateNoticeBody, status: "draft" | "published"): CreateNoticeBody => {
-    const payload: CreateNoticeBody = {
-      title: values.title,
-      recipient: values.recipient,
-      description: values.description,
-      status,
-    };
-    if (!allTowers) {
-      payload.towerIds = values.towerIds;
-    }
-    return payload;
-  };
-
-  const onSubmit = (values: CreateNoticeBody) => {
-    createNotice(buildPayload(values, "published"), {
+  const handleSubmit = (values: CreateNoticeBody) => {
+    const payload = { ...values, status: "published" as const };
+    createNotice(payload, {
       onSuccess: () => router.push(Routes.Notices.Index),
     });
   };
 
-  const saveAsDraft = () => {
-    const values = methods.getValues();
-    createNotice(buildPayload(values, "draft"), {
+  const handleSaveDraft = (values: CreateNoticeBody) => {
+    const payload = { ...values, status: "draft" as const };
+    createNotice(payload, {
       onSuccess: () => router.push(Routes.Notices.Index),
     });
   };
@@ -84,84 +45,15 @@ export default function CreateNoticeScreen() {
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <FormProvider {...methods}>
-            <FormInput
-              name="title"
-              label="Notice Title"
-              placeholder="Enter notice title"
-              required
-            />
-
-            <View style={styles.fieldGap} />
-
-            <FormMultiSelect
-              name="recipient"
-              label="Recipient"
-              options={RECIPIENT_OPTIONS}
-              placeholder="Select recipient groups"
-              required
-            />
-
-            <View style={styles.fieldGap} />
-
-            <ToggleSwitch
-              label="All Towers"
-              description="Send to all towers in the society"
-              value={allTowers}
-              onChange={setAllTowers}
-            />
-
-            {!allTowers && (
-              <>
-                <View style={styles.fieldGap} />
-                <FormMultiSelect
-                  name="towerIds"
-                  label="Select Towers"
-                  options={towerOptions}
-                  placeholder="Choose specific towers"
-                />
-              </>
-            )}
-
-            <View style={styles.fieldGap} />
-
-            <FormTextArea
-              name="description"
-              label="Description"
-              placeholder="Describe the notice in detail"
-              required
-              maxLength={500}
-            />
-
-            <View style={styles.fieldGap} />
-
-            <Text style={styles.sectionLabel}>Attachments</Text>
-            <DocumentPicker
-              files={attachments.map((f) => ({ name: f.title, size: f.size }))}
-              onAdd={(file) => setAttachments((prev) => [...prev, { title: file.name, size: file.size }])}
-              onRemove={(index) => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-            />
-          </FormProvider>
-
-          <View style={styles.buttonRow}>
-            <Button
-              variant="outline"
-              style={styles.draftButton}
-              onPress={saveAsDraft}
-              disabled={isPending}
-            >
-              Save as Draft
-            </Button>
-            <Button
-              style={styles.publishButton}
-              onPress={methods.handleSubmit(onSubmit)}
-              disabled={isPending}
-              loading={isPending}
-            >
-              Publish
-            </Button>
-          </View>
+          <NoticeForm
+            onSubmit={handleSubmit}
+            isSubmitting={isPending}
+            submitButtonText="Publish"
+            showSaveDraftButton
+            onSaveDraft={handleSaveDraft}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -176,27 +68,5 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl * 2,
-  },
-  fieldGap: {
-    height: theme.spacing.md,
-  },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: theme.fontWeights.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: theme.spacing.md,
-    marginTop: theme.spacing.xl,
-  },
-  draftButton: {
-    flex: 1,
-    height: 52,
-  },
-  publishButton: {
-    flex: 1,
-    height: 52,
   },
 });

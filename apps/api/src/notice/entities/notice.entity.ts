@@ -31,8 +31,8 @@ export class Notice {
   @Prop({ required: true })
   description: string;
 
-  @Prop()
-  attachment?: string;
+  @Prop({ type: [String], default: [] })
+  attachments?: string[];
 
   @Prop({ required: true, enum: NOTICE_STATUSES, default: 'draft' })
   status: string;
@@ -51,6 +51,12 @@ NoticeSchema.virtual('publisher', {
   localField: 'createdBy',
   foreignField: 'userId',
   justOne: true,
+});
+
+NoticeSchema.virtual('attachmentList', {
+  ref: 'Media',
+  localField: 'attachments',
+  foreignField: '_id',
 });
 
 NoticeSchema.set('toJSON', { virtuals: true });
