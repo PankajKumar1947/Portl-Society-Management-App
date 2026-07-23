@@ -1,11 +1,12 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "../_components/tower-form";
 import { UpdateTowerBody } from "@repo/schema";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetTowerDetails, useUpdateTower } from "@repo/operations";
 
 export default function EditTowerScreen() {
@@ -21,6 +22,8 @@ export default function EditTowerScreen() {
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  if (isTowerLoading) return <LoadingScreen title="Edit Tower" />;
 
   const handleSubmit = (values: UpdateTowerBody) => {
     if (!id) return;
@@ -49,11 +52,6 @@ export default function EditTowerScreen() {
       >
         <ScreenHeader title="Edit Tower" onBack={() => router.back()} />
 
-        {isTowerLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
@@ -66,7 +64,6 @@ export default function EditTowerScreen() {
               isSubmitting={isUpdating}
             />
           </ScrollView>
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -79,10 +76,5 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

@@ -1,10 +1,12 @@
 import React, { useLayoutEffect, useEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/form-input";
 import { FormMultiSelect } from "@/components/ui/form-multi-select";
@@ -80,25 +82,11 @@ export default function EditNoticeScreen() {
   };
 
   if (isLoadingNotice) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Edit Notice" onBack={() => router.back()} />;
   }
 
   if (!notice) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>Notice not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Edit Notice" message="Notice not found" onBack={() => router.back()} />;
   }
 
   return (
@@ -199,15 +187,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
   },
   content: {
     padding: theme.spacing.lg,

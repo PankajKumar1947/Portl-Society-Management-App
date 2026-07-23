@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, ActivityIndicator, Text } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, Text } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -9,6 +9,7 @@ import StepAllotment from "./_components/step-allotment";
 import StepVehicle from "./_components/step-vehicle";
 import OtpVerificationModal from "./_components/otp-modal";
 import { useAlert } from "@/context/alert-context";
+import LoadingScreen from "@/components/layout/loading-screen";
 import {
   useGetTowers,
   useOnboardResidentPersonal,
@@ -43,6 +44,9 @@ export default function CreateResidentScreen() {
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  const isLoading = isTowersLoading;
+  if (isLoading) return <LoadingScreen title="Create Resident" />;
 
   const handlePersonalSubmit = async (values: ResidentPersonalInput) => {
     try {
@@ -132,8 +136,6 @@ export default function CreateResidentScreen() {
     value: t.towerId,
   })) || [];
 
-  const isLoading = isTowersLoading;
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -143,11 +145,6 @@ export default function CreateResidentScreen() {
       >
         <ScreenHeader title="Add New Resident" onBack={() => router.back()} />
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
@@ -205,7 +202,6 @@ export default function CreateResidentScreen() {
               />
             )}
           </ScrollView>
-        )}
         <OtpVerificationModal
           visible={isOtpVisible}
           email={personalDetails?.email || ""}
@@ -225,11 +221,6 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   stepperContainer: {
     flexDirection: "row",

@@ -7,7 +7,7 @@ import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Card } from "@/components/ui/card";
 import { PersonListItem } from "@/components/ui/person-list-item";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Routes } from "@/constants";
 
 type HistoryType = "all" | "guest" | "delivery" | "staff";

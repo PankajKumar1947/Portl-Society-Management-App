@@ -1,9 +1,11 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, View, Text, ScrollView, Alert, Linking, Share, TouchableOpacity, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Alert, Linking, Share, TouchableOpacity } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { Ionicons } from "@expo/vector-icons";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
@@ -29,25 +31,11 @@ export default function ResidentDetailsScreen() {
   }, [navigation]);
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Resident Details" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Resident Details" onBack={() => router.back()} />;
   }
 
   if (!resident) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Resident Details" onBack={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Resident not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Resident Details" message="Resident not found" onBack={() => router.back()} />;
   }
 
   const handleCall = () => {
@@ -265,16 +253,6 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     paddingBottom: 60,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.danger,
-    fontWeight: theme.fontWeights.medium,
-  },
   headerEditIcon: {
     marginRight: theme.spacing.xs,
   },
@@ -341,10 +319,5 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginTop: theme.spacing.md,
     borderColor: theme.colors.danger,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

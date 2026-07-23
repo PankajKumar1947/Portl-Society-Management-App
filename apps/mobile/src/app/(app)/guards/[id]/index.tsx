@@ -11,9 +11,9 @@ import InfoRow from "@/components/ui/info-row";
 import Button from "@/components/ui/button";
 import Avatar from "@/components/ui/avatar";
 import { useAlert } from "@/context/alert-context";
-
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { useGetGuardDetail, useDeleteGuard } from "@repo/operations";
-import { ActivityIndicator } from "react-native";
 
 export default function GuardDetailsScreen() {
   const router = useRouter();
@@ -24,25 +24,11 @@ export default function GuardDetailsScreen() {
   const { mutate: deleteGuardMutation } = useDeleteGuard(id || "");
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Guard Profile" onBack={() => router.back()} />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Guard Profile" onBack={() => router.back()} />;
   }
 
   if (!guard) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Guard Profile" onBack={() => router.back()} />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ color: theme.colors.textSecondary }}>Guard profile not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Guard Profile" message="Guard profile not found" onBack={() => router.back()} />;
   }
 
   const userDetails = guard.userDetails;

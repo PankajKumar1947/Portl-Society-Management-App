@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { Text, StyleSheet, FlatList, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { Text, StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import Card from "@/components/ui/card";
 import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
 import FlatCard from "./_components/flat-card";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetTowerDetails, useGetFlats } from "@repo/operations";
 
 export default function TowerDetailsScreen() {
@@ -26,6 +27,7 @@ export default function TowerDetailsScreen() {
   }, [navigation]);
 
   const isLoading = isTowerLoading || isFlatsLoading;
+  if (isLoading) return <LoadingScreen title="Tower Details" />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -42,11 +44,6 @@ export default function TowerDetailsScreen() {
         }
       />
 
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
         <FlatList
           data={flats || []}
           keyExtractor={(item) => item.flatId}
@@ -67,7 +64,6 @@ export default function TowerDetailsScreen() {
             </Card>
           }
         />
-      )}
 
       <TouchableOpacity
         activeOpacity={0.85}
@@ -124,10 +120,5 @@ const styles = StyleSheet.create({
     color: theme.colors.surface,
     fontSize: 15,
     fontWeight: theme.fontWeights.bold,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

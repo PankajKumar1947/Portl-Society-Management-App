@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { PersonListItem } from "@/components/ui/person-list-item";
 import { Badge } from "@/components/ui/badge";
 import { Fab } from "@/components/ui/fab";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/layout/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Routes } from "@/constants/routes";
 

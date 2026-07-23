@@ -1,10 +1,12 @@
 import React, { useLayoutEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { IconButton } from "@/components/ui/icon-button";
 import { Card } from "@/components/ui/card";
 import { FileCard } from "@/components/ui/file-card";
@@ -32,25 +34,11 @@ export default function NoticeDetailsScreen() {
   }, [navigation]);
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Notice Details" onBack={() => router.back()} />
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Notice Details" onBack={() => router.back()} />;
   }
 
   if (!notice) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Notice Details" onBack={() => router.back()} />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>Notice not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Notice Details" message="Notice not found" onBack={() => router.back()} />;
   }
 
   const displayDate = formatDate(notice.publishedOn || notice.createdAt);
@@ -149,15 +137,6 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl * 2,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
   },
   detailCard: {
     padding: theme.spacing.lg,

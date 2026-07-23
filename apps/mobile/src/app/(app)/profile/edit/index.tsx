@@ -1,11 +1,12 @@
 import React, { useLayoutEffect, useEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity, Alert } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
+import { LoadingScreen } from "@/components/layout/loading-screen";
 import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
 import FormPhone from "@/components/ui/form-phone";
@@ -64,14 +65,7 @@ export default function EditProfileScreen() {
   };
 
   if (isFetching) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Profile" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Edit Profile" onBack={() => router.back()} />;
   }
 
   return (
@@ -208,10 +202,5 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

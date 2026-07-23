@@ -1,11 +1,12 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "./_components/flat-form";
 import { CreateFlatBody } from "@repo/schema";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetTowers, useCreateFlat } from "@repo/operations";
 
 export default function CreateFlatScreen() {
@@ -21,6 +22,9 @@ export default function CreateFlatScreen() {
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  const isLoading = isTowersLoading;
+  if (isLoading) return <LoadingScreen title="Create Flat" />;
 
   const handleSubmit = (values: CreateFlatBody) => {
     createFlat(
@@ -41,8 +45,6 @@ export default function CreateFlatScreen() {
     value: t.towerId,
   }));
 
-  const isLoading = isTowersLoading;
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -51,11 +53,6 @@ export default function CreateFlatScreen() {
       >
         <ScreenHeader title="Add New Flat" onBack={() => router.back()} />
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
@@ -68,7 +65,6 @@ export default function CreateFlatScreen() {
               isSubmitting={isCreating}
             />
           </ScrollView>
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -81,10 +77,5 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

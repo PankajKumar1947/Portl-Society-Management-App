@@ -13,6 +13,7 @@ import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import Badge from "@/components/ui/badge";
 import Card from "@/components/ui/card";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { MOCK_TICKETS, Ticket } from "./index";
 
 export default function TicketDetailsScreen() {
@@ -29,14 +30,7 @@ export default function TicketDetailsScreen() {
   const ticket = MOCK_TICKETS.find((t) => t.id === id);
 
   if (!ticket) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Ticket Details" onBack={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Ticket not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Ticket Details" message="Ticket not found" onBack={() => router.back()} />;
   }
 
   const getStatusVariant = (status: Ticket["status"]) => {
@@ -240,16 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text,
     lineHeight: 20,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.danger,
-    fontWeight: theme.fontWeights.medium,
   },
   documentsSection: {
     marginBottom: theme.spacing.lg,

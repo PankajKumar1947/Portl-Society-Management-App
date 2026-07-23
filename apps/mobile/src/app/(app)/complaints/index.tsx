@@ -8,6 +8,7 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import IconButton from "@/components/ui/icon-button";
+import { EmptyState } from "@/components/layout/empty-state";
 
 export interface Complaint {
   id: string;
@@ -122,10 +123,7 @@ export default function ComplaintsScreen() {
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="alert-circle-outline" size={48} color={theme.colors.textMuted} />
-            <Text style={styles.emptyText}>No complaints found.</Text>
-          </View>
+          <EmptyState icon="alert-circle-outline" title="No complaints found." />
         }
       />
     </SafeAreaView>
@@ -206,15 +204,5 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: theme.spacing.md,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: theme.spacing.xxl * 2,
-    gap: theme.spacing.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textMuted,
   },
 });

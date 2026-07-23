@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,7 +9,9 @@ import IconButton from "@/components/ui/icon-button";
 import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetResidents } from "@repo/operations";
+import { EmptyState } from "@/components/layout/empty-state";
 
 export default function ResidentsListScreen() {
   const router = useRouter();
@@ -29,6 +31,8 @@ export default function ResidentsListScreen() {
   ];
 
   const filteredResidents = residents || [];
+
+  if (isLoading) return <LoadingScreen title="Residents" />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -72,11 +76,6 @@ export default function ResidentsListScreen() {
         style={styles.tabs}
       />
 
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
         <FlatList
           data={filteredResidents}
           keyExtractor={(item) => item.residentId}
@@ -100,13 +99,9 @@ export default function ResidentsListScreen() {
           )}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons name="people-outline" size={48} color={theme.colors.textMuted} />
-              <Text style={styles.emptyText}>No residents found matching criteria</Text>
-            </View>
+            <EmptyState icon="people-outline" title="No residents found matching criteria" />
           }
         />
-      )}
     </SafeAreaView>
   );
 }
@@ -161,21 +156,5 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginLeft: theme.spacing.xs,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: theme.spacing.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.medium,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

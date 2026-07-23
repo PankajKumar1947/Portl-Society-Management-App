@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,10 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import Card from "@/components/ui/card";
-import Button from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
+import Button from "@/components/ui/button";
 import InfoRow from "@/components/ui/info-row";
 import Badge from "@/components/ui/badge";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { useGetMySociety } from "@repo/operations";
 
 export default function SocietyDetailsScreen() {
@@ -23,29 +24,11 @@ export default function SocietyDetailsScreen() {
   const { data: society, isLoading, error } = useGetMySociety();
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="My Society" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="My Society" onBack={() => router.back()} />;
   }
 
   if (error || !society) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="My Society" onBack={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color={theme.colors.danger} />
-          <Text style={styles.errorText}>Failed to load society details</Text>
-          <Button variant="outline" onPress={() => router.back()}>
-            Go Back
-          </Button>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="My Society" message="Failed to load society details" onBack={() => router.back()} />;
   }
 
   const societyTypeLabel =
@@ -142,23 +125,6 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
   },
   headerCard: {
     alignItems: "center",

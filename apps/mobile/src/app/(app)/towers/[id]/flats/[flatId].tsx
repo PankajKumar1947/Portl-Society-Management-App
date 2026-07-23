@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import Badge from "@/components/ui/badge";
 import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
 import ResidentCard, { Resident } from "./_components/resident-card";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetFlatDetails, useGetTowerDetails } from "@repo/operations";
 
 const MOCK_RESIDENTS: Resident[] = [
@@ -44,6 +45,7 @@ export default function FlatDetailsScreen() {
   }, [navigation]);
 
   const isLoading = isFlatLoading || isTowerLoading;
+  if (isLoading) return <LoadingScreen title="Flat Details" />;
 
   const getStatusVariant = (status?: string): "success" | "warning" | "danger" => {
     if (status === "OCCUPIED") return "success";
@@ -66,11 +68,6 @@ export default function FlatDetailsScreen() {
         }
       />
 
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Flat Summary Banner */}
           <Card variant="flat" style={styles.headerCard}>
@@ -111,7 +108,6 @@ export default function FlatDetailsScreen() {
             ))}
           </Card>
         </ScrollView>
-      )}
     </SafeAreaView>
   );
 }
@@ -170,10 +166,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.md,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

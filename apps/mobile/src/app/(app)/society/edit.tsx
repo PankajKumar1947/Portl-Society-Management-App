@@ -6,19 +6,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
   Alert,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
-import Button from "@/components/ui/button";
 import { SocietyForm } from "@/components/society/society-form";
 import { UpdateSocietyBody } from "@repo/schema";
 import { useGetMySociety, useUpdateSociety } from "@repo/operations";
 import type { ApiErrorResponse } from "@repo/api-client";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 
 export default function EditSocietyScreen() {
   const router = useRouter();
@@ -35,29 +34,11 @@ export default function EditSocietyScreen() {
   }, [navigation]);
 
   if (isFetching) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Society" onBack={() => router.replace(Routes.Society.Index)} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Edit Society" onBack={() => router.replace(Routes.Society.Index)} />;
   }
 
   if (!society) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Society" onBack={() => router.replace(Routes.Society.Index)} />
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color={theme.colors.danger} />
-          <Text style={styles.errorText}>Society details not found</Text>
-          <Button variant="outline" onPress={() => router.replace(Routes.Society.Index)}>
-            Go Back
-          </Button>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Edit Society" message="Society details not found" onBack={() => router.replace(Routes.Society.Index)} />;
   }
 
   const handleUpdateSociety = (values: UpdateSocietyBody) => {
@@ -124,22 +105,5 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
   },
 });

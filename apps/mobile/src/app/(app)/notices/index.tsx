@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
@@ -12,6 +12,8 @@ import { useRouter } from "expo-router";
 import { useGetNotices, useGetTowers } from "@repo/operations";
 import { NoticeData, RECIPIENT_OPTIONS, NOTICE_STATUS_OPTIONS } from "@repo/schema";
 import { formatDate, isRecent } from "@/utils/notice";
+import { EmptyState } from "@/components/layout/empty-state";
+import LoadingScreen from "@/components/layout/loading-screen";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
   residents: { label: "Residents", variant: "success" },
@@ -82,6 +84,8 @@ export default function NoticesScreen() {
     setFilterModalVisible(false);
   };
 
+  if (isLoading) return <LoadingScreen title="Notices" />;
+
   const clearFilters = () => {
     setDraftStatus("all");
     setDraftRecipient("all");
@@ -137,58 +141,49 @@ export default function NoticesScreen() {
         </View>
       </View>
 
-      {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={notices?.slice().sort(statusSort)}
-          keyExtractor={(item) => item.noticeId}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item: notice }) => (
-            <Card
-              variant="outlined"
-              style={styles.noticeCard}
-              onPress={() => router.push(Routes.Notices.Details(notice.noticeId))}
-            >
-              <View style={styles.cardHeader}>
-                <View style={styles.titleRow}>
-                  {isRecent(notice.publishedOn || notice.createdAt) && notice.status === "published" && (
-                    <View style={styles.newDot} />
-                  )}
-                  <Text style={styles.noticeTitle}>{notice.title}</Text>
-                </View>
-                <Text style={styles.date}>
-                  {formatDate(notice.publishedOn || notice.createdAt)}
-                </Text>
+      <FlatList
+        data={notices?.slice().sort(statusSort)}
+        keyExtractor={(item) => item.noticeId}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item: notice }) => (
+          <Card
+            variant="outlined"
+            style={styles.noticeCard}
+            onPress={() => router.push(Routes.Notices.Details(notice.noticeId))}
+          >
+            <View style={styles.cardHeader}>
+              <View style={styles.titleRow}>
+                {isRecent(notice.publishedOn || notice.createdAt) && notice.status === "published" && (
+                  <View style={styles.newDot} />
+                )}
+                <Text style={styles.noticeTitle}>{notice.title}</Text>
               </View>
-              <View style={styles.metaRow}>
-                <Badge variant={notice.status === "published" ? "success" : "secondary"}>
-                  {notice.status === "published" ? "Published" : "Draft"}
-                </Badge>
-              </View>
-              <Text style={styles.description} numberOfLines={2}>
-                {notice.description}
+              <Text style={styles.date}>
+                {formatDate(notice.publishedOn || notice.createdAt)}
               </Text>
-              <View style={styles.recipientRow}>
-                {notice.recipient?.map((r) => {
-                  const config = RECIPIENT_LABELS[r];
-                  return config ? (
-                    <Badge key={r} variant={config.variant}>{config.label}</Badge>
-                  ) : null;
-                })}
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons name="document-text-outline" size={48} color={theme.colors.textMuted} />
-              <Text style={styles.emptyText}>No notices found</Text>
             </View>
-          }
-        />
-      )}
+            <View style={styles.metaRow}>
+              <Badge variant={notice.status === "published" ? "success" : "secondary"}>
+                {notice.status === "published" ? "Published" : "Draft"}
+              </Badge>
+            </View>
+            <Text style={styles.description} numberOfLines={2}>
+              {notice.description}
+            </Text>
+            <View style={styles.recipientRow}>
+              {notice.recipient?.map((r) => {
+                const config = RECIPIENT_LABELS[r];
+                return config ? (
+                  <Badge key={r} variant={config.variant}>{config.label}</Badge>
+                ) : null;
+              })}
+            </View>
+          </Card>
+        )}
+        ListEmptyComponent={
+          <EmptyState icon="document-text-outline" title="No notices found" />
+        }
+      />
 
       <Modal
         transparent
@@ -305,11 +300,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   searchContainer: {
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.sm,
@@ -415,17 +405,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.spacing.xs,
     marginTop: theme.spacing.xs,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: theme.spacing.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.medium,
   },
   modalOverlay: {
     flex: 1,

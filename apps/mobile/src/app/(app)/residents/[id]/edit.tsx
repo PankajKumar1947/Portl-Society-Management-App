@@ -1,9 +1,11 @@
 import React, { useLayoutEffect, useState } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View, Text, TouchableOpacity } from "react-native";
 import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import StepPersonal from "../_components/step-personal";
 import StepAllotment from "../_components/step-allotment";
 import StepVehicle from "../_components/step-vehicle";
@@ -84,25 +86,11 @@ export default function EditResidentScreen() {
   const isLoading = isTowersLoading || isResidentLoading;
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Resident" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Edit Resident" onBack={() => router.back()} />;
   }
 
   if (!resident) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Resident" onBack={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Resident not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Edit Resident" message="Resident not found" onBack={() => router.back()} />;
   }
 
   const towersOptions = towersData?.map((t) => ({
@@ -219,21 +207,6 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.lg,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.danger,
-    fontWeight: theme.fontWeights.medium,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   stepperContainer: {
     flexDirection: "row",

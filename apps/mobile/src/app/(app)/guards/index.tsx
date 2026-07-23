@@ -10,6 +10,8 @@ import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
 import { useGetGuards } from "@repo/operations";
+import LoadingScreen from "@/components/layout/loading-screen";
+import { EmptyState } from "@/components/layout/empty-state";
 
 export default function GuardsListScreen() {
   const router = useRouter();
@@ -28,6 +30,9 @@ export default function GuardsListScreen() {
   ];
 
   const filteredGuards = guards || [];
+  if (isLoading) {
+    return <LoadingScreen title="Security Guards" onBack={() => router.back()} />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -97,10 +102,7 @@ export default function GuardsListScreen() {
         }}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="shield-outline" size={48} color={theme.colors.textMuted} />
-            <Text style={styles.emptyText}>No guards found matching criteria</Text>
-          </View>
+          <EmptyState icon="shield-outline" title="No guards found matching criteria" />
         }
       />
     </SafeAreaView>
@@ -157,16 +159,5 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginLeft: theme.spacing.xs,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: theme.spacing.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.medium,
   },
 });

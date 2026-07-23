@@ -8,6 +8,7 @@ import Button from "@/components/ui/button";
 import { residentVehicleSchema, ResidentVehicleInput, VEHICLE_TYPE_OPTIONS } from "@repo/schema";
 import { theme } from "@/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { EmptyState } from "@/components/layout/empty-state";
 
 interface StepVehicleProps {
   initialValues?: Partial<ResidentVehicleInput>;
@@ -52,16 +53,15 @@ export default function StepVehicle({
     <FormProvider {...methods}>
       <View style={styles.container}>
         {fields.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No vehicles registered yet.</Text>
-            <Button
-              variant="outline"
-              onPress={handleAddVehicle}
-              style={styles.addButton}
-            >
-              Add Vehicle
-            </Button>
-          </View>
+          <EmptyState
+            icon="car-outline"
+            title="No vehicles registered yet."
+            action={
+              <Button variant="outline" onPress={handleAddVehicle} style={styles.addButton}>
+                Add Vehicle
+              </Button>
+            }
+          />
         ) : (
           fields.map((field, index) => (
             <View key={field.id} style={styles.section}>
@@ -174,19 +174,6 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: theme.spacing.xs,
-  },
-  emptyState: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.xl,
-    borderRadius: theme.radius.md,
-    borderColor: theme.colors.border,
-    borderWidth: 1,
-    alignItems: "center",
-    gap: theme.spacing.md,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
   },
   addButton: {
     width: "100%",

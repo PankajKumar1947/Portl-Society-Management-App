@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +19,8 @@ import { useGetPolls } from "@repo/operations";
 import { PollData, UserRoles, POLL_STATUS_OPTIONS, RECIPIENT_OPTIONS } from "@repo/schema";
 import { useRole } from "@/context/role-context";
 import PollCard from "./_components/poll-card";
+import { EmptyState } from "@/components/layout/empty-state";
+import LoadingScreen from "@/components/layout/loading-screen";
 
 const STATUS_OPTIONS = [
   { label: "All", value: "all" },
@@ -78,6 +79,8 @@ export default function PollsScreen() {
     setFilterModalVisible(false);
   };
 
+  if (isLoading) return <LoadingScreen title="Polls" />;
+
   const clearFilters = () => {
     setDraftStatus("all");
     setDraftRecipient("all");
@@ -129,30 +132,21 @@ export default function PollsScreen() {
         </View>
       )}
 
-      {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={sortedPolls}
-          keyExtractor={(item) => item.pollId}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <PollCard
-              poll={item}
-              onVotePress={() => router.push(Routes.Polls.Details(item.pollId))}
-              onCardPress={() => router.push(Routes.Polls.Details(item.pollId))}
-            />
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Ionicons name="bar-chart-outline" size={48} color={theme.colors.textMuted} />
-              <Text style={styles.emptyText}>No polls found</Text>
-            </View>
-          }
-        />
-      )}
+      <FlatList
+        data={sortedPolls}
+        keyExtractor={(item) => item.pollId}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <PollCard
+            poll={item}
+            onVotePress={() => router.push(Routes.Polls.Details(item.pollId))}
+            onCardPress={() => router.push(Routes.Polls.Details(item.pollId))}
+          />
+        )}
+        ListEmptyComponent={
+          <EmptyState icon="bar-chart-outline" title="No polls found" />
+        }
+      />
 
       <Modal
         transparent
@@ -245,11 +239,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   searchContainer: {
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.sm,
@@ -309,17 +298,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingBottom: theme.spacing.lg,
     gap: theme.spacing.md,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: theme.spacing.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.medium,
   },
   modalOverlay: {
     flex: 1,

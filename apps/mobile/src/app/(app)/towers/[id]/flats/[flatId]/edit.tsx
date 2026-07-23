@@ -1,11 +1,12 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "../_components/flat-form";
 import { UpdateFlatBody } from "@repo/schema";
+import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetFlatDetails, useUpdateFlat } from "@repo/operations";
 
 export default function EditFlatScreen() {
@@ -21,6 +22,8 @@ export default function EditFlatScreen() {
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  if (isFlatLoading) return <LoadingScreen title="Edit Flat" />;
 
   const handleSubmit = (values: UpdateFlatBody) => {
     if (!flatId) return;
@@ -54,11 +57,6 @@ export default function EditFlatScreen() {
       >
         <ScreenHeader title="Edit Flat Details" onBack={() => router.back()} />
 
-        {isFlatLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
@@ -71,7 +69,6 @@ export default function EditFlatScreen() {
               isSubmitting={isUpdating}
             />
           </ScrollView>
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -84,10 +81,5 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

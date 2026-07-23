@@ -9,7 +9,7 @@ import StepIdentity from "../_components/step-identity";
 import StepDuty from "../_components/step-duty";
 import { useAlert } from "@/context/alert-context";
 import { useGetGuardDetail, useUpdateGuard } from "@repo/operations";
-import { ActivityIndicator } from "react-native";
+import { LoadingScreen } from "@/components/layout/loading-screen";
 import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput } from "@repo/schema";
 
 interface GuardEditFormValues extends GuardPersonalInput, GuardIdentificationInput, Omit<GuardDutyInput, "userId"> { }
@@ -88,14 +88,7 @@ export default function EditGuardScreen() {
   };
 
   if (isLoading || !formValues) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Edit Guard" onBack={() => router.back()} />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Edit Guard" onBack={() => router.back()} />;
   }
 
   return (

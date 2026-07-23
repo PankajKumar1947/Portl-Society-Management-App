@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +15,8 @@ import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
+import { LoadingScreen } from "@/components/layout/loading-screen";
+import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { formatDate, roleLabel } from "@/utils/notice";
 import { formatRemainingTime, getPollStatusBadgeConfig } from "@/utils/poll";
 import {
@@ -104,25 +105,11 @@ export default function PollDetailsScreen() {
   const totalVotes = localResults?.totalVotes ?? 0;
 
   if (loading && !poll) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Poll Details" onBack={() => router.back()} />
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
+    return <LoadingScreen title="Poll Details" onBack={() => router.back()} />;
   }
 
   if (!poll) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader title="Poll Details" onBack={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Poll not found</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <NotFoundScreen title="Poll Details" message="Poll not found" onBack={() => router.back()} />;
   }
 
   return (
@@ -294,11 +281,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   content: {
     padding: theme.spacing.lg,
     paddingBottom: 120,
@@ -434,14 +416,5 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: theme.colors.danger,
-    fontWeight: theme.fontWeights.medium,
-  },
+
 });

@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, View } from "react-native";
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -7,6 +7,7 @@ import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "./_components/tower-form";
 import { CreateTowerBody } from "@repo/schema";
 import { useGetMySociety, useCreateTower } from "@repo/operations";
+import LoadingScreen from "@/components/layout/loading-screen";
 import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function CreateTowerScreen() {
@@ -20,6 +21,8 @@ export default function CreateTowerScreen() {
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
+
+  if (isLoading) return <LoadingScreen title="Create Tower" />;
 
   const handleSubmit = (values: CreateTowerBody) => {
     if (!society?.societyId) {
@@ -51,11 +54,6 @@ export default function CreateTowerScreen() {
       >
         <ScreenHeader title="Add New Tower" onBack={() => router.back()} />
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
@@ -67,7 +65,6 @@ export default function CreateTowerScreen() {
               isSubmitting={isCreating}
             />
           </ScrollView>
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -80,10 +77,5 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: theme.spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
