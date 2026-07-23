@@ -148,4 +148,17 @@ export const Routes = {
       params: { id },
     }),
   },
+
+  Guards: {
+    Index: app("/guards"),
+    Create: app("/guards/create"),
+    Details: (id: string) => ({
+      pathname: app("/guards/[id]"),
+      params: { id },
+    }),
+    Edit: (id: string) => ({
+      pathname: app("/guards/[id]/edit"),
+      params: { id },
+    }),
+  },
 } as const;

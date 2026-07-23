@@ -41,6 +41,7 @@ export default function HomeScreen() {
     { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index) },
     { id: "towers", title: "Towers", icon: "cube-outline", route: () => router.push(Routes.Towers.Index) },
     { id: "residents", title: "Residents", icon: "people-circle-outline", route: () => router.push(Routes.Residents.Index as any) },
+    { id: "guards", title: "Security Guards", icon: "shield-half-outline", route: () => router.push(Routes.Guards.Index as any) },
     { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index) },
     { id: "amenities", title: "Amenities", icon: "home-outline", route: () => router.push(Routes.Amenities.Index) },
     { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index) },
