@@ -28,7 +28,7 @@ export class PollRepository {
 
   async update(pollId: string, data: Record<string, unknown>): Promise<PollDocument | null> {
     return this.model
-      .findOneAndUpdate({ pollId }, data, { new: true })
+      .findOneAndUpdate({ pollId }, data, { returnDocument: 'after' })
       .populate('publisher')
       .exec();
   }

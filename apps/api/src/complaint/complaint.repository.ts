@@ -39,7 +39,7 @@ export class ComplaintRepository {
     data: Record<string, unknown>,
   ): Promise<ComplaintDocument | null> {
     return this.model
-      .findOneAndUpdate({ complaintId }, { $set: data }, { new: true })
+      .findOneAndUpdate({ complaintId }, { $set: data }, { returnDocument: 'after' })
       .populate("reportedByUser")
       .populate("assignedToUser")
       .populate("attachmentFiles")

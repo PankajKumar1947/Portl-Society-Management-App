@@ -38,7 +38,7 @@ export class SocietyRepository {
     updateSocietyDto: UpdateSocietyDto,
   ): Promise<SocietyDocument | null> {
     return this.societyModel
-      .findOneAndUpdate({ societyId }, updateSocietyDto, { new: true })
+      .findOneAndUpdate({ societyId }, updateSocietyDto, { returnDocument: "after" })
       .exec();
   }
 }

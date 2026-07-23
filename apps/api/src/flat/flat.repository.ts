@@ -34,7 +34,7 @@ export class FlatRepository {
     updateFlatDto: UpdateFlatDto,
   ): Promise<FlatDocument | null> {
     return this.flatModel
-      .findOneAndUpdate({ flatId }, updateFlatDto, { new: true })
+      .findOneAndUpdate({ flatId }, updateFlatDto, { returnDocument: "after" })
       .exec();
   }
 

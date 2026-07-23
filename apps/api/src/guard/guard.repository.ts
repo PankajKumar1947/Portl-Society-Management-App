@@ -30,7 +30,7 @@ export class GuardRepository {
     dto: UpdateGuardDto,
   ): Promise<GuardDocument | null> {
     return this.model
-      .findOneAndUpdate({ guardId }, dto, { new: true })
+      .findOneAndUpdate({ guardId }, dto, { returnDocument: 'after' })
       .populate('userDetails')
       .exec();
   }

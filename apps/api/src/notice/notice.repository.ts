@@ -35,7 +35,7 @@ export class NoticeRepository {
 
   async update(noticeId: string, dto: UpdateNoticeDto): Promise<NoticeDocument | null> {
     return this.model
-      .findOneAndUpdate({ noticeId }, dto, { new: true })
+      .findOneAndUpdate({ noticeId }, dto, { returnDocument: 'after' })
       .populate('publisher')
       .populate('attachmentList')
       .exec();

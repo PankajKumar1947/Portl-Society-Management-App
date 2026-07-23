@@ -34,7 +34,7 @@ export class ResidentRepository {
     dto: UpdateResidentDto,
   ): Promise<ResidentDocument | null> {
     return this.model
-      .findOneAndUpdate({ residentId }, dto, { new: true })
+      .findOneAndUpdate({ residentId }, dto, { returnDocument: "after" })
       .populate('userDetails')
       .populate('vehicles')
       .exec();

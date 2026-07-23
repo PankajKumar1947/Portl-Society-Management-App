@@ -30,7 +30,7 @@ export class TowerRepository {
     updateTowerDto: UpdateTowerDto,
   ): Promise<TowerDocument | null> {
     return this.towerModel
-      .findOneAndUpdate({ towerId }, updateTowerDto, { new: true })
+      .findOneAndUpdate({ towerId }, updateTowerDto, { returnDocument: "after" })
       .exec();
   }
 

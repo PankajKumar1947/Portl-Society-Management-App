@@ -35,7 +35,7 @@ export class UserRepository {
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument | null> {
     return this.userModel
-      .findOneAndUpdate({ userId }, updateUserDto, { new: true })
+      .findOneAndUpdate({ userId }, updateUserDto, { returnDocument: "after" })
       .exec();
   }
 

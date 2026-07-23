@@ -75,7 +75,7 @@ export class AmenityRepository {
     data: Partial<Amenity>,
   ): Promise<AmenityDocument | null> {
     return this.model
-      .findOneAndUpdate({ amenityId, societyId }, { $set: data }, { new: true })
+      .findOneAndUpdate({ amenityId, societyId }, { $set: data }, { returnDocument: 'after' })
       .populate("thumbnailFile")
       .populate("galleryFiles")
       .exec();
