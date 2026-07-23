@@ -1,3 +1,6 @@
+import { ApiResponse } from "../shared/api.type";
+import { MediaData } from "../media/media.type";
+import { User } from "../user/user.type";
 import z from "zod";
 import {
   complaintSchema,
@@ -8,11 +11,10 @@ import {
   addTimelineEntrySchema,
   complaintCategorySchema,
   complaintPrioritySchema,
+  complaintStatusSchema,
 } from "./complaint.schema";
-import { ApiResponse } from "../shared/api.type";
-import { MediaData } from "../media/media.type";
-import { User } from "../user/user.type";
 
+export type ComplaintStatus = z.infer<typeof complaintStatusSchema>;
 export type ComplaintCategory = z.infer<typeof complaintCategorySchema>;
 export type ComplaintPriority = z.infer<typeof complaintPrioritySchema>;
 
