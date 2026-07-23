@@ -27,6 +27,14 @@ export type UpdateAmenityBody = z.infer<typeof updateAmenitySchema>;
 export type AmenityResponse = ApiResponse<AmenityData>;
 export type AmenityListResponse = ApiResponse<AmenityData[]>;
 
+export interface AmenityFilterOptions {
+  search?: string;
+  category?: string;
+  type?: string;
+  status?: string;
+  towerIds?: string[];
+}
+
 export const AmenityCategories = {
   CLUBHOUSE: "CLUBHOUSE",
   GYM: "GYM",

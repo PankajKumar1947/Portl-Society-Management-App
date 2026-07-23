@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { AmenityFilterOptions } from "@repo/schema";
 import { AmenityRepository } from "./amenity.repository";
 import { CreateAmenityDto } from "./dto/create-amenity.dto";
 import { UpdateAmenityDto } from "./dto/update-amenity.dto";
@@ -15,8 +16,11 @@ export class AmenityService {
     });
   }
 
-  async findAll(societyId: string): Promise<AmenityDocument[]> {
-    return this.repository.findBySociety(societyId);
+  async findAll(
+    societyId: string,
+    filters?: AmenityFilterOptions,
+  ): Promise<AmenityDocument[]> {
+    return this.repository.findBySocietyWithFilters(societyId, filters);
   }
 
   async findOne(amenityId: string, societyId: string): Promise<AmenityDocument> {

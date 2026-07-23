@@ -15,11 +15,10 @@ export const useCreateAmenity = () => {
 
 export const useUpdateAmenity = (id: string) => {
   const queryClient = useQueryClient();
-  const query = amenityQueries.update(id);
   return useMutation<AmenityData, Error, UpdateAmenityBody>({
-    mutationKey: query.key,
+    mutationKey: amenityQueries.update(id).key,
     mutationFn: (data: UpdateAmenityBody) => updateAmenity(id, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: amenityQueries.list.key });
       queryClient.invalidateQueries({ queryKey: amenityQueries.detail(id).key });
     },
@@ -28,9 +27,8 @@ export const useUpdateAmenity = (id: string) => {
 
 export const useDeleteAmenity = (id: string) => {
   const queryClient = useQueryClient();
-  const query = amenityQueries.delete(id);
   return useMutation<boolean, Error, void>({
-    mutationKey: query.key,
+    mutationKey: amenityQueries.delete(id).key,
     mutationFn: () => deleteAmenity(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: amenityQueries.list.key });

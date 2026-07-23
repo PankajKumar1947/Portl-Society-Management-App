@@ -1,5 +1,5 @@
 import { apiClient } from "../../services/axios-instance";
-import { CreateAmenityBody, UpdateAmenityBody, AmenityResponse, AmenityListResponse, AmenityData } from "@repo/schema";
+import { CreateAmenityBody, UpdateAmenityBody, AmenityData, AmenityFilterOptions } from "@repo/schema";
 import { amenityQueries } from "../../react-queries/amenity";
 
 export const createAmenity = async (data: CreateAmenityBody): Promise<AmenityData> => {
@@ -7,8 +7,8 @@ export const createAmenity = async (data: CreateAmenityBody): Promise<AmenityDat
   return res.data.data;
 };
 
-export const getAmenities = async (): Promise<AmenityListResponse["data"]> => {
-  const res = await apiClient.get(amenityQueries.list.endpoint);
+export const getAmenities = async (params?: AmenityFilterOptions): Promise<AmenityData[]> => {
+  const res = await apiClient.get(amenityQueries.list.endpoint, { params });
   return res.data.data;
 };
 

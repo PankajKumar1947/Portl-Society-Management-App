@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
@@ -53,8 +54,21 @@ export class AmenityController {
   @Get()
   @Roles(UserRoles.ADMIN, UserRoles.RESIDENTS)
   @ApiGetAmenities()
-  async findAll(@CurrentUser("societyId") societyId: string) {
-    const data = await this.service.findAll(societyId);
+  async findAll(
+    @CurrentUser("societyId") societyId: string,
+    @Query("search") search?: string,
+    @Query("category") category?: string,
+    @Query("type") type?: string,
+    @Query("status") status?: string,
+    @Query("towerIds") towerIds?: string,
+  ) {
+    const data = await this.service.findAll(societyId, {
+      search,
+      category,
+      type,
+      status,
+      towerIds: towerIds ? towerIds.split(",") : undefined,
+    });
     return {
       success: true,
       data,

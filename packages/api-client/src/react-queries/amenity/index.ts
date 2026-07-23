@@ -19,4 +19,4 @@ export const amenityQueries = {
     key: ["delete-amenity", id],
     endpoint: `/amenities/${id}`,
   }),
-} as const;
+};

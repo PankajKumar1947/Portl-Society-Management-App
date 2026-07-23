@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAmenities, getAmenityDetail, amenityQueries } from "@repo/api-client";
-import { AmenityData } from "@repo/schema";
+import { AmenityData, AmenityFilterOptions } from "@repo/schema";
 
-export const useGetAmenities = () => {
+export const useGetAmenities = (params?: AmenityFilterOptions) => {
   return useQuery<AmenityData[]>({
-    queryKey: amenityQueries.list.key,
-    queryFn: () => getAmenities(),
+    queryKey: [...amenityQueries.list.key, params],
+    queryFn: () => getAmenities(params),
   });
 };
 

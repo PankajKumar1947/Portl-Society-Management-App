@@ -44,7 +44,13 @@ export default function AmenitiesScreen() {
   const [draftStatus, setDraftStatus] = useState("all");
   const [draftTowerIds, setDraftTowerIds] = useState<string[]>([]);
 
-  const { data: amenities, isLoading, refetch } = useGetAmenities();
+  const { data: amenities, isLoading, refetch } = useGetAmenities({
+    search: searchQuery || undefined,
+    category: activeCategory,
+    type: activeType,
+    status: activeStatus,
+    towerIds: activeTowerIds.length > 0 ? activeTowerIds : undefined,
+  });
   const { data: me } = useGetMe();
   const { data: towers } = useGetTowers();
 
@@ -63,20 +69,6 @@ export default function AmenitiesScreen() {
     if (activeTowerIds.length > 0) count++;
     return count;
   }, [activeCategory, activeType, activeStatus, activeTowerIds]);
-
-  const filteredAmenities = useMemo(() => {
-    return (amenities || []).filter((item) => {
-      if (activeCategory !== "all" && item.category !== activeCategory) return false;
-      if (activeType !== "all" && item.type !== activeType) return false;
-      if (activeStatus !== "all" && item.status !== activeStatus) return false;
-      if (activeTowerIds.length > 0 && !item.towerIds?.some((id) => activeTowerIds.includes(id))) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        return item.name.toLowerCase().includes(q) || (item.location || "").toLowerCase().includes(q);
-      }
-      return true;
-    });
-  }, [amenities, activeCategory, activeType, activeStatus, activeTowerIds, searchQuery]);
 
   const openFilterModal = () => {
     setDraftCategory(activeCategory);
@@ -163,7 +155,7 @@ export default function AmenitiesScreen() {
       </View>
 
       <FlatList
-        data={filteredAmenities}
+        data={amenities}
         keyExtractor={(item) => item.amenityId}
         contentContainerStyle={styles.list}
         refreshing={isLoading}
