@@ -12,3 +12,5 @@ export * from "./mutation/use-resident";
 export * from "./query/use-resident";
 export * from "./mutation/use-guards";
 export * from "./query/use-guards";
+export * from "./query/use-notice";
+export * from "./mutation/use-notice";

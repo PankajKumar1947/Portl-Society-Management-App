@@ -10,6 +10,7 @@ import { TowerModule } from './tower/tower.module';
 import { FlatModule } from './flat/flat.module';
 import { ResidentModule } from './resident/resident.module';
 import { GuardModule } from './guard/guard.module';
+import { NoticeModule } from './notice/notice.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -29,6 +30,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     FlatModule,
     ResidentModule,
     GuardModule,
+    NoticeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

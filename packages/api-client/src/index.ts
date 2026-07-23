@@ -12,6 +12,8 @@ export * from "./react-queries/resident";
 export * from "./routes/resident";
 export * from "./react-queries/guard";
 export * from "./routes/guard";
+export * from "./react-queries/notice";
+export * from "./routes/notice";
 export {
   setAccessToken,
   setRefreshToken,

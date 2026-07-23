@@ -1,7 +1,7 @@
-import React, { useLayoutEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useLayoutEffect, useEffect, useState, useMemo } from "react";
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
@@ -11,20 +11,23 @@ import { FormMultiSelect } from "@/components/ui/form-multi-select";
 import { FormTextArea } from "@/components/ui/form-textarea";
 import { DocumentPicker } from "@/components/ui/document-picker";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { useCreateNotice, useGetTowers } from "@repo/operations";
-import { CreateNoticeBody, RECIPIENT_OPTIONS } from "@repo/schema";
+import { useGetNoticeDetail, useUpdateNotice, useGetTowers } from "@repo/operations";
+import { UpdateNoticeBody, RECIPIENT_OPTIONS } from "@repo/schema";
 
 interface FileAttachment {
   title: string;
   size: string;
 }
 
-export default function CreateNoticeScreen() {
+export default function EditNoticeScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [allTowers, setAllTowers] = useState(true);
-  const { mutate: createNotice, isPending } = useCreateNotice();
+
+  const { data: notice, isLoading: isLoadingNotice } = useGetNoticeDetail(id ?? "", { enabled: !!id });
+  const { mutate: updateNotice, isPending } = useUpdateNotice(id ?? "");
   const { data: towers } = useGetTowers();
 
   const towerOptions = useMemo(() => {
@@ -32,7 +35,7 @@ export default function CreateNoticeScreen() {
     return towers.map((t) => ({ label: t.towerName, value: t.towerId }));
   }, [towers]);
 
-  const methods = useForm<CreateNoticeBody>({
+  const methods = useForm<UpdateNoticeBody>({
     defaultValues: {
       title: "",
       recipient: [],
@@ -41,37 +44,62 @@ export default function CreateNoticeScreen() {
     },
   });
 
+  useEffect(() => {
+    if (notice) {
+      const hasTowerSelection = notice.towerIds && notice.towerIds.length > 0;
+      setAllTowers(!hasTowerSelection);
+      methods.reset({
+        title: notice.title,
+        recipient: notice.recipient ?? [],
+        description: notice.description,
+        towerIds: notice.towerIds ?? [],
+      });
+    }
+  }, [notice, methods]);
+
   useLayoutEffect(() => {
     const parent = navigation.getParent();
     parent?.setOptions({ tabBarStyle: { display: "none" } });
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const buildPayload = (values: CreateNoticeBody, status: "draft" | "published"): CreateNoticeBody => {
-    const payload: CreateNoticeBody = {
+  const onSubmit = (values: UpdateNoticeBody) => {
+    const payload: UpdateNoticeBody = {
       title: values.title,
       recipient: values.recipient,
       description: values.description,
-      status,
     };
     if (!allTowers) {
       payload.towerIds = values.towerIds;
+    } else {
+      payload.towerIds = [];
     }
-    return payload;
-  };
-
-  const onSubmit = (values: CreateNoticeBody) => {
-    createNotice(buildPayload(values, "published"), {
-      onSuccess: () => router.push(Routes.Notices.Index),
+    updateNotice(payload, {
+      onSuccess: () => router.back(),
     });
   };
 
-  const saveAsDraft = () => {
-    const values = methods.getValues();
-    createNotice(buildPayload(values, "draft"), {
-      onSuccess: () => router.push(Routes.Notices.Index),
-    });
-  };
+  if (isLoadingNotice) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!notice) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>Notice not found</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -79,7 +107,7 @@ export default function CreateNoticeScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScreenHeader title="Create Notice" onBack={() => router.back()} />
+        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
 
         <ScrollView
           contentContainerStyle={styles.content}
@@ -147,19 +175,18 @@ export default function CreateNoticeScreen() {
           <View style={styles.buttonRow}>
             <Button
               variant="outline"
-              style={styles.draftButton}
-              onPress={saveAsDraft}
-              disabled={isPending}
+              style={styles.cancelButton}
+              onPress={() => router.back()}
             >
-              Save as Draft
+              Cancel
             </Button>
             <Button
-              style={styles.publishButton}
+              style={styles.saveButton}
               onPress={methods.handleSubmit(onSubmit)}
               disabled={isPending}
               loading={isPending}
             >
-              Publish
+              Save Changes
             </Button>
           </View>
         </ScrollView>
@@ -172,6 +199,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: theme.colors.textSecondary,
   },
   content: {
     padding: theme.spacing.lg,
@@ -191,11 +227,11 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     marginTop: theme.spacing.xl,
   },
-  draftButton: {
+  cancelButton: {
     flex: 1,
     height: 52,
   },
-  publishButton: {
+  saveButton: {
     flex: 1,
     height: 52,
   },

@@ -96,6 +96,10 @@ export const Routes = {
       pathname: app("/notices/[id]"),
       params: { id },
     }),
+    Edit: (id: string) => ({
+      pathname: app("/notices/[id]/edit"),
+      params: { id },
+    }),
   },
 
   Visitors: {
