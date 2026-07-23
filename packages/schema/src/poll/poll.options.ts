@@ -1,6 +1,7 @@
 export { RECIPIENT_OPTIONS } from "../shared";
 
-export const NOTICE_STATUS_OPTIONS = [
+export const POLL_STATUS_OPTIONS = [
   { label: "Draft", value: "draft" },
   { label: "Published", value: "published" },
+  { label: "Closed", value: "closed" },
 ] as const;

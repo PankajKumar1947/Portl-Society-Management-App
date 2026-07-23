@@ -11,6 +11,7 @@ import { FlatModule } from './flat/flat.module';
 import { ResidentModule } from './resident/resident.module';
 import { GuardModule } from './guard/guard.module';
 import { NoticeModule } from './notice/notice.module';
+import { PollModule } from './poll/poll.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -31,6 +32,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     ResidentModule,
     GuardModule,
     NoticeModule,
+    PollModule,
   ],
   controllers: [AppController],
   providers: [AppService],

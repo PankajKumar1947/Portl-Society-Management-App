@@ -2,15 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { theme } from "@/constants";
 
-export interface PollOption {
-  id: string;
+export interface PollResultOption {
+  optionId: string;
   label: string;
   votes: number;
   percentage: number;
 }
 
 export interface PollResultsProps {
-  options: PollOption[];
+  options: PollResultOption[];
   showTotalVotes?: boolean;
   totalVotes?: number;
 }
@@ -23,7 +23,7 @@ export const PollResults: React.FC<PollResultsProps> = ({
   return (
     <View style={styles.resultsContainer}>
       {options.map((opt) => (
-        <View key={opt.id} style={styles.optionResult}>
+        <View key={opt.optionId} style={styles.optionResult}>
           <View style={styles.optionTextRow}>
             <Text style={styles.optionLabel}>{opt.label}</Text>
             <Text style={styles.optionPercentage}>
@@ -34,7 +34,7 @@ export const PollResults: React.FC<PollResultsProps> = ({
             <View
               style={[
                 styles.progressBarFill,
-                { width: `${opt.percentage}%` },
+                { width: `${Math.max(opt.percentage, 2)}%` },
               ]}
             />
           </View>

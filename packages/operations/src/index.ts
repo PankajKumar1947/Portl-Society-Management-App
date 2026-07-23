@@ -14,3 +14,5 @@ export * from "./mutation/use-guards";
 export * from "./query/use-guards";
 export * from "./query/use-notice";
 export * from "./mutation/use-notice";
+export * from "./query/use-poll";
+export * from "./mutation/use-poll";

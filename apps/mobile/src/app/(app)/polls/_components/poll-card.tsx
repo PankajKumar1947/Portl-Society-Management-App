@@ -3,11 +3,13 @@ import { View, Text, StyleSheet } from "react-native";
 import { theme } from "@/constants";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
-import PollResults from "./poll-results";
-import { Poll } from "../index";
+import Badge from "@/components/ui/badge";
+import { PollData, UserRoles } from "@repo/schema";
+import { formatRemainingTime, getPollStatusBadgeConfig, RECIPIENT_LABELS } from "@/utils/poll";
+import { useRole } from "@/context/role-context";
 
 export interface PollCardProps {
-  poll: Poll;
+  poll: PollData;
   onVotePress?: () => void;
   onCardPress?: () => void;
 }
@@ -17,17 +19,34 @@ export const PollCard: React.FC<PollCardProps> = ({
   onVotePress,
   onCardPress,
 }) => {
-  const showVoteButton = !poll.voted && poll.status === "live" && onVotePress;
+  const { role } = useRole();
+  const isAdmin = role === UserRoles.ADMIN || role === UserRoles.SUPER_ADMIN;
+  const badgeConfig = getPollStatusBadgeConfig(poll.status);
+  const showVoteButton = poll.status === "published" && onVotePress;
 
   return (
     <Card variant="flat" style={styles.card} onPress={onCardPress}>
+      <View style={styles.header}>
+        <Badge variant={badgeConfig.variant}>{badgeConfig.label}</Badge>
+        {!isAdmin && poll.status === "published" && (
+          <Text style={styles.endsIn}>{formatRemainingTime(poll.expiresAt, poll.status)}</Text>
+        )}
+      </View>
       <Text style={styles.questionText}>{poll.question}</Text>
-      <Text style={styles.endsInText}>
-        {poll.status === "live" ? `Ends in ${poll.endsIn}` : poll.endsIn}
-      </Text>
-
-      <PollResults options={poll.options} />
-
+      {poll.description ? (
+        <Text style={styles.description} numberOfLines={2}>{poll.description}</Text>
+      ) : null}
+      <View style={styles.metaRow}>
+        {poll.recipient?.map((r) => {
+          const config = RECIPIENT_LABELS[r];
+          return config ? (
+            <Badge key={r} variant={config.variant}>{config.label}</Badge>
+          ) : null;
+        })}
+      </View>
+      {isAdmin && (
+        <Text style={styles.endsIn}>{formatRemainingTime(poll.expiresAt, poll.status)}</Text>
+      )}
       {showVoteButton && (
         <Button
           variant="primary"
@@ -47,6 +66,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.sm,
+  },
   questionText: {
     fontSize: 16,
     fontWeight: theme.fontWeights.bold,
@@ -54,10 +79,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     lineHeight: 22,
   },
-  endsInText: {
+  description: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: theme.spacing.sm,
+  },
+  metaRow: {
+    flexDirection: "row",
+    gap: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
+    flexWrap: "wrap",
+  },
+  endsIn: {
     fontSize: 12,
     color: theme.colors.textMuted,
-    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
   cardVoteButton: {
     marginTop: theme.spacing.md,

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
@@ -21,11 +22,19 @@ import FormSelect from "@/components/ui/form-select";
 import FormDate from "@/components/ui/form-date";
 import Card from "@/components/ui/card";
 import IconButton from "@/components/ui/icon-button";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import FormMultiSelect from "@/components/ui/form-multi-select";
+import { useCreatePoll, useGetTowers } from "@repo/operations";
+import { RECIPIENT_OPTIONS } from "@repo/schema";
 
 export default function CreatePollScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { mutateAsync: createPoll, isPending } = useCreatePoll();
+  const { data: towers } = useGetTowers();
   const [optionKeys, setOptionKeys] = useState<number[]>([0, 1]);
+  const [allTowers, setAllTowers] = useState(true);
+  const [selectedTowers, setSelectedTowers] = useState<string[]>([]);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -33,16 +42,12 @@ export default function CreatePollScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const CHOICE_OPTIONS = [
-    { label: "Single Select (One answer)", value: "single" },
-    { label: "Multi Select (Multiple answers)", value: "multi" },
-  ];
+  const towerOptions = useMemo(() => {
+    if (!towers) return [];
+    return towers.map((t) => ({ label: t.towerName, value: t.towerId }));
+  }, [towers]);
 
-  const getTodayStr = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  };
-
+  const getTodayStr = () => new Date().toISOString().split("T")[0];
   const getFutureStr = (days: number) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
@@ -54,10 +59,23 @@ export default function CreatePollScreen() {
       question: "",
       description: "",
       choiceType: "single",
-      startDate: getTodayStr(),
+      recipient: [] as string[],
       endDate: getFutureStr(3),
     },
   });
+
+  const endDate = methods.watch("endDate");
+
+  const getCalculatedDuration = () => {
+    if (!endDate) return null;
+    const now = new Date();
+    const end = new Date(endDate);
+    if (isNaN(end.getTime())) return "Invalid date format";
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays < 1) return "Ends today";
+    return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+  };
 
   const handleAddOption = () => {
     setOptionKeys((prev) => [...prev, Math.max(...prev, 0) + 1]);
@@ -68,25 +86,41 @@ export default function CreatePollScreen() {
     setOptionKeys((prev) => prev.filter((k) => k !== keyToRemove));
   };
 
-  const onSubmit = () => {
-    // Navigate back to the index screen
+  const getOptionLabel = (key: number): string => {
+    const values = methods.getValues() as Record<string, unknown>;
+    return (values[`option_${key}`] as string) || "";
+  };
+
+  const buildPayload = (status: "draft" | "published") => {
+    const values = methods.getValues() as Record<string, unknown>;
+    const options = optionKeys.map((key) => ({
+      label: getOptionLabel(key),
+      displayOrder: 0,
+    }));
+    return {
+      question: values.question as string,
+      description: (values.description as string) || undefined,
+      choiceType: values.choiceType as "single" | "multi",
+      recipient: values.recipient as ("residents" | "guard")[],
+      expiresAt: new Date(values.endDate as string).toISOString(),
+      options,
+      status,
+      towerIds: allTowers ? undefined : (selectedTowers.length > 0 ? selectedTowers : undefined),
+    };
+  };
+
+  const onSubmit = async () => {
+    const valid = await methods.trigger();
+    if (!valid) return;
+    await createPoll(buildPayload("draft"));
     router.replace(Routes.Polls.Index);
   };
 
-  const startDateVal = methods.watch("startDate");
-  const endDateVal = methods.watch("endDate");
-
-  const getCalculatedDuration = () => {
-    if (!startDateVal || !endDateVal) return null;
-    const start = new Date(startDateVal);
-    const end = new Date(endDateVal);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return "Invalid date format";
-    }
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 0) return "End date must be after start date";
-    return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+  const handlePublish = async () => {
+    const valid = await methods.trigger();
+    if (!valid) return;
+    await createPoll(buildPayload("published"));
+    router.replace(Routes.Polls.Index);
   };
 
   return (
@@ -95,15 +129,9 @@ export default function CreatePollScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScreenHeader
-          title="Create Poll"
-          onBack={() => router.back()}
-        />
+        <ScreenHeader title="Create Poll" onBack={() => router.back()} />
 
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <FormProvider {...methods}>
             <FormInput
               name="question"
@@ -126,20 +154,62 @@ export default function CreatePollScreen() {
             <FormSelect
               name="choiceType"
               label="Choice Type"
-              options={CHOICE_OPTIONS}
+              options={[
+                { label: "Single Select (One answer)", value: "single" },
+                { label: "Multi Select (Multiple answers)", value: "multi" },
+              ]}
+              required
+            />
+
+            <View style={styles.fieldGap} />
+
+            <View style={styles.towerSection}>
+              <ToggleSwitch
+                label="All Towers"
+                value={allTowers}
+                onChange={setAllTowers}
+              />
+              {!allTowers && towerOptions.length > 0 && (
+                <View style={styles.towerList}>
+                  {towerOptions.map((tower) => {
+                    const selected = selectedTowers.includes(tower.value);
+                    return (
+                      <TouchableOpacity
+                        key={tower.value}
+                        onPress={() =>
+                          setSelectedTowers((prev) =>
+                            prev.includes(tower.value)
+                              ? prev.filter((id) => id !== tower.value)
+                              : [...prev, tower.value]
+                          )
+                        }
+                        style={styles.towerRow}
+                      >
+                        <Text style={styles.towerLabel}>{tower.label}</Text>
+                        <View style={[styles.checkbox, selected && styles.checkboxActive]}>
+                          {selected && (
+                            <Ionicons name="checkmark" size={16} color="#fff" />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+
+            <View style={styles.fieldGap} />
+
+            <FormMultiSelect
+              name="recipient"
+              label="Recipients"
+              options={[...RECIPIENT_OPTIONS]}
               required
             />
 
             <View style={styles.fieldGap} />
 
             <View style={styles.dateRow}>
-              <View style={styles.dateCol}>
-                <FormDate
-                  name="startDate"
-                  label="Start Date"
-                  required
-                />
-              </View>
               <View style={styles.dateCol}>
                 <FormDate
                   name="endDate"
@@ -153,9 +223,7 @@ export default function CreatePollScreen() {
               <Card variant="flat" style={styles.durationCard}>
                 <Ionicons name="time-outline" size={18} color={theme.colors.textSecondary} style={{ marginRight: 6 }} />
                 <Text style={styles.durationText}>
-                  {getCalculatedDuration()?.includes("must") || getCalculatedDuration()?.includes("Invalid")
-                    ? getCalculatedDuration()
-                    : `Calculated duration: ${getCalculatedDuration()}`}
+                  Duration: {getCalculatedDuration()}
                 </Text>
               </Card>
             )}
@@ -196,13 +264,27 @@ export default function CreatePollScreen() {
         </ScrollView>
 
         <View style={styles.bottomContainer}>
-          <Button
-            variant="primary"
-            style={styles.submitButton}
-            onPress={methods.handleSubmit(onSubmit)}
-          >
-            Create Poll
-          </Button>
+          {isPending ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : (
+            <View style={styles.buttonRow}>
+              <Button
+                variant="outline"
+                style={styles.bottomButton}
+                textStyle={styles.bottomButtonText}
+                onPress={onSubmit}
+              >
+                Save as Draft
+              </Button>
+              <Button
+                variant="primary"
+                style={styles.bottomButton}
+                onPress={handlePublish}
+              >
+                Publish
+              </Button>
+            </View>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -220,6 +302,36 @@ const styles = StyleSheet.create({
   },
   fieldGap: {
     height: theme.spacing.md,
+  },
+  towerSection: {
+    marginBottom: theme.spacing.sm,
+  },
+  towerList: {
+    gap: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
+  },
+  towerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.spacing.sm,
+  },
+  towerLabel: {
+    fontSize: 15,
+    color: theme.colors.text,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   optionsHeaderRow: {
     flexDirection: "row",
@@ -249,7 +361,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deleteButton: {
-    marginTop: 18, // Align with input height styling offset
+    marginTop: 18,
   },
   bottomGap: {
     height: 40,
@@ -264,11 +376,16 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.sm,
     backgroundColor: theme.colors.background,
   },
-  submitButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+  buttonRow: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+  },
+  bottomButton: {
+    flex: 1,
+    height: 48,
+  },
+  bottomButtonText: {
+    fontSize: 14,
   },
   dateRow: {
     flexDirection: "row",
