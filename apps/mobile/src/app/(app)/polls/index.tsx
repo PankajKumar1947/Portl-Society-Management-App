@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
     paddingBottom: theme.spacing.lg,
     gap: theme.spacing.md,
   },

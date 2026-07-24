@@ -10,7 +10,7 @@ interface TowerFilterSectionProps {
   onToggle: (id: string) => void;
 }
 
-export function TowerFilterSection({
+export default function TowerFilterSection({
   selectedIds,
   onToggle,
 }: TowerFilterSectionProps) {

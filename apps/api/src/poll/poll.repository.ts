@@ -19,17 +19,17 @@ export class PollRepository {
   }
 
   async find(filter: Record<string, unknown>): Promise<PollDocument[]> {
-    return this.model.find(filter).populate('publisher').sort({ createdAt: -1 }).exec();
+    return this.model.find(filter).populate('publisher', 'firstName lastName role').sort({ createdAt: -1 }).exec();
   }
 
   async findOne(pollId: string): Promise<PollDocument | null> {
-    return this.model.findOne({ pollId }).populate('publisher').exec();
+    return this.model.findOne({ pollId }).populate('publisher', 'firstName lastName role').exec();
   }
 
   async update(pollId: string, data: Record<string, unknown>): Promise<PollDocument | null> {
     return this.model
       .findOneAndUpdate({ pollId }, data, { returnDocument: 'after' })
-      .populate('publisher')
+      .populate('publisher', 'firstName lastName role')
       .exec();
   }
 

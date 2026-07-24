@@ -19,7 +19,7 @@ export class NoticeRepository {
   async find(filter: Record<string, unknown>): Promise<NoticeDocument[]> {
     return this.model
       .find(filter)
-      .populate('publisher')
+      .populate('publisher', 'firstName lastName role')
       .populate('attachmentList')
       .sort({ createdAt: -1 })
       .exec();
@@ -28,7 +28,7 @@ export class NoticeRepository {
   async findOne(noticeId: string): Promise<NoticeDocument | null> {
     return this.model
       .findOne({ noticeId })
-      .populate('publisher')
+      .populate('publisher', 'firstName lastName role')
       .populate('attachmentList')
       .exec();
   }
@@ -36,7 +36,7 @@ export class NoticeRepository {
   async update(noticeId: string, dto: UpdateNoticeDto): Promise<NoticeDocument | null> {
     return this.model
       .findOneAndUpdate({ noticeId }, dto, { returnDocument: 'after' })
-      .populate('publisher')
+      .populate('publisher', 'firstName lastName role')
       .populate('attachmentList')
       .exec();
   }

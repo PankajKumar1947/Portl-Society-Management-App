@@ -35,14 +35,16 @@ export const PollCard: React.FC<PollCardProps> = ({
       {poll.description ? (
         <Text style={styles.description} numberOfLines={2}>{poll.description}</Text>
       ) : null}
-      <View style={styles.metaRow}>
-        {poll.recipient?.map((r) => {
-          const config = RECIPIENT_LABELS[r];
-          return config ? (
-            <Badge key={r} variant={config.variant}>{config.label}</Badge>
-          ) : null;
-        })}
-      </View>
+      {isSuperUser && poll.recipient && poll.recipient.length > 0 && (
+        <View style={styles.metaRow}>
+          {poll.recipient.map((r) => {
+            const config = RECIPIENT_LABELS[r];
+            return config ? (
+              <Badge key={r} variant={config.variant}>{config.label}</Badge>
+            ) : null;
+          })}
+        </View>
+      )}
       {isSuperUser && (
         <Text style={styles.endsIn}>{formatRemainingTime(poll.expiresAt, poll.status)}</Text>
       )}
@@ -93,7 +95,6 @@ const styles = StyleSheet.create({
   endsIn: {
     fontSize: 12,
     color: theme.colors.textMuted,
-    marginTop: theme.spacing.xs,
   },
   cardVoteButton: {
     marginTop: theme.spacing.md,

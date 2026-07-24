@@ -14,7 +14,7 @@ import { useGetNotices, useAccessControl } from "@repo/operations";
 import { NoticeData, RECIPIENT_OPTIONS, NOTICE_STATUS_OPTIONS, AclResource } from "@repo/schema";
 import { formatDate, isRecent } from "@/utils/notice";
 import { EmptyState } from "@/components/layout/empty-state";
-import { TowerFilterSection } from "./_components/tower-filter-section";
+import TowerFilterSection from "./_components/tower-filter-section";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
   residents: { label: "Residents", variant: "success" },
