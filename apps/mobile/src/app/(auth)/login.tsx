@@ -57,7 +57,6 @@ export default function LoginScreen() {
           router.push({ pathname: Routes.Auth.Verify, params: { email: data.email } });
           return;
         }
-        Alert.alert("Login Failed", apiError.message);
       },
     });
   };

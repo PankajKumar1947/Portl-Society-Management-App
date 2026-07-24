@@ -82,7 +82,7 @@ export default function OnboardingIndex() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" backgroundColor={theme.colors.background} />
       <ScrollView
         ref={scrollViewRef}
         horizontal

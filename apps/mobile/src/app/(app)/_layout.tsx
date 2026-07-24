@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../constants";
 import { useRole } from "../../context/role-context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AccessControlProvider } from "@repo/operations";
 
 const ROLE_TABS: Record<string, { name: string; title: string; icon: keyof typeof Ionicons.glyphMap; activeIcon: keyof typeof Ionicons.glyphMap }[]> = {
   resident: [
@@ -35,70 +36,72 @@ export default function AppLayout() {
   const insets = useSafeAreaInsets();
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: theme.fontWeights.semibold },
-        tabBarStyle: {
-          height: 60 + (insets.bottom > 0 ? insets.bottom : 8),
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-          paddingTop: 8,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.border,
-          backgroundColor: theme.colors.surface,
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-        },
-      }}
-    >
-      {tabs.map((tab) => {
-        const isCommunity = tab.name === "community/index";
-        return (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{
-              title: tab.title,
-              tabBarLabel: isCommunity ? () => null : tab.title,
-              tabBarIcon: ({ color, focused }) => {
-                if (isCommunity) {
+    <AccessControlProvider>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textMuted,
+          tabBarLabelStyle: { fontSize: 11, fontWeight: theme.fontWeights.semibold },
+          tabBarStyle: {
+            height: 60 + (insets.bottom > 0 ? insets.bottom : 8),
+            paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+            paddingTop: 8,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.border,
+            backgroundColor: theme.colors.surface,
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+          },
+        }}
+      >
+        {tabs.map((tab) => {
+          const isCommunity = tab.name === "community/index";
+          return (
+            <Tabs.Screen
+              key={tab.name}
+              name={tab.name}
+              options={{
+                title: tab.title,
+                tabBarLabel: isCommunity ? () => null : tab.title,
+                tabBarIcon: ({ color, focused }) => {
+                  if (isCommunity) {
+                    return (
+                      <View style={[styles.communityTabContainer, focused && styles.communityTabContainerActive]}>
+                        <Ionicons
+                          name={focused ? tab.activeIcon : tab.icon}
+                          size={28}
+                          color={theme.colors.surface}
+                        />
+                      </View>
+                    );
+                  }
                   return (
-                    <View style={[styles.communityTabContainer, focused && styles.communityTabContainerActive]}>
-                      <Ionicons
-                        name={focused ? tab.activeIcon : tab.icon}
-                        size={28}
-                        color={theme.colors.surface}
-                      />
-                    </View>
+                    <Ionicons
+                      name={focused ? tab.activeIcon : tab.icon}
+                      size={theme.spacing.xxl}
+                      color={focused ? theme.colors.primary : color}
+                    />
                   );
-                }
-                return (
-                  <Ionicons
-                    name={focused ? tab.activeIcon : tab.icon}
-                    size={theme.spacing.xxl}
-                    color={focused ? theme.colors.primary : color}
-                  />
-                );
-              },
-            }}
-          />
-        );
-      })}
+                },
+              }}
+            />
+          );
+        })}
 
-      <Tabs.Screen name="society" options={{ href: null }} />
-      <Tabs.Screen name="towers" options={{ href: null }} />
-      <Tabs.Screen name="residents" options={{ href: null }} />
-      <Tabs.Screen name="guards" options={{ href: null }} />
-      <Tabs.Screen name="notices" options={{ href: null }} />
-      <Tabs.Screen name="helpdesk" options={{ href: null }} />
-      <Tabs.Screen name="polls" options={{ href: null }} />
-      <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="complaints" options={{ href: null }} />
-    </Tabs>
+        <Tabs.Screen name="society" options={{ href: null }} />
+        <Tabs.Screen name="towers" options={{ href: null }} />
+        <Tabs.Screen name="residents" options={{ href: null }} />
+        <Tabs.Screen name="guards" options={{ href: null }} />
+        <Tabs.Screen name="notices" options={{ href: null }} />
+        <Tabs.Screen name="helpdesk" options={{ href: null }} />
+        <Tabs.Screen name="polls" options={{ href: null }} />
+        <Tabs.Screen name="notifications" options={{ href: null }} />
+        <Tabs.Screen name="complaints" options={{ href: null }} />
+      </Tabs>
+    </AccessControlProvider>
   );
 }
 

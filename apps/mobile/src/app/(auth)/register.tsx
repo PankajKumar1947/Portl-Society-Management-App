@@ -11,6 +11,7 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { registerSchema, RegisterBody } from "@repo/schema";
 import { useRegister } from "@repo/operations";
 import { Routes } from "@/constants/routes";
@@ -22,6 +23,7 @@ import FormPhone from "@/components/ui/form-phone";
 export default function RegisterScreen() {
   const router = useRouter();
   const { mutate: register, isPending: isSubmitting } = useRegister();
+  const insets = useSafeAreaInsets();
 
   const methods = useForm({
     resolver: zodResolver(registerSchema),
@@ -53,7 +55,13 @@ export default function RegisterScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: Math.max(insets.top, theme.spacing.md) }
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Text style={styles.title}>Register Society</Text>
           <Text style={styles.subtitle}>Create a Society Head account to set up and manage your apartment community</Text>
@@ -167,7 +175,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: theme.spacing.xxl,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xxl,
   },
   footerText: {
     fontSize: 14,

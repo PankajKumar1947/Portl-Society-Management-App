@@ -11,12 +11,10 @@ export default function RootLayout() {
     <ReactQueryProvider>
       <AuthProvider>
         <RoleProvider>
-          <AccessControlProvider>
-            <AlertProvider>
-              <StatusBar style="dark" backgroundColor={theme.colors.background} />
-              <Stack screenOptions={{ headerShown: false }} />
-            </AlertProvider>
-          </AccessControlProvider>
+          <AlertProvider>
+            <StatusBar style="dark" backgroundColor={theme.colors.background} />
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.surface } }} />
+          </AlertProvider>
         </RoleProvider>
       </AuthProvider>
     </ReactQueryProvider>
