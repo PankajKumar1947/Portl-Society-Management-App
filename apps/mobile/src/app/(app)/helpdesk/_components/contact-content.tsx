@@ -16,52 +16,137 @@ interface ContactContentProps {
 }
 
 export default function ContactContent({ society }: ContactContentProps) {
+  if (!society) return null;
+
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.heading}>Get in touch with your society's support team</Text>
+      {/* Support Team */}
+      <Text style={styles.sectionTitle}>Support Team</Text>
+      <View style={styles.section}>
+        {society.supportCall && (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => Linking.openURL(`tel:${society.supportCall}`)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.iconWrap, { backgroundColor: "#E8F9EE" }]}>
+              <Ionicons name="call-outline" size={22} color={theme.colors.success} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Call Support</Text>
+              <Text style={styles.rowValue}>{society.supportCall}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        )}
+        {society.supportMail && (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => Linking.openURL(`mailto:${society.supportMail}`)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.iconWrap, { backgroundColor: "#EAF4FF" }]}>
+              <Ionicons name="mail-outline" size={22} color={theme.colors.info} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Email Support</Text>
+              <Text style={styles.rowValue}>{society.supportMail}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        )}
+        {!society.supportCall && !society.supportMail && (
+          <Text style={styles.emptyText}>No support contact details available.</Text>
+        )}
+      </View>
 
-      {society?.supportCall && (
-        <TouchableOpacity
-          style={styles.contactCard}
-          onPress={() => Linking.openURL(`tel:${society.supportCall}`)}
-          activeOpacity={0.7}
-        >
-          <View style={[styles.iconWrap, { backgroundColor: "#E8F9EE" }]}>
-            <Ionicons name="call-outline" size={28} color={theme.colors.success} />
+      {/* Primary Contact */}
+      <Text style={styles.sectionTitle}>Primary Contact</Text>
+      <View style={styles.section}>
+        {society.primaryContactName && (
+          <View style={styles.row}>
+            <View style={[styles.iconWrap, { backgroundColor: "#F3E8FF" }]}>
+              <Ionicons name="person-outline" size={22} color="#9333EA" />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Name</Text>
+              <Text style={styles.rowValue}>{society.primaryContactName}</Text>
+            </View>
           </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactLabel}>Call Support</Text>
-            <Text style={styles.contactValue}>{society.supportCall}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
-        </TouchableOpacity>
-      )}
+        )}
+        {society.primaryContactNumber && (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => Linking.openURL(`tel:${society.primaryContactNumber}`)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.iconWrap, { backgroundColor: "#FEE2E2" }]}>
+              <Ionicons name="call-outline" size={22} color="#DC2626" />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Phone</Text>
+              <Text style={styles.rowValue}>{society.primaryContactNumber}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        )}
+        {society.primaryContactEmail && (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => Linking.openURL(`mailto:${society.primaryContactEmail}`)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.iconWrap, { backgroundColor: "#EAF4FF" }]}>
+              <Ionicons name="mail-outline" size={22} color={theme.colors.info} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowLabel}>Email</Text>
+              <Text style={styles.rowValue}>{society.primaryContactEmail}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {society?.supportMail && (
-        <TouchableOpacity
-          style={styles.contactCard}
-          onPress={() => Linking.openURL(`mailto:${society.supportMail}`)}
-          activeOpacity={0.7}
-        >
-          <View style={[styles.iconWrap, { backgroundColor: "#EAF4FF" }]}>
-            <Ionicons name="mail-outline" size={28} color={theme.colors.info} />
+      {/* Address */}
+      <Text style={styles.sectionTitle}>Address</Text>
+      <View style={styles.section}>
+        <View style={styles.row}>
+          <View style={[styles.iconWrap, { backgroundColor: "#FEF3C7" }]}>
+            <Ionicons name="location-outline" size={22} color="#D97706" />
           </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactLabel}>Email Support</Text>
-            <Text style={styles.contactValue}>{society.supportMail}</Text>
+          <View style={styles.rowInfo}>
+            <Text style={styles.rowLabel}>Society Address</Text>
+            <Text style={styles.rowValue}>
+              {[society.addressLine, society.city, society.state, society.pincode]
+                .filter(Boolean)
+                .join(", ")}
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
-        </TouchableOpacity>
-      )}
-
-      {!society?.supportCall && !society?.supportMail && (
-        <View style={styles.noContact}>
-          <Ionicons name="information-circle-outline" size={48} color={theme.colors.textMuted} />
-          <Text style={styles.noContactTitle}>No contact info available</Text>
-          <Text style={styles.noContactSubtitle}>
-            Your society hasn't set up support contact details yet.
-          </Text>
         </View>
+      </View>
+
+      {/* Website */}
+      {society.website && (
+        <>
+          <Text style={styles.sectionTitle}>Online</Text>
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => Linking.openURL(society.website!)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconWrap, { backgroundColor: "#E8F9EE" }]}>
+                <Ionicons name="globe-outline" size={22} color={theme.colors.success} />
+              </View>
+              <View style={styles.rowInfo}>
+                <Text style={styles.rowLabel}>Website</Text>
+                <Text style={styles.rowValue} numberOfLines={1}>{society.website}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </>
       )}
     </ScrollView>
   );
@@ -70,57 +155,56 @@ export default function ContactContent({ society }: ContactContentProps) {
 const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
+    paddingBottom: theme.spacing.section,
   },
-  heading: {
-    fontSize: 14,
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.textMuted,
-    marginBottom: theme.spacing.xl,
-    textAlign: "center",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: theme.spacing.sm,
+    marginTop: theme.spacing.lg,
   },
-  contactCard: {
-    flexDirection: "row",
-    alignItems: "center",
+  section: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
-    padding: theme.spacing.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    overflow: "hidden",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.spacing.md,
     gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.colors.border,
   },
   iconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
   },
-  contactInfo: {
+  rowInfo: {
     flex: 1,
   },
-  contactLabel: {
-    fontSize: 13,
+  rowLabel: {
+    fontSize: 12,
     color: theme.colors.textMuted,
-    marginBottom: 2,
+    marginBottom: 1,
   },
-  contactValue: {
+  rowValue: {
     fontSize: 15,
     fontWeight: theme.fontWeights.semibold,
     color: theme.colors.text,
   },
-  noContact: {
-    alignItems: "center",
-    paddingVertical: 48,
-    gap: theme.spacing.sm,
-  },
-  noContactTitle: {
-    fontSize: 16,
-    fontWeight: theme.fontWeights.semibold,
-    color: theme.colors.text,
-  },
-  noContactSubtitle: {
-    fontSize: 13,
+  emptyText: {
+    fontSize: 14,
     color: theme.colors.textMuted,
     textAlign: "center",
+    paddingVertical: theme.spacing.lg,
   },
 });
