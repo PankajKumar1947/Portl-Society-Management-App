@@ -14,6 +14,8 @@ export const Routes = {
     Login: "/login",
     Register: "/register",
     Verify: "/verify",
+    ForgotPassword: "/forgot-password",
+    ResetPassword: "/reset-password",
   },
 
   Helpdesk: {

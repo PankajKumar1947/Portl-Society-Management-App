@@ -5,11 +5,18 @@ import {
   verifyOtp,
   resendOtp,
   refreshToken,
+  forgotPassword,
+  resetPassword,
   authQueries,
   setAccessToken,
   setRefreshToken,
 } from "@repo/api-client";
-import { LoginBody, RegisterBody } from "@repo/schema";
+import {
+  LoginBody,
+  RegisterBody,
+  ForgotPasswordRequestBody,
+  ResetPasswordBody,
+} from "@repo/schema";
 
 export const useLogin = () => {
   return useMutation({
@@ -62,5 +69,19 @@ export const useRefreshToken = () => {
       setAccessToken(data.accessToken);
       setRefreshToken(data.refreshToken);
     },
+  });
+};
+
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationKey: authQueries.forgotPassword.key,
+    mutationFn: (data: ForgotPasswordRequestBody) => forgotPassword(data),
+  });
+};
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationKey: authQueries.resetPassword.key,
+    mutationFn: (data: ResetPasswordBody) => resetPassword(data),
   });
 };

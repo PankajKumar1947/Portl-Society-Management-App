@@ -7,57 +7,45 @@ import {
   Platform,
   ScrollView,
   Image,
-  Alert,
-  TouchableOpacity,
 } from "react-native";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { loginSchema, LoginBody } from "@repo/schema";
-import { useLogin } from "@repo/operations";
-import { useAuth } from "@/context/auth-context";
-import type { ApiErrorResponse } from "@repo/api-client";
+import { forgotPasswordRequestSchema, ForgotPasswordRequestBody } from "@repo/schema";
+import { useForgotPassword } from "@repo/operations";
 import { Routes } from "@/constants/routes";
 import { theme } from "@/constants";
+import { Feather } from "@expo/vector-icons";
+import { useAlert } from "@/context/alert-context";
 import Button from "@/components/ui/button";
+import IconButton from "@/components/ui/icon-button";
 import FormInput from "@/components/ui/form-input";
 import { Images } from "@/assets/images";
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { mutate: login, isPending: isSubmitting } = useLogin();
-  const { signIn } = useAuth();
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
+  const { showAlert } = useAlert();
 
   const methods = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(forgotPasswordRequestSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
   const { handleSubmit } = methods;
 
-  const onSubmit = (data: LoginBody) => {
-    login(data, {
-      onSuccess: async (res) => {
-        await signIn(res.accessToken, res.refreshToken, res.isSocietyCreated);
-        if (res.isSocietyCreated) {
-          router.replace("/");
-        } else {
-          router.replace(Routes.Onboarding.SetupSociety);
-        }
+  const onSubmit = (data: ForgotPasswordRequestBody) => {
+    forgotPassword(data, {
+      onSuccess: () => {
+        router.push({
+          pathname: Routes.Auth.ResetPassword,
+          params: { email: data.email },
+        });
       },
       onError: (err) => {
-        const apiError = err as unknown as ApiErrorResponse;
-        const isUnverified =
-          apiError.status === 401 &&
-          (apiError.data as { emailVerified?: boolean })?.emailVerified === false;
-
-        if (isUnverified) {
-          router.push({ pathname: Routes.Auth.Verify, params: { email: data.email } });
-          return;
-        }
+        showAlert({ title: "Error", description: err.message, variant: "error" });
       },
     });
   };
@@ -67,11 +55,20 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      <View style={styles.navBar}>
+        <IconButton
+          onPress={() => router.back()}
+          icon={<Feather name="chevron-left" size={24} color={theme.colors.text} />}
+        />
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Image source={Images.iconFull} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Log in to manage your apartment community</Text>
+          <Text style={styles.title}>Forgot Password?</Text>
+          <Text style={styles.subtitle}>
+            Enter your registered email address and we'll send you a code to reset your password.
+          </Text>
         </View>
 
         <FormProvider {...methods}>
@@ -84,37 +81,21 @@ export default function LoginScreen() {
               required
             />
 
-            <FormInput
-              name="password"
-              label="Password"
-              placeholder="Enter your password"
-              secureTextEntry
-              showToggle
-              required
-            />
-
             <Button
               onPress={handleSubmit(onSubmit)}
               style={styles.submitButton}
-              disabled={isSubmitting}
-              loading={isSubmitting}
+              disabled={isPending}
+              loading={isPending}
             >
-              Log In
+              Send Reset Code
             </Button>
-
-            <TouchableOpacity
-              onPress={() => router.push(Routes.Auth.ForgotPassword)}
-              style={styles.forgotPassword}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
           </View>
         </FormProvider>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Are you a Society Head? </Text>
-          <Text style={styles.linkText} onPress={() => router.push(Routes.Auth.Register)}>
-            Register Society
+          <Text style={styles.footerText}>Remember your password? </Text>
+          <Text style={styles.linkText} onPress={() => router.back()}>
+            Log In
           </Text>
         </View>
       </ScrollView>
@@ -127,11 +108,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  navBar: {
+    height: 56,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.md,
+    marginTop: Platform.OS === "ios" ? 44 : 10,
+  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingHorizontal: theme.spacing.xxl,
-    paddingTop: theme.spacing.section * 1.5,
+    paddingTop: theme.spacing.md,
     paddingBottom: theme.spacing.lg,
   },
   header: {
@@ -145,14 +134,14 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: theme.fontWeights.extrabold,
     color: theme.colors.text,
     textAlign: "center",
-    marginBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
@@ -163,16 +152,6 @@ const styles = StyleSheet.create({
   submitButton: {
     marginTop: theme.spacing.md,
     height: 52,
-  },
-  forgotPassword: {
-    alignItems: "center",
-    marginTop: theme.spacing.md,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.text,
-    textDecorationLine: "underline",
   },
   footer: {
     flexDirection: "row",

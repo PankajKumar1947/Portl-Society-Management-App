@@ -19,4 +19,12 @@ export const authQueries = {
     key: ["refresh-token"],
     endpoint: "/auth/refresh",
   },
+  forgotPassword: {
+    key: ["forgot-password"],
+    endpoint: "/auth/forgot-password",
+  },
+  resetPassword: {
+    key: ["reset-password"],
+    endpoint: "/auth/reset-password",
+  },
 } as const;

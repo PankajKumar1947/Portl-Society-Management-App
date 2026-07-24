@@ -7,6 +7,10 @@ import {
   ResendOtpData,
   RefreshTokenBody,
   RefreshTokenData,
+  ForgotPasswordRequestBody,
+  ForgotPasswordData,
+  ResetPasswordBody,
+  ResetPasswordData,
 } from "@repo/schema";
 import { authQueries } from "../../react-queries/auth";
 import { apiClient } from "../../services/axios-instance";
@@ -40,5 +44,19 @@ export const refreshToken = async (
   data: RefreshTokenBody,
 ): Promise<RefreshTokenData> => {
   const res = await apiClient.post(authQueries.refreshToken.endpoint, data);
+  return res.data;
+};
+
+export const forgotPassword = async (
+  data: ForgotPasswordRequestBody,
+): Promise<ForgotPasswordData> => {
+  const res = await apiClient.post(authQueries.forgotPassword.endpoint, data);
+  return res.data;
+};
+
+export const resetPassword = async (
+  data: ResetPasswordBody,
+): Promise<ResetPasswordData> => {
+  const res = await apiClient.post(authQueries.resetPassword.endpoint, data);
   return res.data;
 };

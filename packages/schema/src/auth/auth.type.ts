@@ -54,3 +54,12 @@ export type ResendOtpData = {
   message: string;
   email: string;
 };
+
+export type ForgotPasswordData = {
+  message: string;
+  email: string;
+};
+
+export type ResetPasswordData = {
+  message: string;
+};
