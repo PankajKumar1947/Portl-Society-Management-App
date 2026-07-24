@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getResidents, getResidentDetails, residentQueries } from "@repo/api-client";
+import {
+  getResidents,
+  getResidentDetails,
+  getMyResident,
+  residentQueries,
+} from "@repo/api-client";
 import { ResidentListResponse, ResidentResponse } from "@repo/schema";
 
 export const useGetResidents = (
@@ -24,5 +29,14 @@ export const useGetResidentDetail = (
     queryFn: () => getResidentDetails(residentId),
     select: (response: ResidentResponse) => response.data,
     enabled: !!residentId && options?.enabled,
+  });
+};
+
+export const useGetMyResident = (options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: residentQueries.myResident.key,
+    queryFn: getMyResident,
+    select: (response: ResidentResponse) => response.data,
+    enabled: options?.enabled ?? true,
   });
 };

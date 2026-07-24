@@ -31,5 +31,9 @@ export const residentQueries = {
     key: ["onboard-vehicle", residentId],
     endpoint: `/residents/onboard/vehicle/${residentId}`,
   }),
+  myResident: {
+    key: ["my-resident"],
+    endpoint: "/residents/me",
+  },
 } as const;
 

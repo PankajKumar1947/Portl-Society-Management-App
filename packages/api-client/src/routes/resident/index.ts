@@ -81,3 +81,8 @@ export const onboardResidentVehicle = async (
   );
   return res.data;
 };
+
+export const getMyResident = async (): Promise<ResidentResponse> => {
+  const res = await apiClient.get<ResidentResponse>(residentQueries.myResident.endpoint);
+  return res.data;
+};

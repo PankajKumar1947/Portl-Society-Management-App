@@ -17,6 +17,7 @@ import { UpdateResidentDto } from './dto/update-resident.dto';
 import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 import { ResidentVehicleDto } from './dto/resident-vehicle.dto';
+import { AddFamilyMemberDto } from './dto/add-family-member.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -31,6 +32,9 @@ import {
   ApiGetResident,
   ApiUpdateResident,
   ApiDeleteResident,
+  ApiGetMyResident,
+  ApiGetFamilyMembers,
+  ApiAddFamilyMember,
 } from './resident.docs';
 
 @ApiTags('residents')
@@ -132,6 +136,54 @@ export class ResidentController {
       success: true,
       message: 'Residents fetched successfully',
       data: residents,
+    };
+  }
+
+  @Get('me')
+  @Roles(UserRoles.RESIDENTS)
+  @ApiGetMyResident()
+  async getMyResident(@CurrentUser() user: TokenPayload) {
+    if (!user.societyId) {
+      return { success: false, message: 'Society context not found', data: null };
+    }
+    const resident = await this.service.findByUserId(user.userId, user.societyId);
+    return {
+      success: true,
+      message: 'Resident profile fetched successfully',
+      data: resident,
+    };
+  }
+
+  @Get('family-members')
+  @Roles(UserRoles.RESIDENTS)
+  @ApiGetFamilyMembers()
+  async getFamilyMembers(@CurrentUser() user: TokenPayload) {
+    if (!user.societyId) {
+      return { success: false, message: 'Society context not found', data: [] };
+    }
+    const members = await this.service.getMyFamilyMembers(user.userId, user.societyId);
+    return {
+      success: true,
+      message: 'Family members fetched successfully',
+      data: members,
+    };
+  }
+
+  @Post('family-members')
+  @Roles(UserRoles.RESIDENTS)
+  @ApiAddFamilyMember()
+  async addFamilyMember(
+    @CurrentUser() user: TokenPayload,
+    @Body() dto: AddFamilyMemberDto,
+  ) {
+    if (!user.societyId) {
+      return { success: false, message: 'Society context not found', data: null };
+    }
+    const member = await this.service.addFamilyMember(user.userId, user.societyId, dto);
+    return {
+      success: true,
+      message: 'Family member added successfully',
+      data: member,
     };
   }
 

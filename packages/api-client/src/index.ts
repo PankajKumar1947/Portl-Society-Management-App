@@ -24,6 +24,8 @@ export * from "./react-queries/complaint";
 export * from "./routes/complaint";
 export * from "./react-queries/helpdesk-ticket";
 export * from "./routes/helpdesk-ticket";
+export * from "./react-queries/family-member";
+export * from "./routes/family-member";
 export {
   setAccessToken,
   setRefreshToken,

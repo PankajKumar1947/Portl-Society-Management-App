@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ResidentRepository } from './resident.repository';
+import { FamilyMemberRepository } from './family-member.repository';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
+import { AddFamilyMemberDto } from './dto/add-family-member.dto';
 import { ResidentDocument } from './entities/resident.entity';
+import { FamilyMemberDocument } from './entities/family-member.entity';
 import { UserService } from '../user/user.service';
 import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
@@ -14,6 +17,7 @@ import { UserRoles } from '@repo/schema';
 export class ResidentService {
   constructor(
     private readonly repository: ResidentRepository,
+    private readonly familyMemberRepository: FamilyMemberRepository,
     private readonly userService: UserService,
     private readonly authService: AuthService,
   ) { }
@@ -109,6 +113,50 @@ export class ResidentService {
       throw new NotFoundException(`Resident with ID "${residentId}" not found after update`);
     }
     return updatedResident;
+  }
+
+  async findByUserId(userId: string, societyId: string): Promise<ResidentDocument> {
+    const resident = await this.repository.findByUserId(userId, societyId);
+    if (!resident) {
+      throw new NotFoundException('Resident profile not found');
+    }
+    return resident;
+  }
+
+  async getMyFamilyMembers(userId: string, societyId: string): Promise<FamilyMemberDocument[]> {
+    const myResident = await this.repository.findByUserId(userId, societyId);
+    if (!myResident) {
+      throw new NotFoundException('Your resident profile was not found');
+    }
+
+    return this.familyMemberRepository.find({
+      societyId,
+      towerId: myResident.towerId,
+      flatNumber: myResident.flatNumber,
+    });
+  }
+
+  async addFamilyMember(
+    userId: string,
+    societyId: string,
+    dto: AddFamilyMemberDto,
+  ): Promise<FamilyMemberDocument> {
+    const myResident = await this.repository.findByUserId(userId, societyId);
+    if (!myResident) {
+      throw new NotFoundException('Your resident profile was not found');
+    }
+
+    return this.familyMemberRepository.create({
+      societyId,
+      residentId: myResident.residentId,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      relationship: dto.relationship,
+      phoneNumber: dto.phoneNumber || undefined,
+      dateOfBirth: dto.dateOfBirth || undefined,
+      towerId: myResident.towerId,
+      flatNumber: myResident.flatNumber,
+    });
   }
 
   async create(dto: CreateResidentDto): Promise<ResidentDocument> {

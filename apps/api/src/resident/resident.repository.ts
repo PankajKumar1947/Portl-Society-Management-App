@@ -29,6 +29,10 @@ export class ResidentRepository {
     return this.model.findOne({ residentId }).populate('userDetails').populate('vehicles').exec();
   }
 
+  async findByUserId(userId: string, societyId: string): Promise<ResidentDocument | null> {
+    return this.model.findOne({ userId, societyId }).populate('userDetails').populate('vehicles').exec();
+  }
+
   async update(
     residentId: string,
     dto: UpdateResidentDto,

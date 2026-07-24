@@ -90,3 +90,5 @@ export const residentVehicleSchema = z.object({
   vehicles: z.array(vehicleSchema).default([]),
 });
 
+
+

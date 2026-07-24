@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,23 +9,23 @@ import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
 import FormSelect from "@/components/ui/form-select";
 import FormDate from "@/components/ui/form-date";
+import { useAddFamilyMember } from "@repo/operations";
+import { RELATIONSHIP_OPTIONS } from "@repo/schema";
+import type { AddFamilyMemberInput } from "@repo/schema";
 
-const RELATIONSHIP_OPTIONS = [
-  { label: "Spouse", value: "Spouse" },
-  { label: "Son", value: "Son" },
-  { label: "Daughter", value: "Daughter" },
-  { label: "Father", value: "Father" },
-  { label: "Mother", value: "Mother" },
-  { label: "Brother", value: "Brother" },
-  { label: "Sister", value: "Sister" },
-  { label: "Other", value: "Other" },
-];
+interface AddFormValues {
+  name: string;
+  relationship: string;
+  dob: string;
+  phone: string;
+}
 
 export default function AddFamilyMemberScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id?: string; name?: string; relationship?: string }>();
   const isEdit = !!params.id;
+  const { mutateAsync: addMember, isPending } = useAddFamilyMember();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -33,7 +33,7 @@ export default function AddFamilyMemberScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const methods = useForm({
+  const methods = useForm<AddFormValues>({
     defaultValues: {
       name: params.name || "",
       relationship: params.relationship || "",
@@ -42,9 +42,25 @@ export default function AddFamilyMemberScreen() {
     },
   });
 
-  const onSubmit = () => {
-    // Navigate back to my family listing screen
-    router.replace(Routes.Profile.MyFamily);
+  const onSubmit = async (form: AddFormValues) => {
+    if (isEdit) {
+      router.replace(Routes.Profile.MyFamily);
+      return;
+    }
+    try {
+      const [firstName, ...lastParts] = form.name.trim().split(" ");
+      const lastName = lastParts.join(" ") || firstName;
+      await addMember({
+        firstName,
+        lastName,
+        relationship: form.relationship as AddFamilyMemberInput["relationship"],
+        phoneNumber: form.phone.replace(/\s/g, "") || undefined,
+        dateOfBirth: form.dob || undefined,
+      });
+      router.replace(Routes.Profile.MyFamily);
+    } catch {
+      Alert.alert("Error", "Failed to add family member. Please try again.");
+    }
   };
 
   return (
@@ -101,6 +117,8 @@ export default function AddFamilyMemberScreen() {
             variant="primary"
             style={styles.submitButton}
             onPress={methods.handleSubmit(onSubmit)}
+            loading={isPending}
+            disabled={isPending}
           >
             {isEdit ? "Save Changes" : "Save Member"}
           </Button>

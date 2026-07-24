@@ -1,5 +1,5 @@
-import React, { useLayoutEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
+import React, { useLayoutEffect, useMemo } from "react";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
@@ -8,43 +8,64 @@ import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import PersonListItem from "@/components/ui/person-list-item";
 import { Ionicons } from "@expo/vector-icons";
+import { useGetMyResident, useGetFamilyMembers } from "@repo/operations";
+import type { FamilyMemberData } from "@repo/schema";
 
-export interface FamilyMember {
+const RELATIONSHIP_LABEL: Record<string, string> = {
+  SPOUSE: "Spouse",
+  SON: "Son",
+  DAUGHTER: "Daughter",
+  FATHER: "Father",
+  MOTHER: "Mother",
+  BROTHER: "Brother",
+  SISTER: "Sister",
+  OTHER: "Other",
+};
+
+interface ListItem {
   id: string;
   name: string;
-  relationship: string;
+  subtitle: string;
   isHead: boolean;
   avatar: string;
 }
 
-export const INITIAL_MEMBERS: FamilyMember[] = [
-  {
-    id: "1",
-    name: "Sunita Sharma",
-    relationship: "Me",
-    isHead: true,
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120",
-  },
-  {
-    id: "2",
-    name: "Rohit Sharma",
-    relationship: "Spouse",
-    isHead: false,
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120",
-  },
-  {
-    id: "3",
-    name: "Ananya Sharma",
-    relationship: "Daughter",
-    isHead: false,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120",
-  },
-];
-
 export default function MyFamilyScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [members] = useState<FamilyMember[]>(INITIAL_MEMBERS);
+  const { data: myResident, isLoading: loadingResident } = useGetMyResident();
+  const { data: familyMembers, isLoading: loadingFamily } = useGetFamilyMembers();
+
+  const loading = loadingResident || loadingFamily;
+
+  const items = useMemo(() => {
+    const result: ListItem[] = [];
+
+    if (myResident) {
+      const u = myResident.userDetails;
+      result.push({
+        id: `resident_${myResident.residentId}`,
+        name: u ? `${u.firstName} ${u.lastName}` : "Unknown",
+        subtitle: "Me",
+        isHead: myResident.isPrimary,
+        avatar: u?.profilePhoto ?? "",
+      });
+    }
+
+    if (familyMembers) {
+      for (const fm of familyMembers) {
+        result.push({
+          id: `family_${fm.familyMemberId}`,
+          name: `${fm.firstName} ${fm.lastName}`,
+          subtitle: RELATIONSHIP_LABEL[fm.relationship] ?? fm.relationship,
+          isHead: false,
+          avatar: "",
+        });
+      }
+    }
+
+    return result;
+  }, [myResident, familyMembers]);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -52,29 +73,32 @@ export default function MyFamilyScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="My Family" onBack={() => router.back()} />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader title="My Family" onBack={() => router.back()} />
 
       <FlatList
-        data={members}
+        data={items}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, items.length === 0 && styles.center]}
         renderItem={({ item }) => (
           <PersonListItem
             name={item.name}
-            subtitle={item.relationship}
+            subtitle={item.subtitle}
             imageUrl={item.avatar}
             style={styles.memberCard}
-            onPress={() => router.push({
-              pathname: Routes.Profile.AddFamily,
-              params: {
-                id: item.id,
-                name: item.name,
-                relationship: item.relationship,
-                avatar: item.avatar,
-              }
-            })}
+            onPress={() => router.push(Routes.Profile.AddFamily)}
             rightElement={
               item.isHead ? (
                 <Badge variant="success">
@@ -87,6 +111,12 @@ export default function MyFamilyScreen() {
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="people-outline" size={48} color={theme.colors.textMuted} />
+            <Text style={styles.emptyText}>No family members yet</Text>
+          </View>
+        }
       />
 
       <View style={styles.bottomContainer}>
@@ -108,9 +138,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   list: {
     padding: theme.spacing.lg,
     paddingBottom: 100,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    paddingTop: 60,
+  },
+  emptyText: {
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.sm,
+    fontSize: 15,
   },
   memberCard: {
     backgroundColor: theme.colors.surface,
