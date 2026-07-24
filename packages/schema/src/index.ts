@@ -11,3 +11,4 @@ export * from "./poll";
 export * from "./media";
 export * from "./amenity";
 export * from "./complaint";
+export * from "./helpdesk-ticket";

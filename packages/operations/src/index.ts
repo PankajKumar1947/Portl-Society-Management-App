@@ -22,4 +22,6 @@ export * from "./query/use-amenity";
 export * from "./mutation/use-amenity";
 export * from "./query/use-complaint";
 export * from "./mutation/use-complaint";
+export * from "./query/use-helpdesk-ticket";
+export * from "./mutation/use-helpdesk-ticket";
 

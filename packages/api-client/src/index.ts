@@ -22,6 +22,8 @@ export * from "./react-queries/amenity";
 export * from "./routes/amenity";
 export * from "./react-queries/complaint";
 export * from "./routes/complaint";
+export * from "./react-queries/helpdesk-ticket";
+export * from "./routes/helpdesk-ticket";
 export {
   setAccessToken,
   setRefreshToken,

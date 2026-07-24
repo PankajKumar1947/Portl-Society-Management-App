@@ -1,35 +1,27 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
+import { useCreateHelpdeskTicket } from "@repo/operations";
 import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
 import FormTextArea from "@/components/ui/form-textarea";
 import FormSelect from "@/components/ui/form-select";
-import AttachmentPicker, { AttachmentItem } from "@/components/ui/attachment-picker";
-
-const CATEGORY_OPTIONS = [
-  { label: "Maintenance", value: "maintenance" },
-  { label: "Plumbing", value: "plumbing" },
-  { label: "Electrical", value: "electrical" },
-  { label: "Security", value: "security" },
-  { label: "Other", value: "other" },
-];
+import { CreateHelpdeskTicketBody, CATEGORY_OPTIONS } from "@repo/schema";
 
 export default function RaiseTicketScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
+  const { mutate: createTicket, isPending } = useCreateHelpdeskTicket();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -37,17 +29,20 @@ export default function RaiseTicketScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const methods = useForm({
+  const methods = useForm<CreateHelpdeskTicketBody>({
     defaultValues: {
-      category: "",
+      category: "" as CreateHelpdeskTicketBody["category"],
       subject: "",
       description: "",
     },
   });
 
-  const onSubmit = () => {
-    // Navigate back to the index screen
-    router.replace(Routes.Helpdesk.Index);
+  const onSubmit = (data: CreateHelpdeskTicketBody) => {
+    createTicket(data, {
+      onSuccess: () => {
+        router.replace(Routes.Helpdesk.Index);
+      },
+    });
   };
 
   return (
@@ -92,15 +87,6 @@ export default function RaiseTicketScreen() {
               required
               maxLength={500}
             />
-
-            <View style={styles.fieldGap} />
-
-            <Text style={styles.attachmentLabel}>Attachments</Text>
-            <AttachmentPicker
-              attachments={attachments}
-              onAdd={(item) => setAttachments((prev) => [...prev, item])}
-              onRemove={(index) => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-            />
           </FormProvider>
 
           <View style={styles.bottomGap} />
@@ -111,8 +97,9 @@ export default function RaiseTicketScreen() {
             variant="primary"
             style={styles.submitButton}
             onPress={methods.handleSubmit(onSubmit)}
+            disabled={isPending}
           >
-            Submit Ticket
+            {isPending ? "Submitting..." : "Submit Ticket"}
           </Button>
         </View>
       </KeyboardAvoidingView>
@@ -131,12 +118,6 @@ const styles = StyleSheet.create({
   },
   fieldGap: {
     height: theme.spacing.md,
-  },
-  attachmentLabel: {
-    fontSize: 14,
-    fontWeight: theme.fontWeights.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
   },
   bottomGap: {
     height: 40,
