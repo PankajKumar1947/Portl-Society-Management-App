@@ -5,14 +5,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "../_components/tower-form";
-import { UpdateTowerBody } from "@repo/schema";
+import { UpdateTowerBody, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetTowerDetails, useUpdateTower } from "@repo/operations";
+import { useGetTowerDetails, useUpdateTower, useAccessControl } from "@repo/operations";
 
 export default function EditTowerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { canUpdate } = useAccessControl(AclResource.TOWERS);
 
   const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
   const { mutate: updateTower, isPending: isUpdating } = useUpdateTower(id || "");
@@ -56,13 +58,15 @@ export default function EditTowerScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            <TowerForm<UpdateTowerBody>
-              isEdit
-              initialValues={initialValues}
-              onSubmit={handleSubmit}
-              submitButtonText="Update Tower"
-              isSubmitting={isUpdating}
-            />
+            {canUpdate ? (
+              <TowerForm<UpdateTowerBody>
+                isEdit
+                initialValues={initialValues}
+                onSubmit={handleSubmit}
+                submitButtonText="Update Tower"
+                isSubmitting={isUpdating}
+              />
+            ) : null}
           </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

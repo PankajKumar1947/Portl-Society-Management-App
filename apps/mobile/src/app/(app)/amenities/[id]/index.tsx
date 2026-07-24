@@ -5,12 +5,12 @@ import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Button } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGetAmenityDetail, useGetMe } from "@repo/operations";
+import { useGetAmenityDetail, useAccessControl } from "@repo/operations";
 import { Ionicons } from "@expo/vector-icons";
 import { IconButton } from "@/components/ui/icon-button";
 import { Card } from "@/components/ui/card";
 import { ImageGallery } from "@/components/ui/image-gallery";
-import { MediaData } from "@repo/schema";
+import { MediaData, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
 import NotFoundScreen from "@/components/layout/not-found-screen";
 
@@ -29,9 +29,8 @@ export default function AmenityDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { data: amenity, isLoading } = useGetAmenityDetail(id ?? "", { enabled: !!id });
-  const { data: me } = useGetMe();
 
-  const isAdmin = me?.role === "ADMIN";
+  const { canUpdate, canCreate } = useAccessControl(AclResource.AMENITIES);
 
   if (isLoading)
     return <LoadingScreen title="Fetching Amenity Details" onBack={() => router.back()} />
@@ -52,7 +51,7 @@ export default function AmenityDetailsScreen() {
         title="Amenity Details"
         onBack={() => router.back()}
         rightElement={
-          isAdmin ? (
+          canUpdate ? (
             <IconButton
               onPress={() => router.push(Routes.Amenities.Edit(amenity.amenityId))}
               icon={<Ionicons name="pencil-outline" size={22} color={theme.colors.text} />}
@@ -130,7 +129,7 @@ export default function AmenityDetailsScreen() {
             </Card>
           </View>
 
-          {amenity.bookingRequired && (
+          {amenity.bookingRequired && canCreate && (
             <Button onPress={handleBook} style={styles.bookButton}>
               Book Now
             </Button>

@@ -1,18 +1,26 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useEffect } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRouter } from "expo-router";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import AmenityForm from "./_components/amenity-form";
-import { useCreateAmenity } from "@repo/operations";
-import { CreateAmenityBody } from "@repo/schema";
+import { useCreateAmenity, useAccessControl } from "@repo/operations";
+import { CreateAmenityBody, AclResource } from "@repo/schema";
 
 export default function CreateAmenityScreen() {
   const router = useRouter();
   const navigation = useNavigation();
 
   const { mutate: createAmenity, isPending } = useCreateAmenity();
+
+  const { canCreate } = useAccessControl(AclResource.AMENITIES);
+
+  useLayoutEffect(() => {
+    if (!canCreate) {
+      router.back();
+    }
+  }, [canCreate, router]);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();

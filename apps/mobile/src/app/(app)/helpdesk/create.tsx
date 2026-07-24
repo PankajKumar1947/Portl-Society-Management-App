@@ -1,6 +1,7 @@
 import React, { useLayoutEffect } from "react";
 import {
   View,
+  Text,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -10,7 +11,8 @@ import { useNavigation, useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
-import { useCreateHelpdeskTicket } from "@repo/operations";
+import { useCreateHelpdeskTicket, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
@@ -22,6 +24,7 @@ export default function RaiseTicketScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { mutate: createTicket, isPending } = useCreateHelpdeskTicket();
+  const { canCreate } = useAccessControl(AclResource.HELPDESK_TICKETS);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -44,6 +47,17 @@ export default function RaiseTicketScreen() {
       },
     });
   };
+
+  if (!canCreate) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Raise New Ticket" onBack={() => router.back()} />
+        <View style={styles.centered}>
+          <Text style={styles.noAccessText}>You do not have permission to raise tickets.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -111,6 +125,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.lg,
+  },
+  noAccessText: {
+    fontSize: 16,
+    color: theme.colors.textMuted,
+    textAlign: "center",
   },
   content: {
     padding: theme.spacing.lg,

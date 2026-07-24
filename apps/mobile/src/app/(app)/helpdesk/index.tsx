@@ -4,7 +4,8 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme, Routes } from "@/constants";
-import { useGetMySociety } from "@repo/operations";
+import { useGetMySociety, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
@@ -22,6 +23,7 @@ export default function HelpdeskScreen() {
   const [activeTab, setActiveTab] = useState("tickets");
 
   const { data: society, isLoading: societyLoading } = useGetMySociety();
+  const { canCreate } = useAccessControl(AclResource.HELPDESK_TICKETS);
 
   if (societyLoading) {
     return <LoadingScreen title="Helpdesk" onBack={() => router.replace(Routes.Root)} />;
@@ -33,12 +35,14 @@ export default function HelpdeskScreen() {
         title="Helpdesk"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Helpdesk.Create)}
-            icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Helpdesk.Create)}
+              icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Divider } from "@/components/ui/divider";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 const AMENITY_IMAGES = {
   "1": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop",
@@ -31,6 +33,8 @@ export default function BookingDetailsScreen() {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
 
   const imageUrl = AMENITY_IMAGES[id as keyof typeof AMENITY_IMAGES] || AMENITY_IMAGES["1"];
+
+  const { canDelete } = useAccessControl(AclResource.AMENITIES);
 
   const handleCancelBooking = () => {
     setCancelModalVisible(false);
@@ -62,7 +66,7 @@ export default function BookingDetailsScreen() {
             <InfoRow icon="barcode-outline" label="Booking ID" value={bookingId} />
           </Card>
 
-          {isUpcoming && (
+          {isUpcoming && canDelete && (
             <Button
               variant="outline"
               onPress={() => setCancelModalVisible(true)}

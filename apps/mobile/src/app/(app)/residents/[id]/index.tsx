@@ -12,13 +12,16 @@ import Badge from "@/components/ui/badge";
 import InfoRow from "@/components/ui/info-row";
 import Button from "@/components/ui/button";
 import Avatar from "@/components/ui/avatar";
-import { useGetResidentDetail, useDeleteResident } from "@repo/operations";
+import { useGetResidentDetail, useDeleteResident, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import { useAlert } from "@/context/alert-context";
 
 export default function ResidentDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  const { canUpdate, canDelete } = useAccessControl(AclResource.RESIDENTS);
 
   const { data: resident, isLoading } = useGetResidentDetail(id || "", { enabled: !!id });
   const { mutate: deleteResidentMutation } = useDeleteResident(id || "");
@@ -83,13 +86,15 @@ export default function ResidentDetailsScreen() {
         title="Resident Profile"
         onBack={() => router.back()}
         rightElement={
-          <Ionicons
-            name="create-outline"
-            size={22}
-            color={theme.colors.text}
-            onPress={() => router.push(Routes.Residents.Edit(resident.residentId) as any)}
-            style={styles.headerEditIcon}
-          />
+          canUpdate && (
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={theme.colors.text}
+              onPress={() => router.push(Routes.Residents.Edit(resident.residentId) as any)}
+              style={styles.headerEditIcon}
+            />
+          )
         }
       />
 
@@ -231,14 +236,16 @@ export default function ResidentDetailsScreen() {
         )}
 
         {/* Danger Zone */}
-        <Button
-          onPress={handleDelete}
-          variant="outline"
-          style={styles.deleteButton}
-          textStyle={{ color: theme.colors.danger }}
-        >
-          Remove Resident
-        </Button>
+        {canDelete && (
+          <Button
+            onPress={handleDelete}
+            variant="outline"
+            style={styles.deleteButton}
+            textStyle={{ color: theme.colors.danger }}
+          >
+            Remove Resident
+          </Button>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

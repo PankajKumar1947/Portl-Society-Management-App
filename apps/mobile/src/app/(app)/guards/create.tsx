@@ -9,12 +9,13 @@ import StepIdentity from "./_components/step-identity";
 import StepDuty from "./_components/step-duty";
 import OtpVerificationModal from "../residents/_components/otp-modal";
 import { useAlert } from "@/context/alert-context";
-import { useOnboardGuardPersonal, useOnboardGuardIdentity, useOnboardGuardDuty } from "@repo/operations";
-import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput } from "@repo/schema";
+import { useOnboardGuardPersonal, useOnboardGuardIdentity, useOnboardGuardDuty, useAccessControl } from "@repo/operations";
+import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput, AclResource } from "@repo/schema";
 
 export default function CreateGuardScreen() {
   const router = useRouter();
   const { showAlert } = useAlert();
+  const { canCreate } = useAccessControl(AclResource.GUARDS);
   const [currentStep, setCurrentStep] = useState<"personal" | "identification" | "duty">("personal");
   const [isOtpVisible, setIsOtpVisible] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
@@ -104,6 +105,17 @@ export default function CreateGuardScreen() {
     }
   };
 
+  if (!canCreate) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Register Guard" onBack={() => router.back()} />
+        <View style={styles.centered}>
+          <Text style={styles.noAccessText}>You do not have permission to register guards.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -182,6 +194,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.lg,
+  },
+  noAccessText: {
+    fontSize: 16,
+    color: theme.colors.textMuted,
+    textAlign: "center",
   },
   content: {
     padding: theme.spacing.lg,

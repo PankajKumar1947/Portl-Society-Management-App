@@ -17,10 +17,13 @@ import InfoRow from "@/components/ui/info-row";
 import Badge from "@/components/ui/badge";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
-import { useGetMySociety } from "@repo/operations";
+import { useGetMySociety, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 export default function SocietyDetailsScreen() {
   const router = useRouter();
+  const { canUpdate } = useAccessControl(AclResource.SOCIETY);
+
   const { data: society, isLoading, error } = useGetMySociety();
 
   if (isLoading) {
@@ -40,12 +43,14 @@ export default function SocietyDetailsScreen() {
         title="My Society"
         onBack={() => router.replace(Routes.App)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Society.Edit)}
-            icon={<Ionicons name="create-outline" size={22} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canUpdate && (
+            <IconButton
+              onPress={() => router.push(Routes.Society.Edit)}
+              icon={<Ionicons name="create-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 
@@ -105,13 +110,15 @@ export default function SocietyDetailsScreen() {
         </Card>
 
         {/* Edit Button */}
-        <Button
-          variant="primary"
-          style={styles.editButton}
-          onPress={() => router.push(Routes.Society.Edit)}
-        >
-          Edit Society Details
-        </Button>
+        {canUpdate && (
+          <Button
+            variant="primary"
+            style={styles.editButton}
+            onPress={() => router.push(Routes.Society.Edit)}
+          >
+            Edit Society Details
+          </Button>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

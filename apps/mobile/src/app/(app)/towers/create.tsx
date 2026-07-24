@@ -5,14 +5,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import TowerForm from "./_components/tower-form";
-import { CreateTowerBody } from "@repo/schema";
-import { useGetMySociety, useCreateTower } from "@repo/operations";
+import { CreateTowerBody, AclResource } from "@repo/schema";
+import { useGetMySociety, useCreateTower, useAccessControl } from "@repo/operations";
 import LoadingScreen from "@/components/layout/loading-screen";
-import type { ApiErrorResponse } from "@repo/api-client";
 
 export default function CreateTowerScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { canCreate } = useAccessControl(AclResource.TOWERS);
+
   const { data: society, isLoading } = useGetMySociety({ enabled: true });
   const { mutate: createTower, isPending: isCreating } = useCreateTower();
 
@@ -37,11 +38,7 @@ export default function CreateTowerScreen() {
       {
         onSuccess: () => {
           router.back();
-        },
-        onError: (err) => {
-          const apiError = err as unknown as ApiErrorResponse;
-          Alert.alert("Failed to create tower", apiError.message || "Unknown error");
-        },
+        }
       },
     );
   };
@@ -54,17 +51,19 @@ export default function CreateTowerScreen() {
       >
         <ScreenHeader title="Add New Tower" onBack={() => router.back()} />
 
-          <ScrollView
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
-          >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {canCreate ? (
             <TowerForm
               societyId={society?.societyId}
               onSubmit={handleSubmit}
               submitButtonText="Create Tower"
               isSubmitting={isCreating}
             />
-          </ScrollView>
+          ) : null}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

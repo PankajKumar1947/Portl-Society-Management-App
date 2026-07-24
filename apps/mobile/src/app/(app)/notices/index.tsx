@@ -8,12 +8,13 @@ import { Card } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
+import Loading from "@/components/ui/loading";
 import { useRouter } from "expo-router";
-import { useGetNotices, useGetTowers } from "@repo/operations";
-import { NoticeData, RECIPIENT_OPTIONS, NOTICE_STATUS_OPTIONS } from "@repo/schema";
+import { useGetNotices, useAccessControl } from "@repo/operations";
+import { NoticeData, RECIPIENT_OPTIONS, NOTICE_STATUS_OPTIONS, AclResource } from "@repo/schema";
 import { formatDate, isRecent } from "@/utils/notice";
 import { EmptyState } from "@/components/layout/empty-state";
-import LoadingScreen from "@/components/layout/loading-screen";
+import { TowerFilterSection } from "./_components/tower-filter-section";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
   residents: { label: "Residents", variant: "success" },
@@ -55,12 +56,8 @@ export default function NoticesScreen() {
     recipient: activeRecipient,
   });
 
-  const { data: towers } = useGetTowers();
-
-  const towerOptions = useMemo(() => {
-    if (!towers) return [];
-    return towers.map((t) => ({ label: t.towerName, value: t.towerId }));
-  }, [towers]);
+  const { canCreate } = useAccessControl(AclResource.NOTICES);
+  const { canView: canViewTowers } = useAccessControl(AclResource.TOWERS);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -84,8 +81,6 @@ export default function NoticesScreen() {
     setFilterModalVisible(false);
   };
 
-  if (isLoading) return <LoadingScreen title="Notices" />;
-
   const clearFilters = () => {
     setDraftStatus("all");
     setDraftRecipient("all");
@@ -104,12 +99,14 @@ export default function NoticesScreen() {
         title="Notices"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Notices.Create)}
-            icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Notices.Create)}
+              icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 
@@ -130,14 +127,16 @@ export default function NoticesScreen() {
               </TouchableOpacity>
             ) : null}
           </View>
-          <TouchableOpacity onPress={openFilterModal} style={styles.filterButton}>
-            <Ionicons name="options-outline" size={22} color={theme.colors.text} />
-            {activeFilterCount > 0 && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {canViewTowers && (
+            <TouchableOpacity onPress={openFilterModal} style={styles.filterButton}>
+              <Ionicons name="options-outline" size={22} color={theme.colors.text} />
+              {activeFilterCount > 0 && (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -181,116 +180,102 @@ export default function NoticesScreen() {
           </Card>
         )}
         ListEmptyComponent={
-          <EmptyState icon="document-text-outline" title="No notices found" />
+          isLoading ? (
+            <Loading style={{ padding: 40 }} />
+          ) : (
+            <EmptyState icon="document-text-outline" title="No notices found" />
+          )
         }
       />
 
-      <Modal
-        transparent
-        visible={filterModalVisible}
-        animationType="fade"
-        onRequestClose={() => setFilterModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filters</Text>
-              <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-                <Ionicons name="close-outline" size={24} color={theme.colors.text} />
-              </TouchableOpacity>
-            </View>
+      {filterModalVisible && (
+        <Modal
+          transparent
+          animationType="fade"
+          onRequestClose={() => setFilterModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Filters</Text>
+                <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                  <Ionicons name="close-outline" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
 
-            <FlatList
-              data={[]}
-              ListHeaderComponent={
-                <View style={styles.modalBody}>
-                  <Text style={styles.filterSectionLabel}>Status</Text>
-                  <View style={styles.optionRow}>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => setDraftStatus(opt.value)}
-                        style={[
-                          styles.optionChip,
-                          draftStatus === opt.value && styles.optionChipActive,
-                        ]}
-                      >
-                        <Text
+              <FlatList
+                data={[]}
+                ListHeaderComponent={
+                  <View style={styles.modalBody}>
+                    <Text style={styles.filterSectionLabel}>Status</Text>
+                    <View style={styles.optionRow}>
+                      {STATUS_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          onPress={() => setDraftStatus(opt.value)}
                           style={[
-                            styles.optionChipText,
-                            draftStatus === opt.value && styles.optionChipTextActive,
+                            styles.optionChip,
+                            draftStatus === opt.value && styles.optionChipActive,
                           ]}
                         >
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <View style={styles.filterDivider} />
-
-                  <Text style={styles.filterSectionLabel}>Recipient</Text>
-                  <View style={styles.optionRow}>
-                    {FILTER_RECIPIENT_OPTIONS.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => setDraftRecipient(opt.value)}
-                        style={[
-                          styles.optionChip,
-                          draftRecipient === opt.value && styles.optionChipActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.optionChipText,
-                            draftRecipient === opt.value && styles.optionChipTextActive,
-                          ]}
-                        >
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  {towerOptions.length > 0 && (
-                    <>
-                      <View style={styles.filterDivider} />
-                      <Text style={styles.filterSectionLabel}>Towers</Text>
-                      {towerOptions.map((tower) => {
-                        const selected = draftTowerIds.includes(tower.value);
-                        return (
-                          <TouchableOpacity
-                            key={tower.value}
-                            onPress={() => toggleTowerId(tower.value)}
-                            style={styles.towerRow}
+                          <Text
+                            style={[
+                              styles.optionChipText,
+                              draftStatus === opt.value && styles.optionChipTextActive,
+                            ]}
                           >
-                            <Text style={styles.towerLabel}>{tower.label}</Text>
-                            <View style={[styles.checkbox, selected && styles.checkboxActive]}>
-                              {selected && (
-                                <Ionicons name="checkmark" size={16} color="#fff" />
-                              )}
-                            </View>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </>
-                  )}
-                </View>
-              }
-              renderItem={() => null}
-            />
+                            {opt.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
 
-            <View style={styles.modalFooter}>
-              <Button variant="outline" style={styles.footerButton} onPress={clearFilters}>
-                Clear
-              </Button>
-              <Button style={styles.footerButton} onPress={applyFilters}>
-                Save
-              </Button>
+                    <View style={styles.filterDivider} />
+
+                    <Text style={styles.filterSectionLabel}>Recipient</Text>
+                    <View style={styles.optionRow}>
+                      {FILTER_RECIPIENT_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          onPress={() => setDraftRecipient(opt.value)}
+                          style={[
+                            styles.optionChip,
+                            draftRecipient === opt.value && styles.optionChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.optionChipText,
+                              draftRecipient === opt.value && styles.optionChipTextActive,
+                            ]}
+                          >
+                            {opt.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <TowerFilterSection
+                      selectedIds={draftTowerIds}
+                      onToggle={toggleTowerId}
+                    />
+                  </View>
+                }
+                renderItem={() => null}
+              />
+
+              <View style={styles.modalFooter}>
+                <Button variant="outline" style={styles.footerButton} onPress={clearFilters}>
+                  Clear
+                </Button>
+                <Button style={styles.footerButton} onPress={applyFilters}>
+                  Save
+                </Button>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }

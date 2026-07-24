@@ -13,8 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import { SocietyForm } from "@/components/society/society-form";
-import { UpdateSocietyBody } from "@repo/schema";
-import { useGetMySociety, useUpdateSociety } from "@repo/operations";
+import { UpdateSocietyBody, AclResource } from "@repo/schema";
+import { useGetMySociety, useUpdateSociety, useAccessControl } from "@repo/operations";
 import type { ApiErrorResponse } from "@repo/api-client";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
@@ -22,6 +22,8 @@ import { NotFoundScreen } from "@/components/layout/not-found-screen";
 export default function EditSocietyScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { canUpdate } = useAccessControl(AclResource.SOCIETY);
+
   const { data: society, isLoading: isFetching } = useGetMySociety();
   const { mutate: updateSociety, isPending: isUpdating } = useUpdateSociety(
     society?.societyId || ""
@@ -82,13 +84,15 @@ export default function EditSocietyScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <SocietyForm
-            initialValues={initialValues}
-            onSubmit={handleUpdateSociety}
-            isSubmitting={isUpdating}
-            submitButtonText="Update Details"
-            isEdit
-          />
+          {canUpdate ? (
+            <SocietyForm
+              initialValues={initialValues}
+              onSubmit={handleUpdateSociety}
+              isSubmitting={isUpdating}
+              submitButtonText="Update Details"
+              isEdit
+            />
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

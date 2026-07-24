@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
@@ -9,8 +9,8 @@ import Button from "@/components/ui/button";
 import FormInput from "@/components/ui/form-input";
 import FormTextArea from "@/components/ui/form-textarea";
 import FormSelect from "@/components/ui/form-select";
-import { useCreateComplaint } from "@repo/operations";
-import { COMPLAINT_CATEGORIES, COMPLAINT_PRIORITY, CreateComplaintBody } from "@repo/schema";
+import { useCreateComplaint, useAccessControl } from "@repo/operations";
+import { COMPLAINT_CATEGORIES, COMPLAINT_PRIORITY, CreateComplaintBody, AclResource } from "@repo/schema";
 
 const CATEGORY_OPTIONS = COMPLAINT_CATEGORIES.map((c) => ({
   label: c.replace(/_/g, " "),
@@ -20,6 +20,7 @@ const CATEGORY_OPTIONS = COMPLAINT_CATEGORIES.map((c) => ({
 export default function CreateComplaintScreen() {
   const router = useRouter();
   const { mutateAsync: createComplaint, isPending } = useCreateComplaint();
+  const { canCreate } = useAccessControl(AclResource.COMPLAINTS);
 
   const methods = useForm<CreateComplaintBody>({
     defaultValues: {
@@ -34,6 +35,12 @@ export default function CreateComplaintScreen() {
     await createComplaint(values);
     router.replace(Routes.Complaints.Index);
   };
+
+  useLayoutEffect(() => {
+    if (!canCreate) {
+      router.back();
+    }
+  }, [canCreate, router]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

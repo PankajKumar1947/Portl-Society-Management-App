@@ -26,17 +26,16 @@ import {
   usePublishPoll,
   useClosePoll,
   useDeletePoll,
+  useAccessControl,
 } from "@repo/operations";
-import { UserRoles } from "@repo/schema";
-import { useRole } from "@/context/role-context";
+import { AclResource } from "@repo/schema";
 import PollResults from "./_components/poll-results";
 
 export default function PollDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
-  const { role } = useRole();
-  const isAdmin = role === UserRoles.ADMIN || role === UserRoles.SUPER_ADMIN;
+  const { canUpdate, canDelete } = useAccessControl(AclResource.POLLS);
 
   const { data: poll, isLoading: pollLoading } = useGetPollDetail(id ?? "", { enabled: !!id });
   const { data: resultsData, refetch: refetchResults } = useGetPollResults(id ?? "", { enabled: !!id });
@@ -118,7 +117,7 @@ export default function PollDetailsScreen() {
         title="Poll Details"
         onBack={() => router.back()}
         rightElement={
-          isAdmin && poll.status !== "closed" ? (
+          canDelete && poll.status !== "closed" ? (
             <TouchableOpacity onPress={handleDelete}>
               <Ionicons name="trash-outline" size={22} color={theme.colors.danger} />
             </TouchableOpacity>
@@ -204,7 +203,7 @@ export default function PollDetailsScreen() {
           </View>
         )}
 
-        {isAdmin && poll.status === "draft" && (
+        {canUpdate && poll.status === "draft" && (
           <View style={styles.sectionGap}>
             <Button variant="primary" onPress={handlePublish} disabled={publishPending}>
               Publish Poll
@@ -212,7 +211,7 @@ export default function PollDetailsScreen() {
           </View>
         )}
 
-        {isAdmin && poll.status === "published" && (
+        {canUpdate && poll.status === "published" && (
           <View style={styles.sectionGap}>
             <Button variant="outline" onPress={handleClose} disabled={closePending}>
               Close Poll

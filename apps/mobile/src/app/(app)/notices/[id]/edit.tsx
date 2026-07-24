@@ -7,8 +7,8 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import NoticeForm from "../_components/notice-form";
-import { useGetNoticeDetail, useUpdateNotice } from "@repo/operations";
-import { UpdateNoticeBody } from "@repo/schema";
+import { useGetNoticeDetail, useUpdateNotice, useAccessControl } from "@repo/operations";
+import { UpdateNoticeBody, AclResource } from "@repo/schema";
 
 export default function EditNoticeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,6 +17,7 @@ export default function EditNoticeScreen() {
 
   const { data: notice, isLoading: isLoadingNotice } = useGetNoticeDetail(id ?? "", { enabled: !!id });
   const { mutate: updateNotice, isPending } = useUpdateNotice(id ?? "");
+  const { canUpdate } = useAccessControl(AclResource.NOTICES);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -36,6 +37,14 @@ export default function EditNoticeScreen() {
 
   if (!notice) {
     return <NotFoundScreen title="Edit Notice" message="Notice not found" onBack={() => router.back()} />;
+  }
+
+  if (!canUpdate) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Edit Notice" onBack={() => router.back()} />
+      </SafeAreaView>
+    );
   }
 
   const initialValues: Partial<UpdateNoticeBody> = {

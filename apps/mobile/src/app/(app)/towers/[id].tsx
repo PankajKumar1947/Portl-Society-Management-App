@@ -10,12 +10,15 @@ import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
 import FlatCard from "./_components/flat-card";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetTowerDetails, useGetFlats } from "@repo/operations";
+import { useGetTowerDetails, useGetFlats, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 export default function TowerDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { canUpdate } = useAccessControl(AclResource.TOWERS);
 
   const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
   const { data: flats, isLoading: isFlatsLoading } = useGetFlats(id || "", { enabled: !!id });
@@ -35,12 +38,14 @@ export default function TowerDetailsScreen() {
         title="Tower Details"
         onBack={() => router.back()}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Towers.Edit(id as string))}
-            icon={<Ionicons name="pencil-outline" size={20} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canUpdate && (
+            <IconButton
+              onPress={() => router.push(Routes.Towers.Edit(id as string))}
+              icon={<Ionicons name="pencil-outline" size={20} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 
@@ -65,14 +70,16 @@ export default function TowerDetailsScreen() {
           }
         />
 
-      <TouchableOpacity
-        activeOpacity={0.85}
-        style={styles.fab}
-        onPress={() => router.push(Routes.Towers.Flats.Create(id as string))}
-      >
-        <Ionicons name="add" size={24} color={theme.colors.surface} />
-        <Text style={styles.fabText}>Add Flat</Text>
-      </TouchableOpacity>
+      {canUpdate && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.fab}
+          onPress={() => router.push(Routes.Towers.Flats.Create(id as string))}
+        >
+          <Ionicons name="add" size={24} color={theme.colors.surface} />
+          <Text style={styles.fabText}>Add Flat</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }

@@ -9,25 +9,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
-import { useGetAmenities, useGetMe, useGetTowers } from "@repo/operations";
-import { AmenityData, AMENITY_CATEGORIES, AMENITY_TYPES, AMENITY_STATUSES } from "@repo/schema";
-import LoadingScreen from "@/components/layout/loading-screen";
+import { useGetAmenities, useAccessControl } from "@repo/operations";
+import { AmenityData, AMENITY_CATEGORY_OPTIONS, AMENITY_TYPE_OPTIONS, AMENITY_STATUS_OPTIONS, AclResource } from "@repo/schema";
+import Loading from "@/components/ui/loading";
 import { EmptyState } from "@/components/layout/empty-state";
-
-const CATEGORY_OPTIONS = [
-  { label: "All", value: "all" },
-  ...AMENITY_CATEGORIES.map((c) => ({ label: c.replace(/_/g, " "), value: c })),
-];
-
-const TYPE_OPTIONS = [
-  { label: "All", value: "all" },
-  ...AMENITY_TYPES.map((t) => ({ label: t, value: t })),
-];
-
-const STATUS_OPTIONS = [
-  { label: "All", value: "all" },
-  ...AMENITY_STATUSES.map((s) => ({ label: s.replace(/_/g, " "), value: s })),
-];
 
 export default function AmenitiesScreen() {
   const router = useRouter();
@@ -37,44 +22,31 @@ export default function AmenitiesScreen() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeType, setActiveType] = useState("all");
   const [activeStatus, setActiveStatus] = useState("all");
-  const [activeTowerIds, setActiveTowerIds] = useState<string[]>([]);
-
   const [draftCategory, setDraftCategory] = useState("all");
   const [draftType, setDraftType] = useState("all");
   const [draftStatus, setDraftStatus] = useState("all");
-  const [draftTowerIds, setDraftTowerIds] = useState<string[]>([]);
 
   const { data: amenities, isLoading, refetch } = useGetAmenities({
     search: searchQuery || undefined,
     category: activeCategory,
     type: activeType,
     status: activeStatus,
-    towerIds: activeTowerIds.length > 0 ? activeTowerIds : undefined,
   });
-  const { data: me } = useGetMe();
-  const { data: towers } = useGetTowers();
 
-  const isAdmin = me?.role === "ADMIN";
-
-  const towerOptions = useMemo(() => {
-    if (!towers) return [];
-    return towers.map((t) => ({ label: t.towerName, value: t.towerId }));
-  }, [towers]);
+  const { canCreate } = useAccessControl(AclResource.AMENITIES);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (activeCategory !== "all") count++;
     if (activeType !== "all") count++;
     if (activeStatus !== "all") count++;
-    if (activeTowerIds.length > 0) count++;
     return count;
-  }, [activeCategory, activeType, activeStatus, activeTowerIds]);
+  }, [activeCategory, activeType, activeStatus]);
 
   const openFilterModal = () => {
     setDraftCategory(activeCategory);
     setDraftType(activeType);
     setDraftStatus(activeStatus);
-    setDraftTowerIds(activeTowerIds);
     setFilterModalVisible(true);
   };
 
@@ -82,7 +54,6 @@ export default function AmenitiesScreen() {
     setActiveCategory(draftCategory);
     setActiveType(draftType);
     setActiveStatus(draftStatus);
-    setActiveTowerIds(draftTowerIds);
     setFilterModalVisible(false);
   };
 
@@ -90,16 +61,7 @@ export default function AmenitiesScreen() {
     setDraftCategory("all");
     setDraftType("all");
     setDraftStatus("all");
-    setDraftTowerIds([]);
   };
-
-  const toggleTowerId = (towerId: string) => {
-    setDraftTowerIds((prev) =>
-      prev.includes(towerId) ? prev.filter((id) => id !== towerId) : [...prev, towerId],
-    );
-  };
-
-  if (isLoading) return <LoadingScreen title="Amenities" />;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -108,7 +70,7 @@ export default function AmenitiesScreen() {
         onBack={() => router.replace(Routes.Root)}
         rightElement={
           <View style={styles.headerActions}>
-            {isAdmin && (
+            {canCreate && (
               <IconButton
                 onPress={() => router.push(Routes.Amenities.Create)}
                 icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
@@ -183,141 +145,124 @@ export default function AmenitiesScreen() {
         }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
-          <EmptyState icon="business-outline" title="No amenities found" />
+          isLoading ? (
+            <Loading style={{ padding: 40 }} />
+          ) : (
+            <EmptyState icon="business-outline" title="No amenities found" />
+          )
         }
       />
 
-      <Modal
-        transparent
-        visible={filterModalVisible}
-        animationType="fade"
-        onRequestClose={() => setFilterModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filters</Text>
-              <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
-                <Ionicons name="close-outline" size={24} color={theme.colors.text} />
-              </TouchableOpacity>
-            </View>
+      {filterModalVisible && (
+        <Modal
+          transparent
+          animationType="fade"
+          onRequestClose={() => setFilterModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Filters</Text>
+                <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                  <Ionicons name="close-outline" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
 
-            <FlatList
-              data={[]}
-              ListHeaderComponent={
-                <View style={styles.modalBody}>
-                  <Text style={styles.filterSectionLabel}>Category</Text>
-                  <View style={styles.optionRow}>
-                    {CATEGORY_OPTIONS.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => setDraftCategory(opt.value)}
-                        style={[
-                          styles.optionChip,
-                          draftCategory === opt.value && styles.optionChipActive,
-                        ]}
-                      >
-                        <Text
+              <FlatList
+                data={[]}
+                ListHeaderComponent={
+                  <View style={styles.modalBody}>
+                    <Text style={styles.filterSectionLabel}>Category</Text>
+                    <View style={styles.optionRow}>
+                      {AMENITY_CATEGORY_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          onPress={() => setDraftCategory(opt.value)}
                           style={[
-                            styles.optionChipText,
-                            draftCategory === opt.value && styles.optionChipTextActive,
+                            styles.optionChip,
+                            draftCategory === opt.value && styles.optionChipActive,
                           ]}
                         >
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <View style={styles.filterDivider} />
-
-                  <Text style={styles.filterSectionLabel}>Type</Text>
-                  <View style={styles.optionRow}>
-                    {TYPE_OPTIONS.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => setDraftType(opt.value)}
-                        style={[
-                          styles.optionChip,
-                          draftType === opt.value && styles.optionChipActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.optionChipText,
-                            draftType === opt.value && styles.optionChipTextActive,
-                          ]}
-                        >
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <View style={styles.filterDivider} />
-
-                  <Text style={styles.filterSectionLabel}>Status</Text>
-                  <View style={styles.optionRow}>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => setDraftStatus(opt.value)}
-                        style={[
-                          styles.optionChip,
-                          draftStatus === opt.value && styles.optionChipActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.optionChipText,
-                            draftStatus === opt.value && styles.optionChipTextActive,
-                          ]}
-                        >
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  {towerOptions.length > 0 && (
-                    <>
-                      <View style={styles.filterDivider} />
-                      <Text style={styles.filterSectionLabel}>Towers</Text>
-                      {towerOptions.map((tower) => {
-                        const selected = draftTowerIds.includes(tower.value);
-                        return (
-                          <TouchableOpacity
-                            key={tower.value}
-                            onPress={() => toggleTowerId(tower.value)}
-                            style={styles.towerRow}
+                          <Text
+                            style={[
+                              styles.optionChipText,
+                              draftCategory === opt.value && styles.optionChipTextActive,
+                            ]}
                           >
-                            <Text style={styles.towerLabel}>{tower.label}</Text>
-                            <View style={[styles.checkbox, selected && styles.checkboxActive]}>
-                              {selected && (
-                                <Ionicons name="checkmark" size={16} color="#fff" />
-                              )}
-                            </View>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </>
-                  )}
-                </View>
-              }
-              renderItem={() => null}
-            />
+                            {opt.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
 
-            <View style={styles.modalFooter}>
-              <Button variant="outline" style={styles.footerButton} onPress={clearFilters}>
-                Clear
-              </Button>
-              <Button style={styles.footerButton} onPress={applyFilters}>
-                Save
-              </Button>
+                    <View style={styles.filterDivider} />
+
+                    <Text style={styles.filterSectionLabel}>Type</Text>
+                    <View style={styles.optionRow}>
+                      {AMENITY_TYPE_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          onPress={() => setDraftType(opt.value)}
+                          style={[
+                            styles.optionChip,
+                            draftType === opt.value && styles.optionChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.optionChipText,
+                              draftType === opt.value && styles.optionChipTextActive,
+                            ]}
+                          >
+                            {opt.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <View style={styles.filterDivider} />
+
+                    <Text style={styles.filterSectionLabel}>Status</Text>
+                    <View style={styles.optionRow}>
+                      {AMENITY_STATUS_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          onPress={() => setDraftStatus(opt.value)}
+                          style={[
+                            styles.optionChip,
+                            draftStatus === opt.value && styles.optionChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.optionChipText,
+                              draftStatus === opt.value && styles.optionChipTextActive,
+                            ]}
+                          >
+                            {opt.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+
+                  </View>
+                }
+                renderItem={() => null}
+              />
+
+              <View style={styles.modalFooter}>
+                <Button variant="outline" style={styles.footerButton} onPress={clearFilters}>
+                  Clear
+                </Button>
+                <Button style={styles.footerButton} onPress={applyFilters}>
+                  Save
+                </Button>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }

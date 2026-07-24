@@ -10,8 +10,8 @@ import StepPersonal from "../_components/step-personal";
 import StepAllotment from "../_components/step-allotment";
 import StepVehicle from "../_components/step-vehicle";
 import { useAlert } from "@/context/alert-context";
-import { useGetTowers, useGetResidentDetail, useUpdateResident } from "@repo/operations";
-import { ResidentPersonalInput, ResidentAllotmentInput, ResidentVehicleInput } from "@repo/schema";
+import { useGetTowers, useGetResidentDetail, useUpdateResident, useAccessControl } from "@repo/operations";
+import { ResidentPersonalInput, ResidentAllotmentInput, ResidentVehicleInput, AclResource } from "@repo/schema";
 
 type EditStep = "personal" | "allotment" | "vehicle";
 
@@ -21,6 +21,8 @@ export default function EditResidentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [currentStep, setCurrentStep] = useState<EditStep>("personal");
   const { showAlert } = useAlert();
+
+  const { canUpdate } = useAccessControl(AclResource.RESIDENTS);
 
   const { data: towersData, isLoading: isTowersLoading } = useGetTowers();
 
@@ -136,6 +138,8 @@ export default function EditResidentScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {canUpdate ? (
+            <>
           <View style={styles.stepperContainer}>
             <TouchableOpacity
               style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}
@@ -193,6 +197,8 @@ export default function EditResidentScreen() {
               submitButtonText="Save Changes"
             />
           )}
+            </>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

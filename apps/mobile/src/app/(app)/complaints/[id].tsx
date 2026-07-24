@@ -4,8 +4,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { useGetComplaintDetail, useUpdateComplaint, useAddComplaintTimelineEntry, useGetMe } from "@repo/operations";
-import { ComplaintStatus } from "@repo/schema";
+import { useGetComplaintDetail, useUpdateComplaint, useAddComplaintTimelineEntry, useAccessControl } from "@repo/operations";
+import { ComplaintStatus, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
 import NotFoundScreen from "@/components/layout/not-found-screen";
 import ComplaintInfoCard from "./_components/complaint-info-card";
@@ -16,11 +16,10 @@ export default function ComplaintDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: detail, isLoading } = useGetComplaintDetail(id || "");
-  const { data: me } = useGetMe();
   const { mutateAsync: updateComplaint, isPending: isUpdating } = useUpdateComplaint(id || "");
   const { mutateAsync: addTimelineEntry, isPending: isAddingEntry } = useAddComplaintTimelineEntry(id || "");
 
-  const isAdmin = me?.role === "ADMIN" || me?.role === "SUPER_ADMIN";
+  const { canUpdate } = useAccessControl(AclResource.COMPLAINTS);
 
   const handleStatusUpdate = async (newStatus: ComplaintStatus) => {
     await updateComplaint({ status: newStatus });
@@ -44,7 +43,7 @@ export default function ComplaintDetailsScreen() {
           <ComplaintTimeline timeline={detail.timeline} />
         )}
 
-        {isAdmin && (
+        {canUpdate && (
           <ComplaintAdminActions
             currentStatus={detail.status}
             isUpdating={isUpdating}

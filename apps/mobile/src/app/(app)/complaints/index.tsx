@@ -9,8 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
-import { useGetComplaints, useGetMe } from "@repo/operations";
-import { COMPLAINT_CATEGORIES, COMPLAINT_STATUSES } from "@repo/schema";
+import { useGetComplaints, useAccessControl } from "@repo/operations";
+import { COMPLAINT_CATEGORIES, COMPLAINT_STATUSES, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
 import { EmptyState } from "@/components/layout/empty-state";
 
@@ -49,8 +49,7 @@ export default function ComplaintsScreen() {
   const [draftStatus, setDraftStatus] = useState("all");
   const [draftCategory, setDraftCategory] = useState("all");
 
-  const { data: me } = useGetMe();
-  const isAdmin = me?.role === "ADMIN";
+  const { canCreate } = useAccessControl(AclResource.COMPLAINTS);
 
   const { data: complaints, isLoading, refetch } = useGetComplaints({
     search: searchQuery || undefined,
@@ -90,12 +89,14 @@ export default function ComplaintsScreen() {
         title="Complaints"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Complaints.Create)}
-            icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Complaints.Create)}
+              icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

@@ -13,7 +13,8 @@ import Avatar from "@/components/ui/avatar";
 import { useAlert } from "@/context/alert-context";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
-import { useGetGuardDetail, useDeleteGuard } from "@repo/operations";
+import { useGetGuardDetail, useDeleteGuard, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 export default function GuardDetailsScreen() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function GuardDetailsScreen() {
 
   const { data: guard, isLoading } = useGetGuardDetail(id || "", { enabled: !!id });
   const { mutate: deleteGuardMutation } = useDeleteGuard(id || "");
+  const { canUpdate, canDelete } = useAccessControl(AclResource.GUARDS);
 
   if (isLoading) {
     return <LoadingScreen title="Guard Profile" onBack={() => router.back()} />;
@@ -63,13 +65,15 @@ export default function GuardDetailsScreen() {
         title="Guard Profile"
         onBack={() => router.back()}
         rightElement={
-          <Ionicons
-            name="create-outline"
-            size={22}
-            color={theme.colors.text}
-            onPress={() => router.push(Routes.Guards.Edit(guard.guardId))}
-            style={{ marginRight: theme.spacing.sm }}
-          />
+          canUpdate && (
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={theme.colors.text}
+              onPress={() => router.push(Routes.Guards.Edit(guard.guardId))}
+              style={{ marginRight: theme.spacing.sm }}
+            />
+          )
         }
       />
 
@@ -132,14 +136,16 @@ export default function GuardDetailsScreen() {
         </Card>
 
         {/* Delete Area */}
-        <Button
-          onPress={handleDelete}
-          variant="outline"
-          style={styles.deleteButton}
-          textStyle={{ color: theme.colors.danger }}
-        >
-          Remove Guard
-        </Button>
+        {canDelete && (
+          <Button
+            onPress={handleDelete}
+            variant="outline"
+            style={styles.deleteButton}
+            textStyle={{ color: theme.colors.danger }}
+          >
+            Remove Guard
+          </Button>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

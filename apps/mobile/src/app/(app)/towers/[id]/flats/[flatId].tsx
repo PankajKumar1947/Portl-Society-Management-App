@@ -11,7 +11,8 @@ import InfoRow from "@/components/ui/info-row";
 import IconButton from "@/components/ui/icon-button";
 import ResidentCard, { Resident } from "./_components/resident-card";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetFlatDetails, useGetTowerDetails } from "@repo/operations";
+import { useGetFlatDetails, useGetTowerDetails, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 const MOCK_RESIDENTS: Resident[] = [
   {
@@ -34,6 +35,8 @@ export default function FlatDetailsScreen() {
   const { id, flatId } = useLocalSearchParams<{ id: string; flatId: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { canUpdate } = useAccessControl(AclResource.FLATS);
 
   const { data: flat, isLoading: isFlatLoading } = useGetFlatDetails(flatId || "", { enabled: !!flatId });
   const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
@@ -59,12 +62,14 @@ export default function FlatDetailsScreen() {
         title="Flat Details"
         onBack={() => router.back()}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Towers.Flats.Edit(id as string, flatId as string))}
-            icon={<Ionicons name="pencil-outline" size={20} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canUpdate && (
+            <IconButton
+              onPress={() => router.push(Routes.Towers.Flats.Edit(id as string, flatId as string))}
+              icon={<Ionicons name="pencil-outline" size={20} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

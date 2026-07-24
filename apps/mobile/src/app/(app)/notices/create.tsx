@@ -5,12 +5,13 @@ import { useNavigation, useRouter } from "expo-router";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import NoticeForm from "./_components/notice-form";
-import { useCreateNotice } from "@repo/operations";
-import { CreateNoticeBody } from "@repo/schema";
+import { useCreateNotice, useAccessControl } from "@repo/operations";
+import { CreateNoticeBody, AclResource } from "@repo/schema";
 
 export default function CreateNoticeScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { canCreate } = useAccessControl(AclResource.NOTICES);
 
   const { mutate: createNotice, isPending } = useCreateNotice();
 
@@ -33,6 +34,14 @@ export default function CreateNoticeScreen() {
       onSuccess: () => router.push(Routes.Notices.Index),
     });
   };
+
+  if (!canCreate) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Create Notice" onBack={() => router.back()} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

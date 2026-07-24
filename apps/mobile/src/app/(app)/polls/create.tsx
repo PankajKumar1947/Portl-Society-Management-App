@@ -24,12 +24,13 @@ import Card from "@/components/ui/card";
 import IconButton from "@/components/ui/icon-button";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import FormMultiSelect from "@/components/ui/form-multi-select";
-import { useCreatePoll, useGetTowers } from "@repo/operations";
-import { RECIPIENT_OPTIONS } from "@repo/schema";
+import { useCreatePoll, useGetTowers, useAccessControl } from "@repo/operations";
+import { RECIPIENT_OPTIONS, AclResource } from "@repo/schema";
 
 export default function CreatePollScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { canCreate } = useAccessControl(AclResource.POLLS);
   const { mutateAsync: createPoll, isPending } = useCreatePoll();
   const { data: towers } = useGetTowers();
   const [optionKeys, setOptionKeys] = useState<number[]>([0, 1]);
@@ -122,6 +123,14 @@ export default function CreatePollScreen() {
     await createPoll(buildPayload("published"));
     router.replace(Routes.Polls.Index);
   };
+
+  if (!canCreate) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Create Poll" onBack={() => router.back()} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>

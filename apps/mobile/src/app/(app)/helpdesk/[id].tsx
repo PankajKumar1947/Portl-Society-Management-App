@@ -9,7 +9,8 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
-import { useGetHelpdeskTicketDetail, useResolveHelpdeskTicket } from "@repo/operations";
+import { useGetHelpdeskTicketDetail, useResolveHelpdeskTicket, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import ScreenHeader from "@/components/ui/screen-header";
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function TicketDetailsScreen() {
     enabled: !!id,
   });
   const { mutate: resolveTicket, isPending: isResolving } = useResolveHelpdeskTicket(id || "");
+  const { canUpdate } = useAccessControl(AclResource.HELPDESK_TICKETS);
 
   const canResolve = ticket && ticket.status !== "RESOLVED" && ticket.status !== "REJECTED";
 
@@ -130,7 +132,7 @@ export default function TicketDetailsScreen() {
           <Text style={styles.noUpdates}>No updates yet</Text>
         )}
 
-        {canResolve && (
+        {canResolve && canUpdate && (
           <View style={styles.resolveSection}>
             <Button
               variant="primary"

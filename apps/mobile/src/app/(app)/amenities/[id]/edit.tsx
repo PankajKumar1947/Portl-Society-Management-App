@@ -7,8 +7,8 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import AmenityForm from "../_components/amenity-form";
-import { useGetAmenityDetail, useUpdateAmenity } from "@repo/operations";
-import { CreateAmenityBody } from "@repo/schema";
+import { useGetAmenityDetail, useUpdateAmenity, useAccessControl } from "@repo/operations";
+import { CreateAmenityBody, AclResource } from "@repo/schema";
 
 export default function EditAmenityScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,6 +17,8 @@ export default function EditAmenityScreen() {
 
   const { data: amenity, isLoading } = useGetAmenityDetail(id ?? "", { enabled: !!id });
   const { mutate: updateAmenity, isPending } = useUpdateAmenity(id ?? "");
+
+  const { canUpdate } = useAccessControl(AclResource.AMENITIES);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -36,6 +38,11 @@ export default function EditAmenityScreen() {
 
   if (!amenity) {
     return <NotFoundScreen title="Edit Amenity" message="Amenity not found" onBack={() => router.back()} />;
+  }
+
+  if (!canUpdate) {
+    router.back();
+    return null;
   }
 
   const initialValues: Partial<CreateAmenityBody> = {

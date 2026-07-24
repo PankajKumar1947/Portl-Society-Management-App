@@ -4,9 +4,9 @@ import { theme } from "@/constants";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
-import { PollData, UserRoles } from "@repo/schema";
+import { PollData } from "@repo/schema";
 import { formatRemainingTime, getPollStatusBadgeConfig, RECIPIENT_LABELS } from "@/utils/poll";
-import { useRole } from "@/context/role-context";
+import { useAccessControl } from "@repo/operations";
 
 export interface PollCardProps {
   poll: PollData;
@@ -19,8 +19,7 @@ export const PollCard: React.FC<PollCardProps> = ({
   onVotePress,
   onCardPress,
 }) => {
-  const { role } = useRole();
-  const isAdmin = role === UserRoles.ADMIN || role === UserRoles.SUPER_ADMIN;
+  const { isSuperUser } = useAccessControl();
   const badgeConfig = getPollStatusBadgeConfig(poll.status);
   const showVoteButton = poll.status === "published" && onVotePress;
 
@@ -28,7 +27,7 @@ export const PollCard: React.FC<PollCardProps> = ({
     <Card variant="flat" style={styles.card} onPress={onCardPress}>
       <View style={styles.header}>
         <Badge variant={badgeConfig.variant}>{badgeConfig.label}</Badge>
-        {!isAdmin && poll.status === "published" && (
+        {!isSuperUser && poll.status === "published" && (
           <Text style={styles.endsIn}>{formatRemainingTime(poll.expiresAt, poll.status)}</Text>
         )}
       </View>
@@ -44,7 +43,7 @@ export const PollCard: React.FC<PollCardProps> = ({
           ) : null;
         })}
       </View>
-      {isAdmin && (
+      {isSuperUser && (
         <Text style={styles.endsIn}>{formatRemainingTime(poll.expiresAt, poll.status)}</Text>
       )}
       {showVoteButton && (

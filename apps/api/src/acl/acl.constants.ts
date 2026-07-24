@@ -19,9 +19,12 @@ export const ROLE_PERMISSIONS: Record<string, PermissionMap> = {
     [AclResource.HELPDESK_TICKETS]: { view: true, create: false, update: false, delete: false },
     [AclResource.MEDIA]: { view: true, create: true, update: false, delete: true },
     [AclResource.USERS]: { view: false, create: false, update: false, delete: false },
+    [AclResource.VISITORS]: { view: true, create: false, update: false, delete: false },
+    [AclResource.COMMUNITY]: { view: false, create: false, update: false, delete: false },
+    [AclResource.NOTIFICATIONS]: { view: false, create: false, update: false, delete: false },
   },
   RESIDENTS: {
-    [AclResource.RESIDENTS]: { view: true, create: false, update: false, delete: false },
+    [AclResource.RESIDENTS]: { view: false, create: false, update: false, delete: false },
     [AclResource.FAMILY_MEMBERS]: { view: true, create: true, update: false, delete: false },
     [AclResource.GUARDS]: { view: false, create: false, update: false, delete: false },
     [AclResource.SOCIETY]: { view: true, create: false, update: false, delete: false },
@@ -34,6 +37,9 @@ export const ROLE_PERMISSIONS: Record<string, PermissionMap> = {
     [AclResource.HELPDESK_TICKETS]: { view: true, create: true, update: false, delete: false },
     [AclResource.MEDIA]: { view: true, create: true, update: false, delete: true },
     [AclResource.USERS]: { view: true, create: false, update: false, delete: false },
+    [AclResource.VISITORS]: { view: true, create: true, update: false, delete: false },
+    [AclResource.COMMUNITY]: { view: true, create: false, update: false, delete: false },
+    [AclResource.NOTIFICATIONS]: { view: true, create: false, update: false, delete: false },
   },
 };
 
@@ -52,5 +58,8 @@ function allResources(val: boolean): PermissionMap {
     [AclResource.HELPDESK_TICKETS]: { view: val, create: val, update: val, delete: val },
     [AclResource.MEDIA]: { view: val, create: val, update: val, delete: val },
     [AclResource.USERS]: { view: val, create: val, update: val, delete: val },
+    [AclResource.VISITORS]: { view: val, create: val, update: val, delete: val },
+    [AclResource.COMMUNITY]: { view: val, create: val, update: val, delete: val },
+    [AclResource.NOTIFICATIONS]: { view: val, create: val, update: val, delete: val },
   };
 }

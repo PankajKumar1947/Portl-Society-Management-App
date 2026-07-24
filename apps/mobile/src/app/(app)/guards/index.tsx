@@ -9,7 +9,8 @@ import IconButton from "@/components/ui/icon-button";
 import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
-import { useGetGuards } from "@repo/operations";
+import { useGetGuards, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
 import { EmptyState } from "@/components/layout/empty-state";
 
@@ -22,6 +23,7 @@ export default function GuardsListScreen() {
     type: activeTab,
     search: searchQuery,
   });
+  const { canCreate } = useAccessControl(AclResource.GUARDS);
 
   const filterTabs = [
     { id: "ALL", label: "All Shifts" },
@@ -40,12 +42,14 @@ export default function GuardsListScreen() {
         title="Security Guards"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Guards.Create)}
-            icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Guards.Create)}
+              icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

@@ -12,8 +12,10 @@ export default function RootLayout() {
       <AuthProvider>
         <RoleProvider>
           <AlertProvider>
-            <StatusBar style="dark" backgroundColor={theme.colors.background} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.surface } }} />
+            <AccessControlProvider>
+              <StatusBar style="dark" backgroundColor={theme.colors.background} />
+              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.surface } }} />
+            </AccessControlProvider>
           </AlertProvider>
         </RoleProvider>
       </AuthProvider>

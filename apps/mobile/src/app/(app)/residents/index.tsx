@@ -10,13 +10,16 @@ import FilterTabs from "@/components/ui/filter-tabs";
 import PersonListItem from "@/components/ui/person-list-item";
 import Badge from "@/components/ui/badge";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetResidents } from "@repo/operations";
+import { useGetResidents, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 import { EmptyState } from "@/components/layout/empty-state";
 
 export default function ResidentsListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
+
+  const { canCreate } = useAccessControl(AclResource.RESIDENTS);
 
   const { data: residents, isLoading } = useGetResidents(
     undefined,
@@ -40,12 +43,14 @@ export default function ResidentsListScreen() {
         title="Residents Directory"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Residents.Create as any)}
-            icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Residents.Create as any)}
+              icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

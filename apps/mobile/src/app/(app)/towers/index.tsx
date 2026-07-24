@@ -7,10 +7,13 @@ import ScreenHeader from "@/components/ui/screen-header";
 import IconButton from "@/components/ui/icon-button";
 import TowerCard from "./_components/tower-card";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetTowers } from "@repo/operations";
+import { useGetTowers, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 export default function TowersListScreen() {
   const router = useRouter();
+
+  const { canCreate } = useAccessControl(AclResource.TOWERS);
 
   const { data: towers, isLoading: isTowersLoading } = useGetTowers();
 
@@ -23,12 +26,14 @@ export default function TowersListScreen() {
         title="Towers & Apartments"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Towers.Create)}
-            icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canCreate && (
+            <IconButton
+              onPress={() => router.push(Routes.Towers.Create)}
+              icon={<Ionicons name="add" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
 

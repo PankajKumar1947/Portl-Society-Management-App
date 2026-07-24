@@ -15,9 +15,8 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "expo-router";
-import { useGetPolls } from "@repo/operations";
-import { PollData, UserRoles, POLL_STATUS_OPTIONS, RECIPIENT_OPTIONS } from "@repo/schema";
-import { useRole } from "@/context/role-context";
+import { useGetPolls, useAccessControl } from "@repo/operations";
+import { PollData, POLL_STATUS_OPTIONS, RECIPIENT_OPTIONS, AclResource } from "@repo/schema";
 import PollCard from "./_components/poll-card";
 import { EmptyState } from "@/components/layout/empty-state";
 import LoadingScreen from "@/components/layout/loading-screen";
@@ -39,8 +38,7 @@ const statusSort = (a: PollData, b: PollData) => {
 
 export default function PollsScreen() {
   const router = useRouter();
-  const { role } = useRole();
-  const isAdmin = role === UserRoles.ADMIN || role === UserRoles.SUPER_ADMIN;
+  const { canCreate } = useAccessControl(AclResource.POLLS);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
@@ -92,7 +90,7 @@ export default function PollsScreen() {
         title="Polls"
         onBack={() => router.replace(Routes.Root)}
         rightElement={
-          isAdmin ? (
+          canCreate ? (
             <IconButton
               onPress={() => router.push(Routes.Polls.Create)}
               icon={<Ionicons name="add" size={24} color={theme.colors.text} />}
@@ -102,7 +100,7 @@ export default function PollsScreen() {
         }
       />
 
-      {isAdmin && (
+      {canCreate && (
         <View style={styles.searchContainer}>
           <View style={styles.searchRow}>
             <View style={styles.searchBar}>

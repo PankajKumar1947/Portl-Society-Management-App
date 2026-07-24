@@ -14,7 +14,8 @@ import { theme } from "@/constants";
 import { Modal } from "@/components/ui/modal";
 import FormInput from "@/components/ui/form-input";
 import FormTextArea from "@/components/ui/form-textarea";
-import { COMPLAINT_STATUS, ComplaintStatus } from "@repo/schema";
+import { COMPLAINT_STATUS, ComplaintStatus, AclResource } from "@repo/schema";
+import { useAccessControl } from "@repo/operations";
 
 const STATUS_OPTIONS = [
   {
@@ -96,7 +97,13 @@ export default function ComplaintAdminActions({
     }
   };
 
+  const { canUpdate } = useAccessControl(AclResource.COMPLAINTS);
+
   if (currentStatus === COMPLAINT_STATUS.RESOLVED || currentStatus === COMPLAINT_STATUS.REJECTED) {
+    return null;
+  }
+
+  if (!canUpdate) {
     return null;
   }
 

@@ -5,14 +5,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "./_components/flat-form";
-import { CreateFlatBody } from "@repo/schema";
+import { CreateFlatBody, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetTowers, useCreateFlat } from "@repo/operations";
+import { useGetTowers, useCreateFlat, useAccessControl } from "@repo/operations";
 
 export default function CreateFlatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { canCreate } = useAccessControl(AclResource.FLATS);
 
   const { data: towers, isLoading: isTowersLoading } = useGetTowers();
   const { mutate: createFlat, isPending: isCreating } = useCreateFlat();
@@ -57,13 +59,15 @@ export default function CreateFlatScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            <FlatForm
-              towerId={id}
-              towerOptions={towerOptions}
-              onSubmit={handleSubmit}
-              submitButtonText="Create Flat"
-              isSubmitting={isCreating}
-            />
+            {canCreate ? (
+              <FlatForm
+                towerId={id}
+                towerOptions={towerOptions}
+                onSubmit={handleSubmit}
+                submitButtonText="Create Flat"
+                isSubmitting={isCreating}
+              />
+            ) : null}
           </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

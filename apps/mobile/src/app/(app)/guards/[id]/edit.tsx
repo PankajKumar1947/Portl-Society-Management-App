@@ -8,9 +8,9 @@ import StepPersonal from "../_components/step-personal";
 import StepIdentity from "../_components/step-identity";
 import StepDuty from "../_components/step-duty";
 import { useAlert } from "@/context/alert-context";
-import { useGetGuardDetail, useUpdateGuard } from "@repo/operations";
+import { useGetGuardDetail, useUpdateGuard, useAccessControl } from "@repo/operations";
 import { LoadingScreen } from "@/components/layout/loading-screen";
-import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput } from "@repo/schema";
+import { GuardPersonalInput, GuardIdentificationInput, GuardDutyInput, AclResource } from "@repo/schema";
 
 interface GuardEditFormValues extends GuardPersonalInput, GuardIdentificationInput, Omit<GuardDutyInput, "userId"> { }
 
@@ -18,6 +18,7 @@ export default function EditGuardScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { showAlert } = useAlert();
+  const { canUpdate } = useAccessControl(AclResource.GUARDS);
   const [currentStep, setCurrentStep] = useState<"personal" | "identification" | "duty">("personal");
 
   const { data: guard, isLoading } = useGetGuardDetail(id || "", { enabled: !!id });
@@ -86,6 +87,17 @@ export default function EditGuardScreen() {
       router.back();
     }
   };
+
+  if (!canUpdate) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Edit Guard" onBack={() => router.back()} />
+        <View style={styles.centered}>
+          <Text style={styles.noAccessText}>You do not have permission to edit guards.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading || !formValues) {
     return <LoadingScreen title="Edit Guard" onBack={() => router.back()} />;
@@ -169,6 +181,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.lg,
+  },
+  noAccessText: {
+    fontSize: 16,
+    color: theme.colors.textMuted,
+    textAlign: "center",
   },
   content: {
     padding: theme.spacing.lg,

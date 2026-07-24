@@ -16,6 +16,8 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Routes } from "@/constants";
 import { Images } from "@/assets/images";
+import { useAccessControl } from "@repo/operations";
+import { AclResource, type AclResourceName } from "@repo/schema";
 
 const { width } = Dimensions.get("window");
 const GRID_ITEM_WIDTH = (width - theme.spacing.lg * 2 - theme.spacing.md * 2) / 3;
@@ -25,6 +27,7 @@ interface GridItem {
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
   route: () => void;
+  resource: AclResourceName;
 }
 
 interface QuickAction {
@@ -36,27 +39,28 @@ interface QuickAction {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { canViewModule } = useAccessControl();
 
   const servicesGrid: GridItem[] = [
-    { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index) },
-    { id: "towers", title: "Towers", icon: "cube-outline", route: () => router.push(Routes.Towers.Index) },
-    { id: "residents", title: "Residents", icon: "people-circle-outline", route: () => router.push(Routes.Residents.Index as any) },
-    { id: "guards", title: "Security Guards", icon: "shield-half-outline", route: () => router.push(Routes.Guards.Index as any) },
-    { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index) },
-    { id: "amenities", title: "Amenities", icon: "home-outline", route: () => router.push(Routes.Amenities.Index) },
-    { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index) },
-    { id: "community", title: "Community", icon: "people-circle-outline", route: () => router.push(Routes.Community.Index) },
-    { id: "helpdesk", title: "Helpdesk", icon: "help-buoy-outline", route: () => router.push(Routes.Helpdesk.Index) },
-    { id: "complaints", title: "Complaints", icon: "alert-circle-outline", route: () => router.push(Routes.Complaints.Index) },
-    { id: "polls", title: "Polls", icon: "stats-chart-outline", route: () => router.push(Routes.Polls.Index) },
-  ];
+    { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index), resource: AclResource.SOCIETY },
+    { id: "towers", title: "Towers", icon: "cube-outline", route: () => router.push(Routes.Towers.Index), resource: AclResource.TOWERS },
+    { id: "residents", title: "Residents", icon: "people-circle-outline", route: () => router.push(Routes.Residents.Index as any), resource: AclResource.RESIDENTS },
+    { id: "guards", title: "Security Guards", icon: "shield-half-outline", route: () => router.push(Routes.Guards.Index as any), resource: AclResource.GUARDS },
+    { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index), resource: AclResource.VISITORS },
+    { id: "amenities", title: "Amenities", icon: "home-outline", route: () => router.push(Routes.Amenities.Index), resource: AclResource.AMENITIES },
+    { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index), resource: AclResource.NOTICES },
+    { id: "community", title: "Community", icon: "people-circle-outline", route: () => router.push(Routes.Community.Index), resource: AclResource.COMMUNITY },
+    { id: "helpdesk", title: "Helpdesk", icon: "help-buoy-outline", route: () => router.push(Routes.Helpdesk.Index), resource: AclResource.HELPDESK_TICKETS },
+    { id: "complaints", title: "Complaints", icon: "alert-circle-outline", route: () => router.push(Routes.Complaints.Index), resource: AclResource.COMPLAINTS },
+    { id: "polls", title: "Polls", icon: "stats-chart-outline", route: () => router.push(Routes.Polls.Index), resource: AclResource.POLLS },
+  ].filter((item) => canViewModule(item.resource)) as GridItem[];
 
   const quickActions: QuickAction[] = [
     { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: () => router.push(Routes.Visitors.Create) },
     { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: () => router.push(Routes.Visitors.Index) },
     { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: () => router.push(Routes.Amenities.Bookings.Index) },
     { id: "pass", title: "View Pass", icon: "qr-code-outline", route: () => router.push(Routes.Visitors.Index) },
-  ];
+  ].filter((a) => canViewModule(AclResource.VISITORS)) as QuickAction[];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>

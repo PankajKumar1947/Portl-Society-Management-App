@@ -13,9 +13,9 @@ import { FileCard } from "@/components/ui/file-card";
 import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import { DocumentPreviewModal } from "@/components/common/document-preview-modal";
-import { useGetNoticeDetail, usePublishNotice } from "@repo/operations";
+import { useGetNoticeDetail, usePublishNotice, useAccessControl } from "@repo/operations";
 import { formatDate, roleLabel } from "@/utils/notice";
-import { MediaData } from "@repo/schema";
+import { MediaData, AclResource } from "@repo/schema";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
   residents: { label: "Residents", variant: "success" },
@@ -28,6 +28,7 @@ export default function NoticeDetailsScreen() {
   const router = useRouter();
   const { data: notice, isLoading } = useGetNoticeDetail(id ?? "", { enabled: !!id });
   const { mutate: publishNotice, isPending: isPublishing } = usePublishNotice(id ?? "");
+  const { canUpdate, canDelete } = useAccessControl(AclResource.NOTICES);
 
   const [selectedFile, setSelectedFile] = useState<MediaData | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
@@ -63,12 +64,14 @@ export default function NoticeDetailsScreen() {
         title="Notice Details"
         onBack={() => router.back()}
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Notices.Edit(notice.noticeId))}
-            icon={<Ionicons name="pencil-outline" size={22} color={theme.colors.text} />}
-            variant="ghost"
-            size="md"
-          />
+          canUpdate && (
+            <IconButton
+              onPress={() => router.push(Routes.Notices.Edit(notice.noticeId))}
+              icon={<Ionicons name="pencil-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+              size="md"
+            />
+          )
         }
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -123,7 +126,7 @@ export default function NoticeDetailsScreen() {
             </>
           )}
 
-          {notice.status === "draft" && (
+          {canUpdate && notice.status === "draft" && (
             <>
               <View style={styles.divider} />
               <Button

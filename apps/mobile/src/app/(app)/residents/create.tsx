@@ -15,8 +15,9 @@ import {
   useOnboardResidentPersonal,
   useOnboardResidentAllotment,
   useOnboardResidentVehicle,
+  useAccessControl,
 } from "@repo/operations";
-import { ResidentPersonalInput, ResidentAllotmentInput, ResidentVehicleInput } from "@repo/schema";
+import { ResidentPersonalInput, ResidentAllotmentInput, ResidentVehicleInput, AclResource } from "@repo/schema";
 
 type OnboardingStep = "personal" | "allotment" | "vehicle";
 
@@ -32,6 +33,8 @@ export default function CreateResidentScreen() {
   const [allotmentDetails, setAllotmentDetails] = useState<ResidentAllotmentInput | null>(null);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [createdResidentId, setCreatedResidentId] = useState<string | null>(null);
+
+  const { canCreate } = useAccessControl(AclResource.RESIDENTS);
 
   const { data: towersData, isLoading: isTowersLoading } = useGetTowers();
 
@@ -150,6 +153,8 @@ export default function CreateResidentScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            {canCreate ? (
+              <>
             <View style={styles.stepperContainer}>
               <View style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}>
                 <Text style={[styles.stepNumber, currentStep === "personal" && styles.stepNumberActive]}>1</Text>
@@ -201,6 +206,8 @@ export default function CreateResidentScreen() {
                 submitButtonText="Finish Registration"
               />
             )}
+              </>
+            ) : null}
           </ScrollView>
         <OtpVerificationModal
           visible={isOtpVisible}

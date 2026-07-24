@@ -5,14 +5,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
 import FlatForm from "../_components/flat-form";
-import { UpdateFlatBody } from "@repo/schema";
+import { UpdateFlatBody, AclResource } from "@repo/schema";
 import LoadingScreen from "@/components/layout/loading-screen";
-import { useGetFlatDetails, useUpdateFlat } from "@repo/operations";
+import { useGetFlatDetails, useUpdateFlat, useAccessControl } from "@repo/operations";
 
 export default function EditFlatScreen() {
   const { id, flatId } = useLocalSearchParams<{ id: string; flatId: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { canUpdate } = useAccessControl(AclResource.FLATS);
 
   const { data: flat, isLoading: isFlatLoading } = useGetFlatDetails(flatId || "", { enabled: !!flatId });
   const { mutate: updateFlat, isPending: isUpdating } = useUpdateFlat(flatId || "");
@@ -61,13 +63,15 @@ export default function EditFlatScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            <FlatForm<UpdateFlatBody>
-              isEdit
-              initialValues={initialValues}
-              onSubmit={handleSubmit}
-              submitButtonText="Update Flat"
-              isSubmitting={isUpdating}
-            />
+            {canUpdate ? (
+              <FlatForm<UpdateFlatBody>
+                isEdit
+                initialValues={initialValues}
+                onSubmit={handleSubmit}
+                submitButtonText="Update Flat"
+                isSubmitting={isUpdating}
+              />
+            ) : null}
           </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
