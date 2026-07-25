@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,46 +13,37 @@ import { Fab } from "@/components/ui/fab";
 import { EmptyState } from "@/components/layout/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Routes } from "@/constants/routes";
+import { useGetVisitors, useAccessControl, useGetTowers } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
-type VisitorStatus = "approved" | "pending" | "rejected";
+type VisitorStatus = "approved" | "pending" | "rejected" | "completed";
 
-interface Visitor {
-  id: string;
-  name: string;
-  type: string;
-  time: string;
-  status: VisitorStatus;
-  filter: "upcoming" | "approved" | "history";
-}
-
-const MOCK_VISITORS: Visitor[] = [
-  { id: "1", name: "Rahul Sharma", type: "Delivery Partner", time: "Today, 10:30 AM", status: "approved", filter: "upcoming" },
-  { id: "2", name: "Amit Kumar", type: "Guest", time: "Today, 04:00 PM", status: "pending", filter: "upcoming" },
-  { id: "3", name: "Vikram Singh", type: "Service Staff", time: "Tomorrow, 11:00 AM", status: "approved", filter: "upcoming" },
-  { id: "4", name: "Rohit Patel", type: "Cab Driver", time: "Tomorrow, 08:30 AM", status: "rejected", filter: "upcoming" },
-  { id: "5", name: "Rahul Sharma", type: "Delivery Partner", time: "16 May 2024, 10:30 AM", status: "approved", filter: "approved" },
-  { id: "6", name: "Amit Kumar", type: "Guest", time: "14 May 2024, 04:00 PM", status: "approved", filter: "approved" },
-  { id: "7", name: "Vikram Singh", type: "Service Staff", time: "13 May 2024, 11:00 AM", status: "approved", filter: "history" },
-  { id: "8", name: "Rohit Patel", type: "Cab Driver", time: "12 May 2024, 08:30 AM", status: "rejected", filter: "history" },
-];
-
-const STATUS_VARIANT: Record<VisitorStatus, "success" | "warning" | "danger"> = {
+const STATUS_VARIANT: Record<VisitorStatus, "success" | "warning" | "danger" | "secondary"> = {
   approved: "success",
   pending: "warning",
   rejected: "danger",
+  completed: "secondary",
 };
 
 const TABS = [
-  { id: "upcoming", label: "Upcoming" },
+  { id: "all", label: "All" },
+  { id: "pending", label: "Pending" },
   { id: "approved", label: "Approved" },
-  { id: "history", label: "History" },
 ];
 
 export default function VisitorsScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("upcoming");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const filtered = MOCK_VISITORS.filter((v) => v.filter === activeTab);
+  const statusFilter = activeTab === "pending" ? "pending" : activeTab === "approved" ? "approved" : undefined;
+  const { data: visitors = [], isLoading, refetch } = useGetVisitors({ status: statusFilter });
+
+  const { canViewModule } = useAccessControl();
+  const canViewTower = canViewModule(AclResource.TOWERS);
+  const canViewFlat = canViewModule(AclResource.FLATS);
+  const shouldFetchTowers = canViewTower || canViewFlat;
+  const { data: towers = [] } = useGetTowers({ enabled: shouldFetchTowers });
+  const towerMap = useMemo(() => new Map(towers.map((t) => [t.towerId, t.towerName])), [towers]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -68,14 +59,14 @@ export default function VisitorsScreen() {
         }
         rightElement={
           <IconButton
-            onPress={() => { }}
-            icon={<Ionicons name="search-outline" size={22} color={theme.colors.text} />}
+            onPress={() => router.push(Routes.Visitors.History)}
+            icon={<Ionicons name="document-text-outline" size={22} color={theme.colors.text} />}
             variant="ghost"
           />
         }
       />
 
-      <View>
+      <View style={styles.container}>
         <FilterTabs
           tabs={TABS}
           activeTab={activeTab}
@@ -84,9 +75,12 @@ export default function VisitorsScreen() {
         />
 
         <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
+          data={visitors}
+          keyExtractor={(item) => item.visitorId}
           contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+          }
           ListEmptyComponent={
             <EmptyState
               icon="people-outline"
@@ -98,41 +92,33 @@ export default function VisitorsScreen() {
             <Card
               variant="flat"
               style={styles.card}
-            onPress={() => {
-              if (item.status === "approved") {
-                router.push({
-                  pathname: "/visitors/[id]/pass",
-                  params: {
-                    id: item.id,
-                    name: item.name,
-                    type: item.type,
-                    date: item.time.split(",")[0],
-                    time: item.time.split(",")[1] || "10:00 AM – 11:00 AM",
-                    status: item.status,
-                    passId: `VP${12345670 + parseInt(item.id)}`,
-                  }
-                });
-              } else {
-                router.push(Routes.Visitors.Approval(item.id));
-              }
-            }}
+              onPress={() => router.push(Routes.Visitors.Pass(item.visitorId))}
             >
               <PersonListItem
                 name={item.name}
-                subtitle={item.type}
-                meta={item.time}
+                subtitle={item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                meta={item.purpose || "No purpose specified"}
                 rightElement={
-                  <Badge variant={STATUS_VARIANT[item.status]}>
+                  <Badge variant={STATUS_VARIANT[item.status as VisitorStatus]}>
                     {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                   </Badge>
                 }
               />
+              {shouldFetchTowers && item.flat && (
+                <View style={styles.locationRow}>
+                  {canViewTower && towerMap.get(item.flat.towerId) && (
+                    <Text style={styles.locationText}>{towerMap.get(item.flat.towerId)}</Text>
+                  )}
+                  {canViewTower && canViewFlat && <Text style={styles.locationSep}>•</Text>}
+                  {canViewFlat && (
+                    <Text style={styles.locationText}>{item.flat.flatNumber}</Text>
+                  )}
+                </View>
+              )}
             </Card>
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
-
-
       </View>
       <Fab
         icon="person-add-outline"
@@ -148,6 +134,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  container: {
+    flex: 1,
+  },
   filterTabs: {
     marginBottom: theme.spacing.sm,
   },
@@ -162,5 +151,21 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: theme.spacing.md,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
+    gap: theme.spacing.xs,
+  },
+  locationText: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+  },
+  locationSep: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginHorizontal: 2,
   },
 });

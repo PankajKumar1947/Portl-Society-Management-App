@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   Share,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 /** Styled QR-code placeholder — replace View with QRCode from
  *  react-native-qrcode-svg once the library is installed. */
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useGetVisitorDetail, useAccessControl, useGetTowers } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 /** Styled QR-code placeholder — replace View with QRCode from
  *  react-native-qrcode-svg once the library is installed. */
@@ -77,12 +80,12 @@ export default function VisitorPassScreen() {
   const router = useRouter();
   const {
     id,
-    name = "Rahul Sharma",
-    type = "Delivery Partner",
-    date = "Today, 15 May 2024",
-    time = "10:00 AM – 11:00 AM",
-    status = "approved",
-    passId = "VP12345678"
+    name: paramName,
+    type: paramType,
+    date: paramDate,
+    time: paramTime,
+    status: paramStatus,
+    passId: paramPassId
   } = useLocalSearchParams<{
     id: string;
     name: string;
@@ -93,6 +96,26 @@ export default function VisitorPassScreen() {
     passId: string;
   }>();
 
+  const { data: visitor } = useGetVisitorDetail(id || "", { enabled: !!id });
+
+  const { canViewModule } = useAccessControl();
+  const canViewTower = canViewModule(AclResource.TOWERS);
+  const canViewFlat = canViewModule(AclResource.FLATS);
+  const shouldFetchTowers = canViewTower || canViewFlat;
+  const { data: towers = [] } = useGetTowers({ enabled: shouldFetchTowers });
+  const towerMap = useMemo(() => new Map(towers.map((t) => [t.towerId, t.towerName])), [towers]);
+
+  const name = visitor?.name || paramName || "Visitor";
+  const type = (visitor?.type || paramType || "Guest").toUpperCase();
+  const purpose = visitor?.purpose || "—";
+  const date = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleDateString() : (paramDate || "Today");
+  const time = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (paramTime || "Pending Arrival");
+  const status = visitor?.status || paramStatus || "approved";
+  const passId = visitor?.passCode || paramPassId || "VP00000000";
+  const visitedAt = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleString() : null;
+  const exitedAt = visitor?.exitedAt ? new Date(visitor.exitedAt).toLocaleString() : null;
+  const createdAt = visitor?.createdAt ? new Date(visitor.createdAt).toLocaleString() : null;
+
   const handleShare = async () => {
     await Share.share({
       message: `My Visitor Pass ID: ${passId}\nShow this at the gate.`,
@@ -102,13 +125,14 @@ export default function VisitorPassScreen() {
   const isApproved = status === "approved" || status === "success";
 
   return (
-    <View style={styles.safeArea}>
-      <ScreenHeader title="Visitor Pass" showBack={true} />
+    <SafeAreaView style={styles.safeArea}>
+      <ScreenHeader title="Visitor Details" showBack={true} />
 
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Pass Card */}
         <Card variant="flat" style={styles.passCard}>
           <View style={styles.badgeRow}>
             <Badge variant={isApproved ? "success" : "warning"}>
@@ -116,13 +140,11 @@ export default function VisitorPassScreen() {
             </Badge>
           </View>
 
-          {/* Visitor info */}
           <View style={styles.visitorBlock}>
             <Text style={styles.visitorName}>{name}</Text>
             <Text style={styles.visitorType}>{type}</Text>
           </View>
 
-          {/* Date / time */}
           <View style={styles.infoRowContainer}>
             <Ionicons name="calendar-outline" size={20} color={theme.colors.textSecondary} style={styles.calendarIcon} />
             <View style={styles.timeBlock}>
@@ -131,26 +153,69 @@ export default function VisitorPassScreen() {
             </View>
           </View>
 
-          {/* QR code */}
+          {shouldFetchTowers && visitor?.flat && (
+            <View style={styles.locationRow}>
+              {canViewTower && towerMap.get(visitor.flat.towerId) && (
+                <InfoRow icon="business-outline" label="Tower" value={towerMap.get(visitor.flat.towerId) || ""} />
+              )}
+              {canViewFlat && (
+                <InfoRow icon="home-outline" label="Flat" value={visitor.flat.flatNumber} />
+              )}
+            </View>
+          )}
+
           <QRPlaceholder value={passId} />
 
-          {/* Pass ID */}
           <View style={styles.passIdRow}>
             <Text style={styles.passIdLabel}>Pass ID: </Text>
             <Text style={styles.passId}>{passId}</Text>
           </View>
-          
+
           <View style={styles.hintContainer}>
             <Ionicons name="alert-circle-outline" size={14} color={theme.colors.textMuted} />
             <Text style={styles.hint}>Show this pass at the gate</Text>
           </View>
         </Card>
 
+        {/* Visitor History */}
+        <Card variant="flat" style={styles.historyCard}>
+          <Text style={styles.sectionTitle}>Visit Timeline</Text>
+          <View style={styles.divider} />
+          {createdAt && (
+            <InfoRow
+              icon="add-circle-outline"
+              label="Requested"
+              value={createdAt}
+            />
+          )}
+          {visitor?.status === "approved" && visitedAt && (
+            <InfoRow
+              icon="checkmark-circle-outline"
+              label="Entered"
+              value={visitedAt}
+            />
+          )}
+          {visitor?.status === "completed" && exitedAt && (
+            <InfoRow
+              icon="exit-outline"
+              label="Exited"
+              value={exitedAt}
+            />
+          )}
+          {visitor?.status === "rejected" && (
+            <InfoRow
+              icon="close-circle-outline"
+              label="Status"
+              value="Rejected"
+            />
+          )}
+        </Card>
+
         <Button onPress={handleShare} style={styles.shareBtn}>
           Share Pass
         </Button>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -233,5 +298,25 @@ const styles = StyleSheet.create({
     height: 52,
     width: "100%",
     marginTop: theme.spacing.lg,
+  },
+  locationRow: {
+    flexDirection: "column",
+    gap: theme.spacing.xs,
+    width: "100%",
+  },
+  historyCard: {
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginBottom: theme.spacing.sm,
   },
 });

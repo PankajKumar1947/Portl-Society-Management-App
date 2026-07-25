@@ -28,4 +28,6 @@ export * from "./query/use-family-member";
 export * from "./mutation/use-family-member";
 export * from "./access-control-context";
 export * from "./query/use-access-control";
+export * from "./query/use-visitor";
+export * from "./mutation/use-visitor";
 

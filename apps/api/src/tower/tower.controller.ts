@@ -46,7 +46,7 @@ export class TowerController {
 
   @Get()
   @ApiGetTowers()
-  @Roles(UserRoles.ADMIN, UserRoles.GUARD, UserRoles.RESIDENTS)
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
   async findBySociety(
     @CurrentUser() user: TokenPayload,
     @Query('societyId') querySocietyId?: string,

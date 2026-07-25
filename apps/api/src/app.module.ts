@@ -17,6 +17,7 @@ import { AmenityModule } from './amenity/amenity.module';
 import { ComplaintModule } from './complaint/complaint.module';
 import { HelpdeskTicketModule } from './helpdesk-ticket/helpdesk-ticket.module';
 import { AclModule } from './acl/acl.module';
+import { VisitorModule } from './visitor/visitor.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -43,6 +44,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     ComplaintModule,
     HelpdeskTicketModule,
     AclModule,
+    VisitorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

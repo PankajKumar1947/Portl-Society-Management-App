@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
@@ -8,57 +9,48 @@ import { Card } from "@/components/ui/card";
 import { PersonListItem } from "@/components/ui/person-list-item";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/layout/empty-state";
-import { Routes } from "@/constants";
+import { useGetVisitors, useAccessControl, useGetTowers } from "@repo/operations";
+import { AclResource } from "@repo/schema";
+import { Routes } from "@/constants/routes";
 
-type HistoryType = "all" | "guest" | "delivery" | "staff";
-type VisitorStatus = "approved" | "rejected" | "checked_out";
-
-interface HistoryEntry {
-  id: string;
-  name: string;
-  type: string;
-  category: "guest" | "delivery" | "staff";
-  date: string;
-  status: VisitorStatus;
-}
-
-const MOCK_HISTORY: HistoryEntry[] = [
-  { id: "1", name: "Rahul Sharma", type: "Delivery Partner", category: "delivery", date: "16 May 2024, 10:30 AM", status: "approved" },
-  { id: "2", name: "Amit Kumar", type: "Guest", category: "guest", date: "14 May 2024, 04:00 PM", status: "approved" },
-  { id: "3", name: "Vikram Singh", type: "Service Staff", category: "staff", date: "13 May 2024, 11:00 AM", status: "approved" },
-  { id: "4", name: "Rohit Patel", type: "Cab Driver", category: "guest", date: "12 May 2024, 08:30 AM", status: "checked_out" },
-  { id: "5", name: "Priya Desai", type: "Guest", category: "guest", date: "11 May 2024, 12:00 PM", status: "rejected" },
-];
+type HistoryType = "all" | "guest" | "delivery" | "service_staff";
+type VisitorStatus = "approved" | "rejected" | "completed";
 
 const STATUS_VARIANT: Record<VisitorStatus, "success" | "danger" | "secondary"> = {
   approved: "success",
   rejected: "danger",
-  checked_out: "secondary",
+  completed: "secondary",
 };
 
 const STATUS_LABEL: Record<VisitorStatus, string> = {
-  approved: "Approved",
+  approved: "Active",
   rejected: "Rejected",
-  checked_out: "Checked Out",
+  completed: "Completed",
 };
 
 const TABS = [
   { id: "all", label: "All" },
   { id: "guest", label: "Guests" },
   { id: "delivery", label: "Delivery" },
-  { id: "staff", label: "Staff" },
+  { id: "service_staff", label: "Staff" },
 ];
 
 export default function HistoryScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<HistoryType>("all");
 
-  const filtered = activeTab === "all"
-    ? MOCK_HISTORY
-    : MOCK_HISTORY.filter((h) => h.category === activeTab);
+  const typeFilter = activeTab === "all" ? undefined : activeTab;
+  const { data: visitors = [], isLoading, refetch } = useGetVisitors({ status: "completed,rejected", type: typeFilter });
+
+  const { canViewModule } = useAccessControl();
+  const canViewTower = canViewModule(AclResource.TOWERS);
+  const canViewFlat = canViewModule(AclResource.FLATS);
+  const shouldFetchTowers = canViewTower || canViewFlat;
+  const { data: towers = [] } = useGetTowers({ enabled: shouldFetchTowers });
+  const towerMap = useMemo(() => new Map(towers.map((t) => [t.towerId, t.towerName])), [towers]);
 
   return (
-    <View style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <ScreenHeader title="Visitor History" />
 
       <FilterTabs
@@ -69,9 +61,12 @@ export default function HistoryScreen() {
       />
 
       <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
+        data={visitors}
+        keyExtractor={(item) => item.visitorId}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        }
         ListEmptyComponent={
           <EmptyState
             icon="time-outline"
@@ -83,34 +78,34 @@ export default function HistoryScreen() {
           <Card
             variant="flat"
             style={styles.card}
-            onPress={() => router.push({
-              pathname: "/visitors/[id]/pass",
-              params: {
-                id: item.id,
-                name: item.name,
-                type: item.type,
-                date: item.date.split(",")[0],
-                time: item.date.split(",")[1] || "10:00 AM – 11:00 AM",
-                status: item.status,
-                passId: `VP${12345670 + parseInt(item.id)}`,
-              }
-            })}
+            onPress={() => router.push(Routes.Visitors.Pass(item.visitorId))}
           >
             <PersonListItem
               name={item.name}
-              subtitle={item.type}
-              meta={item.date}
+              subtitle={item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+              meta={item.visitedAt ? new Date(item.visitedAt).toLocaleString() : "Date unavailable"}
               rightElement={
-                <Badge variant={STATUS_VARIANT[item.status]}>
-                  {STATUS_LABEL[item.status]}
+                <Badge variant={STATUS_VARIANT[item.status as VisitorStatus]}>
+                  {STATUS_LABEL[item.status as VisitorStatus]}
                 </Badge>
               }
             />
+            {shouldFetchTowers && item.flat && (
+              <View style={styles.locationRow}>
+                {canViewTower && towerMap.get(item.flat.towerId) && (
+                  <Text style={styles.locationText}>{towerMap.get(item.flat.towerId)}</Text>
+                )}
+                {canViewTower && canViewFlat && <Text style={styles.locationSep}>•</Text>}
+                {canViewFlat && (
+                  <Text style={styles.locationText}>{item.flat.flatNumber}</Text>
+                )}
+              </View>
+            )}
           </Card>
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -133,5 +128,21 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: theme.spacing.md,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
+    gap: theme.spacing.xs,
+  },
+  locationText: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+  },
+  locationSep: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginHorizontal: 2,
   },
 });

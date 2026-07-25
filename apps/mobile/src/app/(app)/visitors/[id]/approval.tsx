@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,16 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { InfoRow } from "@/components/ui/info-row";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useGetVisitorDetail, useUpdateVisitorStatus, useAccessControl, useGetTowers } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [seconds, setSeconds] = useState(initial);
@@ -36,10 +39,28 @@ function CountdownTimer({ seconds: initial }: { seconds: number }) {
 
 export default function ApprovalScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [note, setNote] = useState("");
 
+  const { data: visitor } = useGetVisitorDetail(id || "", { enabled: !!id });
+  const { mutate: updateStatus, isPending } = useUpdateVisitorStatus(id || "");
+
+  const { canViewModule } = useAccessControl();
+  const canViewTower = canViewModule(AclResource.TOWERS);
+  const canViewFlat = canViewModule(AclResource.FLATS);
+  const shouldFetchTowers = canViewTower || canViewFlat;
+  const { data: towers = [] } = useGetTowers({ enabled: shouldFetchTowers });
+  const towerMap = useMemo(() => new Map(towers.map((t) => [t.towerId, t.towerName])), [towers]);
+
+  const name = visitor?.name || "Visitor";
+  const type = visitor?.type ? visitor.type.charAt(0).toUpperCase() + visitor.type.slice(1) : "Guest";
+  const purpose = visitor?.purpose || "Personal Visit";
+  const timeStr = visitor?.createdAt
+    ? `Today, ${new Date(visitor.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    : "Today, 04:00 PM";
+
   return (
-    <View style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <ScreenHeader title="Approval Request" />
 
       <ScrollView
@@ -50,21 +71,28 @@ export default function ApprovalScreen() {
         {/* Visitor identity */}
         <Card variant="flat" style={styles.visitorCard}>
           <View style={styles.visitorRow}>
-            <Avatar name="Amit Kumar" size="lg" />
+            <Avatar name={name} size="lg" />
             <View style={styles.visitorInfo}>
-              <Text style={styles.visitorName}>Amit Kumar</Text>
-              <Text style={styles.visitorRole}>Guest</Text>
+              <Text style={styles.visitorName}>{name}</Text>
+              <Text style={styles.visitorRole}>{type}</Text>
             </View>
           </View>
         </Card>
 
         {/* Details */}
         <Card variant="flat" style={styles.detailCard}>
-          <InfoRow icon="home-outline" label="Flat" value="A-1203" />
+          {shouldFetchTowers && visitor?.flat && canViewFlat && (
+            <>
+              {canViewTower && towerMap.get(visitor.flat.towerId) && (
+                <InfoRow icon="business-outline" label="Tower" value={towerMap.get(visitor.flat.towerId) || ""} />
+              )}
+              <InfoRow icon="home-outline" label="Flat" value={visitor.flat.flatNumber} />
+              <View style={styles.divider} />
+            </>
+          )}
+          <InfoRow icon="document-text-outline" label="Purpose" value={purpose} />
           <View style={styles.divider} />
-          <InfoRow icon="document-text-outline" label="Purpose" value="Personal Visit" />
-          <View style={styles.divider} />
-          <InfoRow icon="time-outline" value="Today, 04:00 PM – 06:00 PM" />
+          <InfoRow icon="time-outline" value={timeStr} />
         </Card>
 
         {/* Countdown */}
@@ -75,15 +103,38 @@ export default function ApprovalScreen() {
           <Button
             variant="outline"
             style={{ flex: 1, height: 50, borderColor: theme.colors.danger }}
-            onPress={() => { }}
+            onPress={() => {
+              updateStatus("rejected", {
+                onSuccess: () => {
+                  router.replace(Routes.Visitors.Index);
+                }
+              });
+            }}
+            loading={isPending}
           >
             Decline
           </Button>
           <Button
             style={{ flex: 1, height: 50 }}
             onPress={() => {
-              router.replace(Routes.Visitors.Pass("1"));
+              updateStatus("approved", {
+                onSuccess: (res) => {
+                  router.replace({
+                    pathname: "/visitors/[id]/pass",
+                    params: {
+                      id: res.data.visitorId,
+                      name: res.data.name,
+                      type: res.data.type,
+                      date: "Today",
+                      time: "Approved Pass",
+                      status: res.data.status,
+                      passId: res.data.passCode || "N/A",
+                    }
+                  });
+                }
+              });
             }}
+            loading={isPending}
           >
             Approve
           </Button>
@@ -110,7 +161,7 @@ export default function ApprovalScreen() {
           Send
         </Button>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

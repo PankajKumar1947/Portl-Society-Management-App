@@ -28,6 +28,8 @@ export * from "./react-queries/family-member";
 export * from "./routes/family-member";
 export * from "./react-queries/acl";
 export * from "./routes/acl";
+export * from "./react-queries/visitor";
+export * from "./routes/visitor";
 export {
   setAccessToken,
   setRefreshToken,

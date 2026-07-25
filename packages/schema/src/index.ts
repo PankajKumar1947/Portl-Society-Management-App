@@ -14,3 +14,4 @@ export * from "./complaint";
 export * from "./helpdesk-ticket";
 export * from "./family-member";
 export * from "./acl";
+export * from "./visitor";

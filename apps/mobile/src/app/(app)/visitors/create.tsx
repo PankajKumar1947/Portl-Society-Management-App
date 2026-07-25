@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { TypeSelector } from "@/components/ui/type-selector";
 import { Card } from "@/components/ui/card";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Button } from "@/components/ui/button";
@@ -19,51 +18,69 @@ import { FormInput } from "@/components/ui/form-input";
 import { FormPhone } from "@/components/ui/form-phone";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormDate } from "@/components/ui/form-date";
-
-
-const VISITOR_TYPES = [
-  { id: "guest", label: "Guest" },
-  { id: "delivery", label: "Delivery" },
-  { id: "service_staff", label: "Service Staff" },
-  { id: "cab", label: "Cab" },
-];
-
-const PURPOSE_OPTIONS = [
-  { label: "Personal Visit", value: "personal" },
-  { label: "Delivery", value: "delivery" },
-  { label: "Maintenance Work", value: "maintenance" },
-  { label: "Other", value: "other" },
-];
-
-const FLAT_OPTIONS = [
-  { label: "A-1202", value: "a1202" },
-  { label: "A-1203", value: "a1203" },
-  { label: "B-102", value: "b102" },
-  { label: "C-903", value: "c903" },
-];
+import { useCreateVisitor, useGetTowers, useGetFlats, useAccessControl } from "@repo/operations";
+import { AclResource, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, CreateVisitorForm } from "@repo/schema";
 
 export default function CreateVisitorScreen() {
   const router = useRouter();
-  const [visitorType, setVisitorType] = useState("guest");
   const [preApprove, setPreApprove] = useState(false);
 
-  const methods = useForm({
+  const { canViewModule } = useAccessControl();
+  const canViewTower = canViewModule(AclResource.TOWERS);
+  const canViewFlat = canViewModule(AclResource.FLATS);
+
+  const { mutate: createVisitor, isPending } = useCreateVisitor();
+  const { data: towers = [] } = useGetTowers({ enabled: canViewTower });
+
+  const methods = useForm<CreateVisitorForm>({
     defaultValues: {
-      visitorName: "",
-      mobileNumber: "",
-      purposeOfVisit: "",
-      visitDate: undefined as Date | undefined,
-      visitTime: undefined as Date | undefined,
-      flatNumber: "",
+      type: "guest",
+      name: "",
+      mobile: "",
+      purpose: "",
+      visitDate: undefined,
+      visitTime: undefined,
+      towerId: "",
+      flatId: "",
     },
   });
 
-  const onSubmit = () => {
-    router.push(Routes.Visitors.Pass("new-pass"));
+  const selectedTowerId = methods.watch("towerId");
+  const { data: flats = [] } = useGetFlats(selectedTowerId || "", { enabled: !!selectedTowerId && canViewFlat });
+
+  useEffect(() => {
+    if (selectedTowerId) {
+      methods.setValue("flatId", "");
+    }
+  }, [selectedTowerId]);
+
+  const onSubmit = (data: CreateVisitorForm) => {
+    createVisitor({
+      name: data.name,
+      mobile: data.mobile,
+      type: data.type,
+      purpose: data.purpose,
+      flatId: canViewFlat ? data.flatId : undefined,
+    }, {
+      onSuccess: (res) => {
+        router.push({
+          ...Routes.Visitors.Pass(res.data.visitorId),
+          params: {
+            id: res.data.visitorId,
+            name: res.data.name,
+            type: res.data.type,
+            date: "Today",
+            time: "Pending Arrival",
+            status: res.data.status,
+            passId: res.data.passCode || "N/A",
+          },
+        });
+      },
+    });
   };
 
   return (
-    <View style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -74,33 +91,29 @@ export default function CreateVisitorScreen() {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          {/* Visitor Type */}
-          <Text style={styles.label}>Visitor Type</Text>
-          <Card variant="outlined" style={styles.section}>
-            <TypeSelector
-              options={VISITOR_TYPES}
-              value={visitorType}
-              onChange={setVisitorType}
-            />
-          </Card>
-
           {/* Form Fields */}
           <FormProvider {...methods}>
             <View style={styles.form}>
+              <FormSelect
+                name="type"
+                label="Visitor Type"
+                placeholder="Select type"
+                options={VISITOR_TYPE_OPTIONS}
+              />
               <FormInput
-                name="visitorName"
+                name="name"
                 label="Visitor Name"
                 placeholder="Enter name"
                 required
               />
               <FormPhone
-                name="mobileNumber"
+                name="mobile"
                 label="Mobile Number"
                 placeholder="Enter mobile number"
                 required
               />
               <FormSelect
-                name="purposeOfVisit"
+                name="purpose"
                 label="Purpose of Visit"
                 placeholder="Select purpose"
                 options={PURPOSE_OPTIONS}
@@ -123,12 +136,22 @@ export default function CreateVisitorScreen() {
                   />
                 </View>
               </View>
-              <FormSelect
-                name="flatNumber"
-                label="Flat Number"
-                placeholder="A-1202"
-                options={FLAT_OPTIONS}
-              />
+              {canViewTower && (
+                <FormSelect
+                  name="towerId"
+                  label="Tower"
+                  placeholder="Select Tower"
+                  options={towers.map((t) => ({ label: t.towerName, value: t.towerId }))}
+                />
+              )}
+              {canViewFlat && selectedTowerId && (
+                <FormSelect
+                  name="flatId"
+                  label="Flat Number"
+                  placeholder="Select Flat"
+                  options={flats.map((f) => ({ label: f.flatNumber, value: f.flatId }))}
+                />
+              )}
 
               {/* Pre-Approve toggle */}
               <Card variant="flat" style={styles.toggleCard}>
@@ -141,12 +164,12 @@ export default function CreateVisitorScreen() {
               </Card>
             </View>
           </FormProvider>
-          <Button onPress={methods.handleSubmit(onSubmit)} style={styles.submit}>
+          <Button onPress={methods.handleSubmit(onSubmit)} style={styles.submit} loading={isPending}>
             Create Pass
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -159,10 +182,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     gap: theme.spacing.md,
     marginTop: theme.spacing.md,
-  },
-  section: {
-    backgroundColor: theme.colors.surface,
-    paddingVertical: theme.spacing.md,
+    paddingBottom: 180,
   },
   label: {
     fontSize: 14,
