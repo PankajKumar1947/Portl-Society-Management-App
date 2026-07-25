@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Modal } 
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { formatDate } from "@/utils/date";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
@@ -153,9 +154,7 @@ export default function ComplaintsScreen() {
             <Text style={styles.titleText}>{item.subject}</Text>
             <Text style={styles.descText} numberOfLines={2}>{item.description}</Text>
             <Text style={styles.dateText}>
-              {item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric", month: "short", year: "numeric",
-              }) : ""}
+              {formatDate(item.createdAt, "short")}
             </Text>
           </Card>
         )}

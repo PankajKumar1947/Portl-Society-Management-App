@@ -28,10 +28,10 @@ export const useGetVisitorVisits = (logId: string, options?: { enabled?: boolean
   });
 };
 
-export const useGetVisitorLogs = () => {
+export const useGetVisitorLogs = (query?: { search?: string; dateFrom?: string; dateTo?: string }) => {
   return useQuery({
-    queryKey: visitorQueries.getVisitorLogs.key,
-    queryFn: () => getVisitorLogs(),
+    queryKey: [...visitorQueries.getVisitorLogs.key, query],
+    queryFn: () => getVisitorLogs(query),
     select: (response: VisitorListResponse): VisitorLogData[] => response.data,
   });
 };

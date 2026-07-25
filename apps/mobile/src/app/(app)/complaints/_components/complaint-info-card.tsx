@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { theme } from "@/constants";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/utils/date";
 import { ComplaintData } from "@repo/schema";
 
 const STATUS_VARIANTS: Record<string, "warning" | "info" | "success" | "danger"> = {
@@ -40,13 +41,7 @@ export default function ComplaintInfoCard({ complaint }: ComplaintInfoCardProps)
       <Text style={styles.desc}>{complaint.description}</Text>
       <Text style={styles.date}>
         Registered on{" "}
-        {complaint.createdAt
-          ? new Date(complaint.createdAt).toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })
-          : ""}
+        {formatDate(complaint.createdAt, "short")}
       </Text>
       {complaint.reportedByUser && (
         <Text style={styles.reportedBy}>

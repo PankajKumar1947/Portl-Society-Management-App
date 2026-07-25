@@ -1,11 +1,8 @@
-export function formatDate(dateStr?: string): string {
+import { formatDate } from "./date";
+
+export function formatNoticeDate(dateStr?: string): string {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatDate(dateStr, "short");
 }
 
 export function isRecent(dateStr?: string): boolean {

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import { Card } from "@/components/ui/card";
+import { formatDate } from "@/utils/date";
 import { TimelineEntryData } from "@repo/schema";
 
 interface ComplaintTimelineProps {
@@ -41,15 +42,7 @@ export default function ComplaintTimeline({ timeline }: ComplaintTimelineProps) 
               <Text style={styles.stepTitle}>{step.title}</Text>
               <Text style={styles.stepDesc}>{step.description}</Text>
               <Text style={styles.stepTime}>
-                {step.createdAt
-                  ? new Date(step.createdAt).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : ""}
+                {formatDate(step.createdAt, "dateTime")}
               </Text>
             </View>
           </View>

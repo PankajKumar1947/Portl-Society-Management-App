@@ -7,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { theme } from "../../constants";
+import { formatDate } from "../../utils/date";
 
 export interface DateItem {
   date: Date;
@@ -28,7 +29,7 @@ export const HorizontalCalendar: React.FC<HorizontalCalendarProps> = ({
   const days: DateItem[] = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+    const dayLabel = formatDate(d, "weekday");
     const dayNum = String(d.getDate());
     const isToday = i === 0;
     return { date: d, dayLabel, dayNum, isToday };
@@ -45,7 +46,7 @@ export const HorizontalCalendar: React.FC<HorizontalCalendarProps> = ({
   return (
     <View style={styles.outerContainer}>
       <Text style={styles.monthHeader}>
-        {selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        {formatDate(selectedDate, "monthYear")}
       </Text>
       <ScrollView
         horizontal

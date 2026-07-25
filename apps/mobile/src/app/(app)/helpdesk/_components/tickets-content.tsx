@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { formatDate } from "@/utils/date";
 import {
   TICKET_STATUS_LABEL,
   TICKET_STATUS_VARIANT,
@@ -161,11 +162,7 @@ export default function TicketsContent() {
                 </Badge>
                 {item.createdAt && (
                   <Text style={styles.cardDate}>
-                    {new Date(item.createdAt).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {formatDate(item.createdAt, "short")}
                   </Text>
                 )}
               </View>

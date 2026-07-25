@@ -12,7 +12,7 @@ import Loading from "@/components/ui/loading";
 import { useRouter } from "expo-router";
 import { useGetNotices, useAccessControl } from "@repo/operations";
 import { NoticeData, RECIPIENT_OPTIONS, NOTICE_STATUS_OPTIONS, AclResource } from "@repo/schema";
-import { formatDate, isRecent } from "@/utils/notice";
+import { formatNoticeDate, isRecent } from "@/utils/notice";
 import { EmptyState } from "@/components/layout/empty-state";
 import TowerFilterSection from "./_components/tower-filter-section";
 
@@ -158,7 +158,7 @@ export default function NoticesScreen() {
                 <Text style={styles.noticeTitle}>{notice.title}</Text>
               </View>
               <Text style={styles.date}>
-                {formatDate(notice.publishedOn || notice.createdAt)}
+                {formatNoticeDate(notice.publishedOn || notice.createdAt)}
               </Text>
             </View>
             <View style={styles.metaRow}>

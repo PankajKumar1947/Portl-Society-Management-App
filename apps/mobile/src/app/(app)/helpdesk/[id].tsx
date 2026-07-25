@@ -9,6 +9,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
+import { formatDate } from "@/utils/date";
 import { useGetHelpdeskTicketDetail, useResolveHelpdeskTicket, useAccessControl } from "@repo/operations";
 import { AclResource } from "@repo/schema";
 import ScreenHeader from "@/components/ui/screen-header";
@@ -81,11 +82,7 @@ export default function TicketDetailsScreen() {
           </Badge>
           {ticket.createdAt && (
             <Text style={styles.dateSub}>
-              {new Date(ticket.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              {formatDate(ticket.createdAt, "short")}
             </Text>
           )}
         </View>
@@ -112,13 +109,7 @@ export default function TicketDetailsScreen() {
                   <View style={styles.timelineRight}>
                     {update.createdAt && (
                       <Text style={styles.timelineTime}>
-                        {new Date(update.createdAt).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatDate(update.createdAt, "dateTime")}
                       </Text>
                     )}
                     <Text style={styles.timelineTitle}>{update.title}</Text>

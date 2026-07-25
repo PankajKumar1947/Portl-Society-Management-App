@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useGetVisitorDetail, useUpdateVisitorStatus, useAccessControl, useGetTowers } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
+import { formatDate } from "@/utils/date";
 
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [seconds, setSeconds] = useState(initial);
@@ -56,7 +57,7 @@ export default function ApprovalScreen() {
   const type = visitor?.type ? visitor.type.charAt(0).toUpperCase() + visitor.type.slice(1) : "Guest";
   const purpose = visitor?.purpose || "Personal Visit";
   const timeStr = visitor?.createdAt
-    ? `Today, ${new Date(visitor.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    ? `Today, ${formatDate(visitor.createdAt, "time")}`
     : "Today, 04:00 PM";
 
   return (

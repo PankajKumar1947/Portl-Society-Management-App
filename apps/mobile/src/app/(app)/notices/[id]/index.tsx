@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import { DocumentPreviewModal } from "@/components/common/document-preview-modal";
 import { useGetNoticeDetail, usePublishNotice, useAccessControl } from "@repo/operations";
-import { formatDate, roleLabel } from "@/utils/notice";
+import { formatNoticeDate, roleLabel } from "@/utils/notice";
 import { MediaData, AclResource } from "@repo/schema";
 
 const RECIPIENT_LABELS: Record<string, { label: string; variant: "success" | "warning" }> = {
@@ -47,7 +47,7 @@ export default function NoticeDetailsScreen() {
     return <NotFoundScreen title="Notice Details" message="Notice not found" onBack={() => router.back()} />;
   }
 
-  const displayDate = formatDate(notice.publishedOn || notice.createdAt);
+  const displayDate = formatNoticeDate(notice.publishedOn || notice.createdAt);
   const publisherName = notice.publisher
     ? `${notice.publisher.firstName} ${notice.publisher.lastName}`
     : "";

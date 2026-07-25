@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import { useFormContext, Controller } from "react-hook-form";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { theme } from "../../constants";
+import { theme } from "@/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "./button";
+import { formatDate as formatDateUtil } from "@/utils/date";
 
 export interface FormDateProps {
   name: string;
@@ -41,10 +42,8 @@ export const FormDate: React.FC<FormDateProps> = ({
   const [tempDate, setTempDate] = useState<Date>(new Date());
 
   const defaultFormat = (date: Date) => {
-    if (mode === "time") {
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
-    return date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
+    if (mode === "time") return formatDateUtil(date, "time");
+    return formatDateUtil(date, "short");
   };
 
   const formatter = formatDate || defaultFormat;

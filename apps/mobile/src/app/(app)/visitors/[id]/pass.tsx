@@ -19,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Routes } from "@/constants/routes";
+import { formatDate } from "@/utils/date";
 import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
 
@@ -67,13 +68,13 @@ export default function VisitorPassScreen() {
   const purpose = visitor?.purpose || "—";
   const entries = visitor?.entries || [];
   const latestEntry = entries[entries.length - 1];
-  const entryDate = latestEntry?.enteredAt ? new Date(latestEntry.enteredAt).toLocaleDateString() : null;
-  const entryTime = latestEntry?.enteredAt ? new Date(latestEntry.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+  const entryDate = latestEntry?.enteredAt ? formatDate(latestEntry.enteredAt) : null;
+  const entryTime = latestEntry?.enteredAt ? formatDate(latestEntry.enteredAt, "time") : null;
   const date = entryDate || paramDate || "Today";
   const time = entryTime || paramTime || "Pending Arrival";
   const status = visitor?.status || paramStatus || VISITOR_STATUS.APPROVED;
   const passId = visitor?.passCode || paramPassId || "VP00000000";
-  const createdAt = visitor?.createdAt ? new Date(visitor.createdAt).toLocaleString() : null;
+  const createdAt = visitor?.createdAt ? formatDate(visitor.createdAt, "dateTime") : null;
 
   const handleShare = async () => {
     await Share.share({
@@ -155,14 +156,14 @@ export default function VisitorPassScreen() {
                 <InfoRow
                   icon="checkmark-circle-outline"
                   label={idx === 0 && entries.length > 1 ? `Entry ${idx + 1}` : "Entered"}
-                  value={new Date(entry.enteredAt).toLocaleString()}
+                  value={formatDate(entry.enteredAt, "dateTime")}
                 />
               )}
               {entry.exitedAt && (
                 <InfoRow
                   icon="exit-outline"
                   label={idx === 0 && entries.length > 1 ? `Exit ${idx + 1}` : "Exited"}
-                  value={new Date(entry.exitedAt).toLocaleString()}
+                  value={formatDate(entry.exitedAt, "dateTime")}
                 />
               )}
             </View>
@@ -210,13 +211,7 @@ export default function VisitorPassScreen() {
                     >
                       <View style={styles.pastVisitTop}>
                         <Text style={styles.pastVisitDate}>
-                          {visit.createdAt
-                            ? new Date(visit.createdAt).toLocaleDateString(undefined, {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              })
-                            : "Unknown date"}
+                          {formatDate(visit.createdAt, "withWeekday")}
                         </Text>
                         <Badge variant={STATUS_VARIANT[visit.status]}>
                           {visit.status.charAt(0).toUpperCase() + visit.status.slice(1)}
@@ -228,7 +223,7 @@ export default function VisitorPassScreen() {
                           <View style={styles.pastVisitEntryRow}>
                             <View style={[styles.pastVisitDot, styles.entryDotPast]} />
                             <Text style={styles.pastVisitTime}>
-                              IN {new Date(firstEntry.enteredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              IN {formatDate(firstEntry.enteredAt, "time")}
                             </Text>
                           </View>
                         )}
@@ -236,7 +231,7 @@ export default function VisitorPassScreen() {
                           <View style={styles.pastVisitEntryRow}>
                             <View style={[styles.pastVisitDot, styles.exitDotPast]} />
                             <Text style={styles.pastVisitTime}>
-                              OUT {new Date(firstEntry.exitedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              OUT {formatDate(firstEntry.exitedAt, "time")}
                             </Text>
                           </View>
                         )}

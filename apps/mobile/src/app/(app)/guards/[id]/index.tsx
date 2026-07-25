@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "@/utils/date";
 import { StyleSheet, View, Text, ScrollView, Linking } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -117,7 +118,7 @@ export default function GuardDetailsScreen() {
           <InfoRow label="Assigned Gate" value={guard.gateNumber} />
           <InfoRow label="Shift Schedule" value={guard.shiftType === "DAY" ? "08:00 AM - 08:00 PM" : "08:00 PM - 08:00 AM"} />
           <InfoRow label="Security Agency" value={guard.agencyName || "None"} />
-          <InfoRow label="Joining Date" value={guard.joiningDate ? new Date(guard.joiningDate).toLocaleDateString() : "N/A"} />
+          <InfoRow label="Joining Date" value={formatDate(guard.joiningDate, "short")} />
         </Card>
 
         {/* Verification & Identification Details */}

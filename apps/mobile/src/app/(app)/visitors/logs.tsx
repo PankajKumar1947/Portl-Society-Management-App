@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,144 +17,20 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/layout/empty-state";
 import { useGetVisitorLogs, useAccessControl, useGetTowers } from "@repo/operations";
-import { AclResource, VisitorLogData, SCAN_DIRECTION } from "@repo/schema";
-
-interface LogEvent {
-  id: string;
-  timestamp: string;
-  action: string;
-  visitorName: string;
-  visitorType: string;
-  towerName: string | null;
-  flatNumber: string | null;
-  residentName: string;
-  scannedBy: string | null;
-}
-
-type DateFilter = "today" | "yesterday" | "week" | "all" | "custom";
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
-function formatSectionDate(iso: string): string {
-  const d = new Date(iso);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (d.toDateString() === today.toDateString()) return "Today";
-  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return d.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric", year: "numeric" });
-}
-
-function formatPickerDate(d: Date): string {
-  return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
-}
-
-function getDateRange(filter: DateFilter, customFrom?: Date, customTo?: Date): { start: Date; end: Date } {
-  const now = new Date();
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(now);
-  end.setHours(23, 59, 59, 999);
-
-  if (filter === "today") return { start, end };
-
-  if (filter === "yesterday") {
-    start.setDate(start.getDate() - 1);
-    end.setDate(end.getDate() - 1);
-    return { start, end };
-  }
-
-  if (filter === "week") {
-    start.setDate(start.getDate() - 6);
-    return { start, end };
-  }
-
-  if (filter === "custom" && customFrom && customTo) {
-    const cs = new Date(customFrom);
-    cs.setHours(0, 0, 0, 0);
-    const ce = new Date(customTo);
-    ce.setHours(23, 59, 59, 999);
-    return { start: cs, end: ce };
-  }
-
-  start.setFullYear(2000);
-  return { start, end };
-}
-
-function extractEvents(logs: VisitorLogData[], towerMap: Map<string, string>): LogEvent[] {
-  const events: LogEvent[] = [];
-
-  for (const log of logs) {
-    const towerName = log.flat?.towerId ? towerMap.get(log.flat?.towerId) ?? null : null;
-    const flatNumber = log.flat?.flatNumber ?? null;
-    const residentName = log.resident
-      ? `${log.resident.firstName || ""} ${log.resident.lastName || ""}`.trim()
-      : "—";
-
-    for (const entry of log.entries || []) {
-      if (entry.enteredAt) {
-        events.push({
-          id: `${log.logId}-entry-${entry.enteredAt}`,
-          timestamp: entry.enteredAt,
-          action: SCAN_DIRECTION.ENTRY,
-          visitorName: log.name,
-          visitorType: log.type,
-          towerName,
-          flatNumber,
-          residentName,
-          scannedBy: entry.scannedBy ?? null,
-        });
-      }
-      if (entry.exitedAt) {
-        events.push({
-          id: `${log.logId}-exit-${entry.exitedAt}`,
-          timestamp: entry.exitedAt,
-          action: SCAN_DIRECTION.EXIT,
-          visitorName: log.name,
-          visitorType: log.type,
-          towerName,
-          flatNumber,
-          residentName,
-          scannedBy: entry.scannedBy ?? null,
-        });
-      }
-    }
-  }
-
-  return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-}
-
-function groupByDate(events: LogEvent[]): { title: string; data: LogEvent[] }[] {
-  const groups: Record<string, LogEvent[]> = {};
-
-  for (const event of events) {
-    const dateKey = new Date(event.timestamp).toDateString();
-    if (!groups[dateKey]) groups[dateKey] = [];
-    groups[dateKey].push(event);
-  }
-
-  return Object.entries(groups)
-    .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-    .map(([dateKey, data]) => ({
-      title: formatSectionDate(dateKey),
-      data,
-    }));
-}
-
-const DATE_FILTERS: { key: DateFilter; label: string }[] = [
-  { key: "today", label: "Today" },
-  { key: "yesterday", label: "Yesterday" },
-  { key: "week", label: "This Week" },
-  { key: "custom", label: "Custom" },
-  { key: "all", label: "All" },
-];
+import { AclResource, SCAN_DIRECTION } from "@repo/schema";
+import {
+  formatTime,
+  formatPickerDate,
+  getDateRange,
+  extractEvents,
+  groupByDate,
+  DateFilter,
+  DATE_FILTER_OPTIONS,
+} from "../../../utils/logs.utils";
 
 export default function LogsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("today");
   const [showFilters, setShowFilters] = useState(false);
   const [customFrom, setCustomFrom] = useState(new Date());
@@ -162,7 +38,25 @@ export default function LogsScreen() {
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
-  const { data: logs = [], isLoading, refetch } = useGetVisitorLogs();
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const apiParams = useMemo(() => {
+    const trimmed = debouncedSearch.trim();
+    if (dateFilter === "all" && !trimmed) return undefined;
+    const params: { search?: string; dateFrom?: string; dateTo?: string } = {};
+    if (trimmed) params.search = trimmed;
+    if (dateFilter !== "all") {
+      const { start, end } = getDateRange(dateFilter, customFrom, customTo);
+      params.dateFrom = start.toISOString();
+      params.dateTo = end.toISOString();
+    }
+    return params;
+  }, [debouncedSearch, dateFilter, customFrom, customTo]);
+
+  const { data: logs = [], isLoading, refetch } = useGetVisitorLogs(apiParams);
 
   const { canViewModule } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
@@ -172,18 +66,8 @@ export default function LogsScreen() {
 
   const sections = useMemo(() => {
     const allEvents = extractEvents(logs, towerMap);
-    const query = searchQuery.toLowerCase().trim();
-    const { start, end } = getDateRange(dateFilter, customFrom, customTo);
-
-    const filtered = allEvents.filter((ev) => {
-      const ts = new Date(ev.timestamp).getTime();
-      if (ts < start.getTime() || ts > end.getTime()) return false;
-      if (query && !ev.visitorName.toLowerCase().includes(query)) return false;
-      return true;
-    });
-
-    return groupByDate(filtered);
-  }, [logs, towerMap, searchQuery, dateFilter, customFrom, customTo]);
+    return groupByDate(allEvents);
+  }, [logs, towerMap]);
 
   const totalCount = useMemo(() => sections.reduce((sum, s) => sum + s.data.length, 0), [sections]);
 
@@ -239,7 +123,7 @@ export default function LogsScreen() {
       {showFilters && (
         <View style={styles.filterPanel}>
           <View style={styles.filterBar}>
-            {DATE_FILTERS.map((f) => (
+            {DATE_FILTER_OPTIONS.map((f) => (
               <TouchableOpacity
                 key={f.key}
                 style={[styles.filterChip, dateFilter === f.key && styles.filterChipActive]}

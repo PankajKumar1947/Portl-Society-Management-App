@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { formatDate } from "@/utils/date";
 import { theme, Routes } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { HorizontalCalendar } from "@/components/ui/horizontal-calendar";
@@ -40,7 +41,7 @@ export default function BookAmenityScreen() {
     router.push(Routes.Amenities.Confirm(
       id,
       name,
-      selectedDate.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+      formatDate(selectedDate, "short"),
       slotLabel
     ));
   };

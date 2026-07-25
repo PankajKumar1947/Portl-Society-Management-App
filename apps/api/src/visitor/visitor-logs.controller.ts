@@ -3,6 +3,7 @@ import {
   Get,
   UseGuards,
   UsePipes,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { VisitorService } from './visitor.service';
@@ -27,8 +28,11 @@ export class VisitorLogsController {
     @CurrentUser('societyId') societyId: string,
     @CurrentUser('role') role: UserRole,
     @CurrentUser('userId') userId: string,
+    @Query('search') search?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
-    const data = await this.service.findAllLogs(societyId, role, userId);
+    const data = await this.service.findAllLogs(societyId, role, userId, { search, dateFrom, dateTo });
     return {
       success: true,
       message: 'Visitor logs retrieved successfully',

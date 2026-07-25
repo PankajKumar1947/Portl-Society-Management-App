@@ -150,10 +150,18 @@ export class VisitorService {
     return this.repository.findLogsByVisitorId(log.visitorId, societyId);
   }
 
-  async findAllLogs(societyId: string, role: UserRole, userId: string) {
+  async findAllLogs(societyId: string, role: UserRole, userId: string, query?: { search?: string; dateFrom?: string; dateTo?: string }) {
     const filter: Record<string, unknown> = { societyId };
     if (role === UserRoles.RESIDENTS) {
       filter.residentId = userId;
+    }
+    if (query?.search) {
+      filter.name = { $regex: query.search, $options: 'i' };
+    }
+    if (query?.dateFrom || query?.dateTo) {
+      filter.createdAt = {};
+      if (query.dateFrom) (filter.createdAt as Record<string, string>).$gte = query.dateFrom;
+      if (query.dateTo) (filter.createdAt as Record<string, string>).$lte = query.dateTo;
     }
     return this.repository.findLogs(filter);
   }

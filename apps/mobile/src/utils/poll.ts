@@ -1,7 +1,8 @@
+import { formatDate } from "./date";
+
 export function formatRemainingTime(expiresAt: string, status: string): string {
   if (status === "closed") {
-    const d = new Date(expiresAt);
-    return `Ended ${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`;
+    return `Ended ${formatDate(expiresAt, "short")}`;
   }
   if (status === "draft") return "Not published yet";
 

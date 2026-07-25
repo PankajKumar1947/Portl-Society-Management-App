@@ -17,7 +17,7 @@ import Badge from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
-import { formatDate, roleLabel } from "@/utils/notice";
+import { formatNoticeDate, roleLabel } from "@/utils/notice";
 import { formatRemainingTime, getPollStatusBadgeConfig } from "@/utils/poll";
 import {
   useGetPollDetail,
@@ -154,7 +154,7 @@ export default function PollDetailsScreen() {
         )}
 
         {poll.publishedOn && (
-          <Text style={styles.date}>Published {formatDate(poll.publishedOn)}</Text>
+          <Text style={styles.date}>Published {formatNoticeDate(poll.publishedOn)}</Text>
         )}
 
         {(hasVoted || poll.status === "closed") && resultOptions.length > 0 && (
