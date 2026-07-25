@@ -1,16 +1,20 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { VisitorRepository } from './visitor.repository';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { UserRole, UserRoles } from '@repo/schema';
 import { ResidentRepository } from '../resident/resident.repository';
 import { FlatRepository } from '../flat/flat.repository';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class VisitorService {
+  private readonly logger = new Logger(VisitorService.name);
+
   constructor(
     private readonly repository: VisitorRepository,
     private readonly residentRepository: ResidentRepository,
     private readonly flatRepository: FlatRepository,
+    private readonly notificationService: NotificationService,
   ) {}
 
   private generatePassCode(): string {
@@ -106,6 +110,7 @@ export class VisitorService {
     logId: string,
     societyId: string,
     status: 'pending' | 'approved' | 'rejected' | 'completed',
+    notifiedUserId?: string,
   ) {
     const log = await this.repository.findOneLog(logId);
     if (!log || log.societyId !== societyId) {
@@ -125,6 +130,24 @@ export class VisitorService {
         entries[entries.length - 1].enteredAt = new Date().toISOString();
       }
       updateData.entries = entries;
+
+      if (log.residentId) {
+        await this.notificationService.sendAndSave(log.residentId, {
+          type: 'visitor_approved',
+          title: 'Visitor Approved',
+          body: `${log.name}'s entry has been approved. Pass code: ${updateData.passCode || log.passCode}`,
+          data: { logId, status: 'approved' },
+        });
+      }
+    } else if (status === 'rejected') {
+      if (log.residentId) {
+        await this.notificationService.sendAndSave(log.residentId, {
+          type: 'visitor_rejected',
+          title: 'Visitor Declined',
+          body: `Entry for ${log.name} has been declined.`,
+          data: { logId, status: 'rejected' },
+        });
+      }
     } else if (status === 'completed') {
       const entries = log.entries || [];
       if (entries.length > 0 && !entries[entries.length - 1].exitedAt) {
@@ -166,6 +189,76 @@ export class VisitorService {
     return this.repository.findLogs(filter);
   }
 
+  async requestEntry(
+    dto: { mobile: string; name?: string; type?: string; purpose?: string; flatId?: string },
+    societyId: string,
+    scannedBy?: string,
+  ) {
+    const profile = await this.repository.findOrCreateProfile({
+      mobile: dto.mobile,
+      name: dto.name || dto.mobile,
+      societyId,
+    });
+
+    let resolvedFlatId = dto.flatId;
+    let residentId: string | undefined;
+
+    if (resolvedFlatId) {
+      const flat = await this.flatRepository.findOne(resolvedFlatId);
+      if (flat) {
+        const residents = await this.residentRepository.find({ societyId, towerId: flat.towerId, flatNumber: flat.flatNumber });
+        if (residents.length > 0) {
+          residentId = residents[0].userId;
+        }
+      }
+    }
+
+    if (!residentId) {
+      const existingLogs = await this.repository.findLogs({ visitorId: profile.visitorId, societyId, residentId: { $ne: null } });
+      if (existingLogs.length > 0) {
+        const logWithResident = existingLogs.find(l => l.residentId);
+        if (logWithResident) {
+          residentId = logWithResident.residentId!;
+          resolvedFlatId = resolvedFlatId || logWithResident.flatId;
+        }
+      }
+    }
+
+    if (!residentId) {
+      throw new BadRequestException(
+        'Could not determine the resident for this visitor. Please select a flat.',
+      );
+    }
+
+    const log = await this.repository.createLog({
+      societyId,
+      visitorId: profile.visitorId,
+      name: profile.name,
+      mobile: profile.mobile,
+      flatId: resolvedFlatId,
+      residentId,
+      type: dto.type || 'guest',
+      purpose: dto.purpose || 'Personal Visit',
+      status: 'pending',
+      entries: [],
+    });
+
+    const populated = await this.repository.findOneLog(log.logId);
+    if (!populated) {
+      throw new NotFoundException('Visitor log creation failed');
+    }
+
+    await this.notificationService.sendAndSave(residentId, {
+      type: 'visitor_request',
+      title: 'Visitor Entry Request',
+      body: `${profile.name} is at the gate requesting entry.`,
+      data: { logId: log.logId, visitorId: profile.visitorId },
+    });
+
+    this.logger.log(`Entry request sent to resident ${residentId} for visitor ${profile.visitorId}`);
+    return populated;
+  }
+
   async scanPassCode(
     passCode: string,
     societyId: string,
@@ -177,7 +270,7 @@ export class VisitorService {
       throw new NotFoundException(`Visitor with pass code "${passCode}" not found`);
     }
 
-    if (log.status !== 'approved') {
+    if (log.status !== 'approved' && log.status !== 'active') {
       throw new BadRequestException(`Pass code is not valid. Status: ${log.status}`);
     }
 

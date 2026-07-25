@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createVisitor, updateVisitorStatus, scanPassCode, visitorQueries } from "@repo/api-client";
+import { createVisitor, updateVisitorStatus, scanPassCode, requestEntry, visitorQueries } from "@repo/api-client";
 import { CreateVisitorBody, UpdatableVisitorStatus, ScanDirection } from "@repo/schema";
 
 export const useCreateVisitor = () => {
@@ -35,6 +35,19 @@ export const useScanPassCode = () => {
         queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorDetail(res.data.logId).key });
       }
       queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitors.key });
+    },
+  });
+};
+
+export const useRequestEntry = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: visitorQueries.requestEntry.key,
+    mutationFn: (data: { mobile: string; name?: string; type?: string; purpose?: string; flatId?: string }) =>
+      requestEntry(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitors.key });
+      queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorLogs.key });
     },
   });
 };

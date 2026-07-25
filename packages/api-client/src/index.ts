@@ -30,6 +30,8 @@ export * from "./react-queries/acl";
 export * from "./routes/acl";
 export * from "./react-queries/visitor";
 export * from "./routes/visitor";
+export * from "./react-queries/notification";
+export * from "./routes/notification";
 export {
   setAccessToken,
   setRefreshToken,

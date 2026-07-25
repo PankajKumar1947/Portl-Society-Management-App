@@ -23,6 +23,7 @@ export const userSchema = z.object({
   gender: z.string().optional(),
   profilePhoto: z.string().optional(),
   societyId: z.string().optional(),
+  fcmToken: z.string().optional(),
 });
 
 export const createUserSchema = userSchema.omit({

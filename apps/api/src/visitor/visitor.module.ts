@@ -9,6 +9,7 @@ import { VisitorLog, VisitorLogSchema } from './entities/visitor-log.entity';
 import { ResidentModule } from '../resident/resident.module';
 import { FlatModule } from '../flat/flat.module';
 import { TokenModule } from '../shared/token/token.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TokenModule } from '../shared/token/token.module';
     ResidentModule,
     FlatModule,
     TokenModule,
+    NotificationModule,
   ],
   controllers: [VisitorController, VisitorLogsController],
   providers: [VisitorService, VisitorRepository],

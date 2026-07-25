@@ -30,4 +30,6 @@ export * from "./access-control-context";
 export * from "./query/use-access-control";
 export * from "./query/use-visitor";
 export * from "./mutation/use-visitor";
+export * from "./query/use-notification";
+export * from "./mutation/use-notification";
 

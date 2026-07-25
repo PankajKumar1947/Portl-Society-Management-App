@@ -27,4 +27,8 @@ export const visitorQueries = {
     key: ["scan-pass-code", passCode],
     endpoint: `/visitors/scan/${passCode}`,
   }),
+  requestEntry: {
+    key: ["request-entry"],
+    endpoint: "/visitors/request-entry",
+  },
 } as const;

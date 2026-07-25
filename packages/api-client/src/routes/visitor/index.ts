@@ -43,3 +43,8 @@ export const scanPassCode = async (params: { passCode: string; type: 'entry' | '
   const res = await apiClient.patch(visitorQueries.scanPassCode(params.passCode).endpoint, null, { params: { type: params.type } });
   return res.data;
 };
+
+export const requestEntry = async (data: { mobile: string; name?: string; type?: string; purpose?: string; flatId?: string }): Promise<VisitorResponse> => {
+  const res = await apiClient.post(visitorQueries.requestEntry.endpoint, data);
+  return res.data;
+};

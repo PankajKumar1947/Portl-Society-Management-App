@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "893369656865",
+    "project_id": "portl-7438d",
+    "storage_bucket": "portl-7438d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893369656865:android:56d11f8c79830d765be560",
+        "android_client_info": {
+          "package_name": "com.pankajkry.portl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_HxwVaURs4mhpORT5ArYadEOxiO9z1k4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

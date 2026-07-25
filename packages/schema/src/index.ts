@@ -15,3 +15,4 @@ export * from "./helpdesk-ticket";
 export * from "./family-member";
 export * from "./acl";
 export * from "./visitor";
+export * from "./notification";

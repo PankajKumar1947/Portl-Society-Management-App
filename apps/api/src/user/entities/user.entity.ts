@@ -58,6 +58,9 @@ export class User {
   @Prop({ index: true })
   societyId?: string;
 
+  @Prop()
+  fcmToken?: string;
+
   comparePassword!: (password: string) => Promise<boolean>;
 }
 

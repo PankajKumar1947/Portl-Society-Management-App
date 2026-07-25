@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { VisitorService } from './visitor.service';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { UpdateVisitorStatusDto } from './dto/update-status.dto';
+import { RequestEntryDto } from './dto/request-entry.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -95,6 +96,27 @@ export class VisitorController {
     return {
       success: true,
       message: 'Visitor visits retrieved successfully',
+      data,
+    };
+  }
+
+  @Post('request-entry')
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
+  async requestEntry(
+    @Body() dto: RequestEntryDto,
+    @CurrentUser('societyId') societyId: string,
+    @CurrentUser('firstName') firstName: string,
+    @CurrentUser('lastName') lastName: string,
+  ) {
+    const scannedBy = `${firstName} ${lastName}`.trim();
+    const data = await this.service.requestEntry(
+      { ...dto, flatId: dto.flatId },
+      societyId,
+      scannedBy,
+    );
+    return {
+      success: true,
+      message: 'Approval request sent to resident',
       data,
     };
   }

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PortL",
-    "slug": "mobile",
+    "slug": "portl",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -14,14 +14,19 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.veerukry.mobile"
+      "bundleIdentifier": "com.pankajkry.portl"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FAF9F5"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.veerukry.mobile"
+      "package": "com.pankajkry.portl",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -56,6 +61,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "74ade280-afa9-43ec-8921-5df86b03d2f7"
+      }
     }
   }
 }
