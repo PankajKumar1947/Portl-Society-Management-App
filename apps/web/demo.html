@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portl App Demo & Screenshots — Society Management App</title>
+  <meta name="description" content="View the product video walkthrough and interface screenshots for the Resident, Guard, and Admin dashboards of Portl.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./icon-full.png">
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    .demo-hero {
+      padding: var(--spacing-section) 0;
+      border-bottom: 1px solid var(--color-border);
+      text-align: center;
+    }
+    .highlight-nav {
+      background-color: var(--color-primary);
+      border: 1px solid #252833;
+      padding: 4px 12px !important;
+      border-radius: var(--radius-sm);
+      color: #252833 !important;
+      box-shadow: 2px 2px 0 #252833;
+    }
+    .highlight-nav:hover {
+      background-color: var(--color-primary-dark) !important;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="demo.html" class="nav-link highlight-nav">Demo</a>
+        <a href="download.html" class="nav-link">Download</a>
+      </nav>
+      <div class="header-actions">
+        <a href="download.html" class="btn btn-primary">Get App</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Demo Content Section -->
+  <section class="demo-hero">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="eyebrow">Product Tour</span>
+        <h1 class="section-title" style="font-size: 48px;">Video Walkthrough & Screenshots</h1>
+        <p class="section-subtitle" style="max-width: 600px; margin: 0 auto;">
+          Take a look at how the Portl app works. Check out the screenshots of our mobile and admin interfaces, or play the video walkthrough.
+        </p>
+      </div>
+
+      <!-- Demo Video Block -->
+      <div class="video-container-card">
+        <div class="video-preview-wrapper">
+          <div class="video-overlay" id="video-overlay-pane">
+            <div class="play-btn-circle" onclick="playMockVideo()">
+              <i data-lucide="play" style="fill: #252833; width: 24px; height: 24px; margin-left: 2px;"></i>
+            </div>
+            <h3>Watch Portl Product Demo</h3>
+            <p>10-minute walkthrough of the system, gate approval flow, and backend console</p>
+          </div>
+          <!-- Google Drive embed iframe placeholder, can be replaced by real user link later -->
+          <div id="demo-video-iframe-placeholder" class="video-placeholder-bg">
+            <div class="pulse-ring"></div>
+            <div class="placeholder-icon"><i data-lucide="video" style="width: 36px; height: 36px;"></i></div>
+            <span class="placeholder-note">Google Drive Video Embed will load here</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshots Gallery Grid -->
+      <div class="screenshots-container">
+        <h3 class="gallery-title">Interface Screenshots</h3>
+        <p class="gallery-subtitle">Drop screenshots into <code>/screenshots/</code> folder in the public directory to customize this section.</p>
+        
+        <div class="screenshots-grid">
+          <!-- Screenshot 1 -->
+          <div class="screenshot-card">
+            <div class="img-wrapper">
+              <img src="./screenshots/resident_dashboard.png" alt="Resident Dashboard" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'500\' viewBox=\'0 0 300 500\' style=\'background:%23FAF9F5;font-family:sans-serif;\'><rect width=\'100%\' height=\'100%\' fill=\'%23FAF9F5\'/><rect x=\'10\' y=\'10\' width=\'280\' height=\'480\' rx=\'20\' fill=\'%23FFFFFF\' stroke=\'%23ECE8DD\' stroke-width=\'2\'/><text x=\'50%\' y=\'45%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%235E6573\' font-weight=\'bold\'>Resident Dashboard</text><text x=\'50%\' y=\'52%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'11\' fill=\'%239AA3AF\'>Drop resident_dashboard.png here</text></svg>'">
+            </div>
+            <div class="screenshot-info">
+              <h4>Resident Dashboard</h4>
+              <p>Quick Actions, Visitor logs, billing, and notice cards.</p>
+            </div>
+          </div>
+
+          <!-- Screenshot 2 -->
+          <div class="screenshot-card">
+            <div class="img-wrapper">
+              <img src="./screenshots/guard_gate.png" alt="Guard Gate Console" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'500\' viewBox=\'0 0 300 500\' style=\'background:%23FAF9F5;font-family:sans-serif;\'><rect width=\'100%\' height=\'100%\' fill=\'%23121216\'/><rect x=\'10\' y=\'10\' width=\'280\' height=\'480\' rx=\'20\' fill=\'%231A1A24\' stroke=\'%23252833\' stroke-width=\'2\'/><text x=\'50%\' y=\'45%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%23D3DB36\' font-weight=\'bold\'>Guard Gate Terminal</text><text x=\'50%\' y=\'52%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'11\' fill=\'%239AA3AF\'>Drop guard_gate.png here</text></svg>'">
+            </div>
+            <div class="screenshot-info">
+              <h4>Guard Gate Terminal</h4>
+              <p>Walk-in registration and barcodes/QR scanning.</p>
+            </div>
+          </div>
+
+          <!-- Screenshot 3 -->
+          <div class="screenshot-card">
+            <div class="img-wrapper">
+              <img src="./screenshots/admin_panel.png" alt="Admin Dashboard" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'500\' viewBox=\'0 0 300 500\' style=\'background:%23FAF9F5;font-family:sans-serif;\'><rect width=\'100%\' height=\'100%\' fill=\'%23FAF9F5\'/><rect x=\'10\' y=\'10\' width=\'280\' height=\'480\' rx=\'10\' fill=\'%23FFFFFF\' stroke=\'%23ECE8DD\' stroke-width=\'2\'/><text x=\'50%\' y=\'45%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%235E6573\' font-weight=\'bold\'>Admin Dashboard</text><text x=\'50%\' y=\'52%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'11\' fill=\'%239AA3AF\'>Drop admin_panel.png here</text></svg>'">
+            </div>
+            <div class="screenshot-info">
+              <h4>Admin Portal</h4>
+              <p>Towers & Flats manager, notice board & polls setup.</p>
+            </div>
+          </div>
+
+          <!-- Screenshot 4 -->
+          <div class="screenshot-card">
+            <div class="img-wrapper">
+              <img src="./screenshots/amenity_booking.png" alt="Amenity Booking" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'500\' viewBox=\'0 0 300 500\' style=\'background:%23FAF9F5;font-family:sans-serif;\'><rect width=\'100%\' height=\'100%\' fill=\'%23FAF9F5\'/><rect x=\'10\' y=\'10\' width=\'280\' height=\'480\' rx=\'20\' fill=\'%23FFFFFF\' stroke=\'%23ECE8DD\' stroke-width=\'2\'/><text x=\'50%\' y=\'45%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%235E6573\' font-weight=\'bold\'>Amenity Booking</text><text x=\'50%\' y=\'52%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'11\' fill=\'%239AA3AF\'>Drop amenity_booking.png here</text></svg>'">
+            </div>
+            <div class="screenshot-info">
+              <h4>Amenity Booking</h4>
+              <p>Browse facilities, choose slots, and pay booking fees.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <p class="copyright">&copy; 2026 Portl Inc. All rights reserved. Society Management App Monorepo.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module" src="./main.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

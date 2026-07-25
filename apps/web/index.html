@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portl — Society Management Platform</title>
+  <meta name="description" content="Portl is a mobile-first society management platform that digitizes conversations at the gate and WhatsApp groups into a seamless, role-aware experience.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./icon-full.png">
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link highlight-nav">Home</a>
+        <a href="demo.html" class="nav-link">Demo</a>
+        <a href="download.html" class="nav-link">Download</a>
+      </nav>
+      <div class="header-actions">
+        <a href="download.html" class="btn btn-primary">Get App</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <span class="eyebrow">Smart Gate & Community Operations</span>
+        <h1 class="hero-title">The Conversations at the gate belong inside the app.</h1>
+        <p class="hero-subtitle">
+          Portl is a mobile-first society management platform that digitizes every conversation that used to happen at the apartment gate or in fragmented WhatsApp groups — and moves them into one seamless, role-aware experience.
+        </p>
+        <div class="hero-buttons">
+          <a href="#simulator" class="btn btn-primary btn-lg">Launch Gate Simulator</a>
+          <a href="#features" class="btn btn-secondary btn-lg">Explore Features</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">&lt; 30s</span>
+            <span class="stat-label">Visitor Approval Time</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Ticket Transparency</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">Paperless</span>
+            <span class="stat-label">Gate Log Audit Trails</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-glowing">
+          <div class="mockup-header">
+            <div class="mockup-dots"><span></span><span></span><span></span></div>
+            <div class="mockup-title">Portl System Operations</div>
+          </div>
+          <div class="mockup-body">
+            <div class="system-diagram-mini">
+              <div class="node node-resident">
+                <span class="node-icon"><i data-lucide="smartphone"></i></span>
+                <span class="node-title">Resident App</span>
+                <span class="node-desc">Approve, pre-invite, book, complain</span>
+              </div>
+              <div class="conn-line conn-1"></div>
+              <div class="node node-server">
+                <span class="logo-dot"></span>
+                <span class="node-title">Portl API Cloud</span>
+                <span class="node-desc">WebSockets & Push Gateways</span>
+              </div>
+              <div class="conn-line conn-2"></div>
+              <div class="node node-guard">
+                <span class="node-icon"><i data-lucide="shield"></i></span>
+                <span class="node-title">Guard Gate Terminal</span>
+                <span class="node-desc">Scan passes, register, alert flats</span>
+              </div>
+            </div>
+            <div class="diagram-tag">Real-time bi-directional pipeline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="eyebrow">Complete Feature Coverage</span>
+        <h2 class="section-title">The Platform Modules</h2>
+        <p class="section-subtitle">Portl features three tightly integrated products to digitalize all daily interactions.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="shield-check"></i></div>
+          <h3 class="feature-name">Visitor Management</h3>
+          <p class="feature-text">Bidirectional notification approval workflow under 30 seconds. Pre-approve guests, generate temporary QR passes, and maintain historical audit logs.</p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="layout-dashboard"></i></div>
+          <h3 class="feature-name">Guard Dashboard</h3>
+          <p class="feature-text">Super-fast walk-in registration, barcode/QR scanning, and exit logging designed specifically for high-pressure security desks at the gate.</p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="home"></i></div>
+          <h3 class="feature-name">Resident Hub</h3>
+          <p class="feature-text">A centralized interface for residents to approve entries, book amenities, pay monthly maintenance bills, raise complaints, and read announcements.</p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="calendar-days"></i></div>
+          <h3 class="feature-name">Amenity Booking</h3>
+          <p class="feature-text">Admins can create amenities with hours, capacities, and slot durations. Residents reserve slots via real-time calendars with manual fee verification.</p>
+        </div>
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="megaphone"></i></div>
+          <h3 class="feature-name">Notice Board & Polls</h3>
+          <p class="feature-text">Broadcast critical updates to specific targets (Guards, Residents, or All) and launch opinion polls to replace chaotic WhatsApp voting lists.</p>
+        </div>
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="wrench"></i></div>
+          <h3 class="feature-name">Helpdesk & Complaints</h3>
+          <p class="feature-text">Structured category categorization (Maintenance vs. Complaints), assigned staff notifications, status progression tracking, and inline comment threads.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Role Showcase Tabs -->
+  <section id="roles" class="roles-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="eyebrow">Tailored User Experiences</span>
+        <h2 class="section-title">One App. Three Roles.</h2>
+        <p class="section-subtitle">Portl adapts its workspace layout and features to match the active user's permissions.</p>
+      </div>
+
+      <div class="roles-showcase-tabs">
+        <button class="role-tab active" onclick="switchRoleView('resident')">Resident App</button>
+        <button class="role-tab" onclick="switchRoleView('guard')">Security Guard</button>
+        <button class="role-tab" onclick="switchRoleView('admin')">Society Admin</button>
+      </div>
+
+      <div class="role-card-display">
+        <!-- Resident Card -->
+        <div id="role-resident" class="role-content-view active">
+          <div class="role-layout-grid">
+            <div class="role-desc-column">
+              <h3><i data-lucide="smartphone" style="width: 24px; height: 24px;"></i> The Resident App</h3>
+              <p class="lead-text">Giving residents full command of their home access, bills, and community life.</p>
+              
+              <ul class="role-feature-list">
+                <li><strong>Dynamic Approvals:</strong> Instant push notifications to approve/reject visitors.</li>
+                <li><strong>Amenity Booking:</strong> Browse categories, check calendars, and pay fees.</li>
+                <li><strong>Bill Management:</strong> View and track outstanding maintenance dues with history.</li>
+                <li><strong>Helpdesk Ticket:</strong> Snap a photo of a leak, raise a ticket, and track it live.</li>
+              </ul>
+              
+              <div class="role-badge">Expo SDK 55 · React Native · TanStack Query</div>
+            </div>
+            <div class="role-visual-column">
+              <div class="mock-app-preview">
+                <div class="mock-app-header">
+                  <span>Resident Dashboard</span>
+                </div>
+                <div class="mock-app-body">
+                  <div class="mock-alert-box warning-alert">
+                    <span class="alert-icon"><i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i></span>
+                    <div class="alert-body">
+                      <strong>Maintenance Bill Overdue</strong>
+                      <p>July 2026 maintenance due: ₹4,500</p>
+                    </div>
+                  </div>
+                  <div class="booking-preview-card">
+                    <div class="card-line"><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> <strong>Swimming Pool Reservation</strong></div>
+                    <div class="card-line">Tomorrow at 7:00 AM - 8:00 AM</div>
+                    <span class="badge badge-success">Confirmed</span>
+                  </div>
+                  <div class="poll-preview-card">
+                    <div class="poll-title"><i data-lucide="bar-chart-2" style="width: 12px; height: 12px;"></i> Paint color for Clubhouse?</div>
+                    <div class="poll-options-list">
+                      <div class="poll-opt"><span style="background-color: #2563eb; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span> Royal Blue <span class="poll-pct">(62%)</span></div>
+                      <div class="poll-opt"><span style="background-color: #16a34a; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span> Olive Green <span class="poll-pct">(38%)</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guard Card -->
+        <div id="role-guard" class="role-content-view">
+          <div class="role-layout-grid">
+            <div class="role-desc-column">
+              <h3><i data-lucide="shield" style="width: 24px; height: 24px;"></i> The Guard Dashboard</h3>
+              <p class="lead-text">Optimized for speed and usability under sunlight at the society main gate.</p>
+              
+              <ul class="role-feature-list">
+                <li><strong>Speed-Driven Navigation:</strong> Giant, tap-friendly tiles for core tasks.</li>
+                <li><strong>Instant Flat Lookup:</strong> Search residents by Tower and Flat number in milliseconds.</li>
+                <li><strong>QR Scanner:</strong> Reads guest passes directly using the device camera.</li>
+                <li><strong>Live Counters:</strong> Tracks total visitors inside, ensuring an active security audit.</li>
+              </ul>
+              
+              <div class="role-badge">React Native · Barcode Scanner · WebSockets</div>
+            </div>
+            <div class="role-visual-column">
+              <div class="mock-app-preview">
+                <div class="mock-app-header">
+                  <span>Guard Main Gate Terminal</span>
+                </div>
+                <div class="mock-app-body">
+                  <div class="stats-grid-2">
+                    <div class="guard-stat-card">
+                      <div class="lbl">Visitors Inside</div>
+                      <div class="val">14</div>
+                    </div>
+                    <div class="guard-stat-card">
+                      <div class="lbl">Pending Invites</div>
+                      <div class="val">3</div>
+                    </div>
+                  </div>
+                  <div class="action-tile-group">
+                    <div class="action-tile-btn accent-btn"><i data-lucide="camera" style="width: 12px; height: 12px; margin-right: 4px;"></i> Register Walk-In</div>
+                    <div class="action-tile-btn"><i data-lucide="qr-code" style="width: 12px; height: 12px; margin-right: 4px;"></i> Scan QR Pass</div>
+                    <div class="action-tile-btn"><i data-lucide="log-out" style="width: 12px; height: 12px; margin-right: 4px;"></i> Log Visitor Exit</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Card -->
+        <div id="role-admin" class="role-content-view">
+          <div class="role-layout-grid">
+            <div class="role-desc-column">
+              <h3><i data-lucide="building-2" style="width: 24px; height: 24px;"></i> The Society Admin Portal</h3>
+              <p class="lead-text">An operations center for the RWA committee and building management.</p>
+              
+              <ul class="role-feature-list">
+                <li><strong>Complete CRUD Control:</strong> Manage Towers, Flats, Residents, and staff profiles.</li>
+                <li><strong>Helpdesk Console:</strong> Assign plumber or electrician staff, comment, and resolve issues.</li>
+                <li><strong>Notices & Polls Builder:</strong> Draft announcements and schedule community polls.</li>
+                <li><strong>Audit Trails:</strong> Access absolute history of visitors, exits, and payment status.</li>
+              </ul>
+              
+              <div class="role-badge">NestJS API · MongoDB / Mongoose · Firebase Cloud Messaging</div>
+            </div>
+            <div class="role-visual-column">
+              <div class="mock-app-preview">
+                <div class="mock-app-header admin-header">
+                  <span>Portl Operations Center</span>
+                </div>
+                <div class="mock-app-body">
+                  <div class="admin-table">
+                    <div class="table-row table-head">
+                      <div>Flat</div>
+                      <div>Resident</div>
+                      <div>Status</div>
+                    </div>
+                    <div class="table-row">
+                      <div>A-402</div>
+                      <div>Pankaj Kumar</div>
+                      <div><span class="badge badge-success">Active</span></div>
+                    </div>
+                    <div class="table-row">
+                      <div>B-102</div>
+                      <div>Sunita Sharma</div>
+                      <div><span class="badge badge-warning">Pending Auth</span></div>
+                    </div>
+                    <div class="table-row">
+                      <div>C-309</div>
+                      <div>Rohan Verma</div>
+                      <div><span class="badge badge-success">Active</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technology Stack & System Architecture -->
+  <section id="architecture" class="architecture-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="eyebrow">Robust Infrastructure</span>
+        <h2 class="section-title">System Architecture & Tech Stack</h2>
+        <p class="section-subtitle">Portl runs on a monorepo workspace structured for scaling, speed, and real-time operations.</p>
+      </div>
+
+      <div class="arch-grid">
+        <!-- Tech List -->
+        <div class="arch-details-column">
+          <div class="arch-card">
+            <h4>Monorepo Structure (Turborepo)</h4>
+            <p>Code is split into discrete packages: <code>apps/mobile</code>, <code>apps/api</code>, and shared packages including client models and Zod schemas, minimizing duplication and enforcing type safety.</p>
+          </div>
+          <div class="arch-card">
+            <h4>Frontend Stack</h4>
+            <p>Built with <strong>Expo SDK 55 + React Native</strong> for cross-platform app performance, leveraging <strong>TanStack React Query</strong> for server-state caching and state synchronization.</p>
+          </div>
+          <div class="arch-card">
+            <h4>Backend REST API</h4>
+            <p>Powered by a robust <strong>NestJS REST API</strong> designed with strict TypeScript models, Zod validation pipelines, and dependency injection services.</p>
+          </div>
+          <div class="arch-card">
+            <h4>Database & Push</h4>
+            <p>A <strong>MongoDB</strong> database managed via <strong>Mongoose</strong> is paired with <strong>Firebase Cloud Messaging (FCM)</strong> to dispatch instant push notifications to mobile clients.</p>
+          </div>
+        </div>
+
+        <!-- Arch Diagram -->
+        <div class="arch-diagram-column">
+          <div class="diagram-container-card">
+            <div class="diagram-title">System Topology Map</div>
+            <div class="arch-visual-node-tree">
+              
+              <div class="arch-group">
+                <span class="group-label">Monorepo Packages</span>
+                <div class="horizontal-nodes">
+                  <div class="mini-node">apps/mobile (Expo)</div>
+                  <div class="mini-node">apps/api (NestJS)</div>
+                  <div class="mini-node">packages/schema</div>
+                </div>
+              </div>
+
+              <div class="flow-indicator"><i data-lucide="arrow-down" style="width: 14px; height: 14px;"></i> HTTP REST / JSON</div>
+
+              <div class="arch-group">
+                <span class="group-label">Core Database & Storage</span>
+                <div class="horizontal-nodes">
+                  <div class="mini-node db-node">MongoDB</div>
+                  <div class="mini-node db-node">ImageKit</div>
+                </div>
+              </div>
+
+              <div class="flow-indicator"><i data-lucide="arrow-down" style="width: 14px; height: 14px;"></i> Event Trigger</div>
+
+              <div class="arch-group">
+                <span class="group-label">Push Alerts Pipeline</span>
+                <div class="horizontal-nodes">
+                  <div class="mini-node gateway-node">FCM Admin SDK</div>
+                  <div class="mini-node gateway-node">FCM Service</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container text-center">
+      <h2>Modernize your society operations today.</h2>
+      <p>Replace paper registers, noisy WhatsApp groups, and missed gate calls with Portl's high-speed gate and community system.</p>
+      <div class="cta-buttons">
+        <a href="https://github.com/PankajKumar1947/Portl-Society-Management-App" target="_blank" class="btn btn-primary btn-lg">View Monorepo Code</a>
+        <a href="download.html" class="btn btn-secondary btn-lg">Download App</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="logo">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <p class="copyright">&copy; 2026 Portl Inc. All rights reserved. Society Management App Monorepo.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module" src="./main.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

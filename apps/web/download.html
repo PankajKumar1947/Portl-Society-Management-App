@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Portl App — Society Management App</title>
+  <meta name="description" content="Download the Portl Mobile App for Android (APK, Play Store) and iOS to manage your apartment gate, book amenities, and more.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./icon-full.png">
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    .download-hero {
+      padding: var(--spacing-section) 0;
+      text-align: center;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-xxl);
+      margin-top: var(--spacing-xxxl);
+    }
+    .download-card {
+      background-color: var(--color-surface);
+      border: 2px solid #252833;
+      border-radius: var(--radius-xxl);
+      padding: var(--spacing-xxxl);
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 380px;
+      box-shadow: 6px 6px 0 #252833;
+    }
+    .download-card:hover {
+      transform: translate(-4px, -4px);
+      box-shadow: 12px 12px 0 var(--color-primary-light), 12px 12px 0 2px #252833;
+    }
+    .download-icon {
+      font-size: 48px;
+      margin-bottom: var(--spacing-md);
+    }
+    .download-platform {
+      font-family: var(--font-family-display);
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: var(--spacing-sm);
+    }
+    .download-desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-xl);
+      flex-grow: 1;
+    }
+    .version-tag {
+      font-size: 12px;
+      background-color: var(--color-surface-secondary);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      margin-bottom: var(--spacing-lg);
+    }
+    .highlight-nav {
+      background-color: var(--color-primary);
+      border: 1px solid #252833;
+      padding: 4px 12px !important;
+      border-radius: var(--radius-sm);
+      color: #252833 !important;
+      box-shadow: 2px 2px 0 #252833;
+    }
+    .highlight-nav:hover {
+      background-color: var(--color-primary-dark) !important;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="demo.html" class="nav-link">Demo</a>
+        <a href="download.html" class="nav-link highlight-nav">Download</a>
+      </nav>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-secondary">Back Home</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Download Hero -->
+  <section class="download-hero">
+    <div class="container">
+      <span class="eyebrow">Mobile Clients</span>
+      <h1 class="section-title" style="font-size: 48px;">Download Portl App</h1>
+      <p class="section-subtitle" style="max-width: 600px; margin: 0 auto;">
+        Get access to your society gates, pre-approve guest visitors, view notices, pay maintenance bills, and book community spaces.
+      </p>
+
+      <div class="download-grid">
+        <!-- Google Play -->
+        <div class="download-card">
+          <div>
+            <div class="download-icon"><i data-lucide="play" style="width: 48px; height: 48px;"></i></div>
+            <h3 class="download-platform">Google Play Store</h3>
+            <span class="version-tag">Android (v1.0.0)</span>
+            <p class="download-desc">Download and install the official app directly from the Google Play Store for automatic background updates and secure verification.</p>
+          </div>
+          <a href="https://play.google.com/store" target="_blank" class="btn btn-primary btn-full">Get on Play Store</a>
+        </div>
+
+        <!-- Direct APK -->
+        <div class="download-card">
+          <div>
+            <div class="download-icon"><i data-lucide="package" style="width: 48px; height: 48px;"></i></div>
+            <h3 class="download-platform">Direct APK Link</h3>
+            <span class="version-tag">Android APK (Universal)</span>
+            <p class="download-desc">For testing and manual installation. Download the APK file directly to your Android device. Perfect for guard tablets and testing environments.</p>
+          </div>
+          <a href="#" class="btn btn-secondary btn-full" onclick="alert('APK file download link will be configured soon.')">Download APK Directly</a>
+        </div>
+
+        <!-- iOS App Store -->
+        <div class="download-card">
+          <div>
+            <div class="download-icon"><i data-lucide="smartphone" style="width: 48px; height: 48px;"></i></div>
+            <h3 class="download-platform">Apple App Store</h3>
+            <span class="version-tag">iOS (Upcoming)</span>
+            <p class="download-desc">The official iOS companion application for Apple iPhone users. Manage your invitations and receive push notifications on the go.</p>
+          </div>
+          <a href="https://apps.apple.com" target="_blank" class="btn btn-secondary btn-full" style="opacity: 0.6; cursor: not-allowed;" onclick="event.preventDefault(); alert('iOS version coming soon!')">Coming Soon</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+        <img src="./logo.png" alt="Portl Logo" class="logo-img">
+        <span class="logo-text">portl</span>
+      </div>
+      <p class="copyright">&copy; 2026 Portl Inc. All rights reserved. Society Management App Monorepo.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
