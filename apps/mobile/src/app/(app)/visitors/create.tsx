@@ -19,7 +19,7 @@ import { FormPhone } from "@/components/ui/form-phone";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormDate } from "@/components/ui/form-date";
 import { useCreateVisitor, useGetTowers, useGetFlats, useAccessControl } from "@repo/operations";
-import { AclResource, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, CreateVisitorForm } from "@repo/schema";
+import { AclResource, VISITOR_TYPE, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, CreateVisitorForm } from "@repo/schema";
 
 export default function CreateVisitorScreen() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function CreateVisitorScreen() {
 
   const methods = useForm<CreateVisitorForm>({
     defaultValues: {
-      type: "guest",
+      type: VISITOR_TYPE.GUEST,
       name: "",
       mobile: "",
       purpose: "",
@@ -64,9 +64,9 @@ export default function CreateVisitorScreen() {
     }, {
       onSuccess: (res) => {
         router.push({
-          ...Routes.Visitors.Pass(res.data.visitorId),
+          ...Routes.Visitors.Pass(res.data.logId),
           params: {
-            id: res.data.visitorId,
+            id: res.data.logId,
             name: res.data.name,
             type: res.data.type,
             date: "Today",

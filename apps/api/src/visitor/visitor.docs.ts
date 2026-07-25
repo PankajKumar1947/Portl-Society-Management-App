@@ -20,24 +20,24 @@ export function ApiGetVisitors() {
 
 export function ApiGetVisitor() {
   return applyDecorators(
-    ApiOperation({ summary: 'Get specific visitor details' }),
-    ApiResponse({ status: 200, description: 'Visitor retrieved successfully.' }),
-    ApiResponse({ status: 404, description: 'Visitor not found.' }),
+    ApiOperation({ summary: 'Get specific visitor log details' }),
+    ApiResponse({ status: 200, description: 'Visitor log retrieved successfully.' }),
+    ApiResponse({ status: 404, description: 'Visitor log not found.' }),
   );
 }
 
 export function ApiUpdateVisitorStatus() {
   return applyDecorators(
-    ApiOperation({ summary: 'Approve, reject, check-in, or check-out a visitor' }),
+    ApiOperation({ summary: 'Approve, reject, or complete a visitor log' }),
     ApiResponse({ status: 200, description: 'Visitor status updated successfully.' }),
-    ApiResponse({ status: 404, description: 'Visitor not found.' }),
+    ApiResponse({ status: 404, description: 'Visitor log not found.' }),
   );
 }
 
-export function ApiVerifyPassCode() {
+export function ApiScanPassCode() {
   return applyDecorators(
-    ApiOperation({ summary: 'Verify visitor QR pass code' }),
-    ApiResponse({ status: 200, description: 'Pass code verified successfully.' }),
+    ApiOperation({ summary: 'Guard scan visitor pass code for entry/exit' }),
+    ApiResponse({ status: 200, description: 'Pass code scanned successfully.' }),
     ApiResponse({ status: 404, description: 'Invalid or expired pass code.' }),
   );
 }

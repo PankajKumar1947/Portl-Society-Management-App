@@ -293,6 +293,8 @@ export class AuthService {
       email: user.email,
       role: user.role,
       societyId: societyId || undefined,
+      firstName: user.firstName,
+      lastName: user.lastName,
     };
     const { accessToken, refreshToken } =
       await this.tokenService.generateTokens(payload);

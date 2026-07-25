@@ -15,7 +15,7 @@ import { InfoRow } from "@/components/ui/info-row";
 import { Button } from "@/components/ui/button";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useGetVisitorDetail, useUpdateVisitorStatus, useAccessControl, useGetTowers } from "@repo/operations";
-import { AclResource } from "@repo/schema";
+import { AclResource, VISITOR_STATUS } from "@repo/schema";
 
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [seconds, setSeconds] = useState(initial);
@@ -104,7 +104,7 @@ export default function ApprovalScreen() {
             variant="outline"
             style={{ flex: 1, height: 50, borderColor: theme.colors.danger }}
             onPress={() => {
-              updateStatus("rejected", {
+              updateStatus(VISITOR_STATUS.REJECTED, {
                 onSuccess: () => {
                   router.replace(Routes.Visitors.Index);
                 }
@@ -117,20 +117,20 @@ export default function ApprovalScreen() {
           <Button
             style={{ flex: 1, height: 50 }}
             onPress={() => {
-              updateStatus("approved", {
-                onSuccess: (res) => {
-                  router.replace({
-                    pathname: "/visitors/[id]/pass",
-                    params: {
-                      id: res.data.visitorId,
-                      name: res.data.name,
-                      type: res.data.type,
-                      date: "Today",
-                      time: "Approved Pass",
-                      status: res.data.status,
-                      passId: res.data.passCode || "N/A",
-                    }
-                  });
+              updateStatus(VISITOR_STATUS.APPROVED, {
+                  onSuccess: (res) => {
+                    router.replace({
+                      pathname: "/visitors/[id]/pass",
+                      params: {
+                        id: res.data.logId,
+                        name: res.data.name,
+                        type: res.data.type,
+                        date: "Today",
+                        time: "Approved Pass",
+                        status: res.data.status,
+                        passId: res.data.passCode || "N/A",
+                      }
+                    });
                 }
               });
             }}

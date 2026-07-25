@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Share,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -15,69 +16,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
 
-/** Styled QR-code placeholder — replace View with QRCode from
- *  react-native-qrcode-svg once the library is installed. */
+import QRCode from "react-native-qrcode-svg";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useGetVisitorDetail, useAccessControl, useGetTowers } from "@repo/operations";
-import { AclResource } from "@repo/schema";
+import { Routes } from "@/constants/routes";
+import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers } from "@repo/operations";
+import { AclResource, VISITOR_STATUS } from "@repo/schema";
 
-/** Styled QR-code placeholder — replace View with QRCode from
- *  react-native-qrcode-svg once the library is installed. */
-function QRPlaceholder({ value }: { value: string }) {
-  const CELL = 7;
-  const GRID = 17;
-  // pseudo-random deterministic pattern from value characters
-  const seed = value.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const cells = Array.from({ length: GRID * GRID }, (_, i) => {
-    const r = Math.floor(i / GRID);
-    const c = i % GRID;
-    // corner finder patterns
-    if ((r < 3 && c < 3) || (r < 3 && c >= GRID - 3) || (r >= GRID - 3 && c < 3)) {
-      return true;
-    }
-    // pseudo-random fill
-    return (((seed * (i + 1) * 31) ^ (i * 17)) & 1) === 1;
-  });
-
-  return (
-    <View style={qrStyles.wrapper}>
-      <View style={qrStyles.grid}>
-        {cells.map((filled, i) => (
-          <View
-            key={i}
-            style={[
-              qrStyles.cell,
-              { width: CELL, height: CELL },
-              filled ? qrStyles.dark : qrStyles.light,
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
-
-const qrStyles = StyleSheet.create({
-  wrapper: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: theme.radius.md,
-    alignSelf: "center",
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    width: 7 * 17,
-  },
-  cell: {},
-  dark: { backgroundColor: "#000" },
-  light: { backgroundColor: "#fff" },
-});
+const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "secondary"> = {
+  [VISITOR_STATUS.APPROVED]: "success",
+  [VISITOR_STATUS.PENDING]: "warning",
+  [VISITOR_STATUS.REJECTED]: "danger",
+  [VISITOR_STATUS.COMPLETED]: "secondary",
+};
 
 export default function VisitorPassScreen() {
   const router = useRouter();
+  const [showPastVisits, setShowPastVisits] = useState(false);
   const {
     id,
     name: paramName,
@@ -97,6 +51,9 @@ export default function VisitorPassScreen() {
   }>();
 
   const { data: visitor } = useGetVisitorDetail(id || "", { enabled: !!id });
+  const { data: visits = [] } = useGetVisitorVisits(id || "", { enabled: !!id });
+
+  const pastVisits = useMemo(() => visits.filter((v) => v.logId !== id), [visits, id]);
 
   const { canViewModule } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
@@ -108,12 +65,14 @@ export default function VisitorPassScreen() {
   const name = visitor?.name || paramName || "Visitor";
   const type = (visitor?.type || paramType || "Guest").toUpperCase();
   const purpose = visitor?.purpose || "—";
-  const date = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleDateString() : (paramDate || "Today");
-  const time = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (paramTime || "Pending Arrival");
-  const status = visitor?.status || paramStatus || "approved";
+  const entries = visitor?.entries || [];
+  const latestEntry = entries[entries.length - 1];
+  const entryDate = latestEntry?.enteredAt ? new Date(latestEntry.enteredAt).toLocaleDateString() : null;
+  const entryTime = latestEntry?.enteredAt ? new Date(latestEntry.enteredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+  const date = entryDate || paramDate || "Today";
+  const time = entryTime || paramTime || "Pending Arrival";
+  const status = visitor?.status || paramStatus || VISITOR_STATUS.APPROVED;
   const passId = visitor?.passCode || paramPassId || "VP00000000";
-  const visitedAt = visitor?.visitedAt ? new Date(visitor.visitedAt).toLocaleString() : null;
-  const exitedAt = visitor?.exitedAt ? new Date(visitor.exitedAt).toLocaleString() : null;
   const createdAt = visitor?.createdAt ? new Date(visitor.createdAt).toLocaleString() : null;
 
   const handleShare = async () => {
@@ -122,7 +81,7 @@ export default function VisitorPassScreen() {
     });
   };
 
-  const isApproved = status === "approved" || status === "success";
+  const isApproved = status === VISITOR_STATUS.APPROVED || status === VISITOR_STATUS.COMPLETED;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -164,7 +123,9 @@ export default function VisitorPassScreen() {
             </View>
           )}
 
-          <QRPlaceholder value={passId} />
+          <View style={styles.qrWrapperStyles}>
+            <QRCode value={passId} size={200} backgroundColor="#fff" color="#000" />
+          </View>
 
           <View style={styles.passIdRow}>
             <Text style={styles.passIdLabel}>Pass ID: </Text>
@@ -177,7 +138,7 @@ export default function VisitorPassScreen() {
           </View>
         </Card>
 
-        {/* Visitor History */}
+        {/* Visit Timeline */}
         <Card variant="flat" style={styles.historyCard}>
           <Text style={styles.sectionTitle}>Visit Timeline</Text>
           <View style={styles.divider} />
@@ -188,21 +149,25 @@ export default function VisitorPassScreen() {
               value={createdAt}
             />
           )}
-          {visitor?.status === "approved" && visitedAt && (
-            <InfoRow
-              icon="checkmark-circle-outline"
-              label="Entered"
-              value={visitedAt}
-            />
-          )}
-          {visitor?.status === "completed" && exitedAt && (
-            <InfoRow
-              icon="exit-outline"
-              label="Exited"
-              value={exitedAt}
-            />
-          )}
-          {visitor?.status === "rejected" && (
+          {entries.map((entry, idx) => (
+            <View key={idx}>
+              {entry.enteredAt && (
+                <InfoRow
+                  icon="checkmark-circle-outline"
+                  label={idx === 0 && entries.length > 1 ? `Entry ${idx + 1}` : "Entered"}
+                  value={new Date(entry.enteredAt).toLocaleString()}
+                />
+              )}
+              {entry.exitedAt && (
+                <InfoRow
+                  icon="exit-outline"
+                  label={idx === 0 && entries.length > 1 ? `Exit ${idx + 1}` : "Exited"}
+                  value={new Date(entry.exitedAt).toLocaleString()}
+                />
+              )}
+            </View>
+          ))}
+          {visitor?.status === VISITOR_STATUS.REJECTED && (
             <InfoRow
               icon="close-circle-outline"
               label="Status"
@@ -210,6 +175,80 @@ export default function VisitorPassScreen() {
             />
           )}
         </Card>
+
+        {/* Past Visits */}
+        {pastVisits.length > 0 && (
+          <Card variant="flat" style={styles.pastVisitsCard}>
+            <TouchableOpacity
+              style={styles.pastVisitsHeader}
+              onPress={() => setShowPastVisits((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.pastVisitsHeaderLeft}>
+                <Text style={styles.sectionTitle}>Past Visits</Text>
+                <View style={styles.pastVisitsCount}>
+                  <Text style={styles.pastVisitsCountText}>{pastVisits.length}</Text>
+                </View>
+              </View>
+              <Ionicons
+                name={showPastVisits ? "chevron-up" : "chevron-down"}
+                size={20}
+                color={theme.colors.textSecondary}
+              />
+            </TouchableOpacity>
+            <View style={styles.divider} />
+            {showPastVisits && (
+              <View style={styles.pastVisitsList}>
+                {pastVisits.map((visit, idx) => {
+                  const firstEntry = visit.entries?.[0];
+                  return (
+                    <TouchableOpacity
+                      key={visit.logId}
+                      style={[styles.pastVisitCard, idx < pastVisits.length - 1 && styles.pastVisitCardBorder]}
+                      onPress={() => router.push(Routes.Visitors.Pass(visit.logId))}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.pastVisitTop}>
+                        <Text style={styles.pastVisitDate}>
+                          {visit.createdAt
+                            ? new Date(visit.createdAt).toLocaleDateString(undefined, {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "Unknown date"}
+                        </Text>
+                        <Badge variant={STATUS_VARIANT[visit.status]}>
+                          {visit.status.charAt(0).toUpperCase() + visit.status.slice(1)}
+                        </Badge>
+                      </View>
+                      <View style={styles.pastVisitTimeline}>
+                        <Text style={styles.pastVisitPassId}>Pass: {visit.passCode || "N/A"}</Text>
+                        {firstEntry?.enteredAt && (
+                          <View style={styles.pastVisitEntryRow}>
+                            <View style={[styles.pastVisitDot, styles.entryDotPast]} />
+                            <Text style={styles.pastVisitTime}>
+                              IN {new Date(firstEntry.enteredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </Text>
+                          </View>
+                        )}
+                        {firstEntry?.exitedAt && (
+                          <View style={styles.pastVisitEntryRow}>
+                            <View style={[styles.pastVisitDot, styles.exitDotPast]} />
+                            <Text style={styles.pastVisitTime}>
+                              OUT {new Date(firstEntry.exitedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      {idx < pastVisits.length - 1 && <View style={styles.pastVisitConnector} />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </Card>
+        )}
 
         <Button onPress={handleShare} style={styles.shareBtn}>
           Share Pass
@@ -308,6 +347,88 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.lg,
   },
+  pastVisitsCard: {
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  pastVisitsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xs,
+  },
+  pastVisitsHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+  },
+  pastVisitsCount: {
+    backgroundColor: theme.colors.surfaceSecondary,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  pastVisitsCountText: {
+    fontSize: 12,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.textMuted,
+  },
+  pastVisitsList: {
+    gap: theme.spacing.sm,
+  },
+  pastVisitCard: {
+    paddingVertical: theme.spacing.sm,
+  },
+  pastVisitCardBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  pastVisitTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xs,
+  },
+  pastVisitDate: {
+    fontSize: 14,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
+  },
+  pastVisitTimeline: {
+    gap: 3,
+  },
+  pastVisitPassId: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginBottom: 2,
+  },
+  pastVisitEntryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  pastVisitDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  entryDotPast: {
+    backgroundColor: theme.colors.success,
+  },
+  exitDotPast: {
+    backgroundColor: theme.colors.warning,
+  },
+  pastVisitTime: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.medium,
+  },
+  pastVisitConnector: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginTop: theme.spacing.sm,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: theme.fontWeights.bold,
@@ -318,5 +439,13 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: theme.colors.border,
     marginBottom: theme.spacing.sm,
+  },
+  qrWrapperStyles: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: theme.radius.md,
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
 });

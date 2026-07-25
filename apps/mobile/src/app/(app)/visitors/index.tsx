@@ -14,28 +14,26 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Routes } from "@/constants/routes";
 import { useGetVisitors, useAccessControl, useGetTowers } from "@repo/operations";
-import { AclResource } from "@repo/schema";
+import { AclResource, VISITOR_STATUS } from "@repo/schema";
 
-type VisitorStatus = "approved" | "pending" | "rejected" | "completed";
-
-const STATUS_VARIANT: Record<VisitorStatus, "success" | "warning" | "danger" | "secondary"> = {
-  approved: "success",
-  pending: "warning",
-  rejected: "danger",
-  completed: "secondary",
+const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "secondary"> = {
+  [VISITOR_STATUS.APPROVED]: "success",
+  [VISITOR_STATUS.PENDING]: "warning",
+  [VISITOR_STATUS.REJECTED]: "danger",
+  [VISITOR_STATUS.COMPLETED]: "secondary",
 };
 
 const TABS = [
   { id: "all", label: "All" },
-  { id: "pending", label: "Pending" },
-  { id: "approved", label: "Approved" },
+  { id: VISITOR_STATUS.PENDING, label: "Pending" },
+  { id: VISITOR_STATUS.APPROVED, label: "Approved" },
 ];
 
 export default function VisitorsScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
 
-  const statusFilter = activeTab === "pending" ? "pending" : activeTab === "approved" ? "approved" : undefined;
+  const statusFilter = activeTab === VISITOR_STATUS.PENDING ? VISITOR_STATUS.PENDING : activeTab === VISITOR_STATUS.APPROVED ? VISITOR_STATUS.APPROVED : undefined;
   const { data: visitors = [], isLoading, refetch } = useGetVisitors({ status: statusFilter });
 
   const { canViewModule } = useAccessControl();
@@ -58,11 +56,18 @@ export default function VisitorsScreen() {
           />
         }
         rightElement={
-          <IconButton
-            onPress={() => router.push(Routes.Visitors.History)}
-            icon={<Ionicons name="document-text-outline" size={22} color={theme.colors.text} />}
-            variant="ghost"
-          />
+          <View style={{ flexDirection: "row", gap: theme.spacing.xs }}>
+            <IconButton
+              onPress={() => router.push(Routes.Visitors.Scan)}
+              icon={<Ionicons name="qr-code-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+            />
+            <IconButton
+              onPress={() => router.push(Routes.Visitors.Logs)}
+              icon={<Ionicons name="document-text-outline" size={22} color={theme.colors.text} />}
+              variant="ghost"
+            />
+          </View>
         }
       />
 
@@ -76,7 +81,7 @@ export default function VisitorsScreen() {
 
         <FlatList
           data={visitors}
-          keyExtractor={(item) => item.visitorId}
+          keyExtractor={(item) => item.logId}
           contentContainerStyle={styles.list}
           refreshControl={
             <RefreshControl refreshing={isLoading} onRefresh={refetch} />
@@ -92,14 +97,14 @@ export default function VisitorsScreen() {
             <Card
               variant="flat"
               style={styles.card}
-              onPress={() => router.push(Routes.Visitors.Pass(item.visitorId))}
+              onPress={() => router.push(Routes.Visitors.Pass(item.logId))}
             >
               <PersonListItem
                 name={item.name}
                 subtitle={item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                 meta={item.purpose || "No purpose specified"}
                 rightElement={
-                  <Badge variant={STATUS_VARIANT[item.status as VisitorStatus]}>
+                  <Badge variant={STATUS_VARIANT[item.status]}>
                     {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                   </Badge>
                 }

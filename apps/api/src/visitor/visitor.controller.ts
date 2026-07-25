@@ -12,6 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { VisitorService } from './visitor.service';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
+import { UpdateVisitorStatusDto } from './dto/update-status.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -24,7 +25,7 @@ import {
   ApiGetVisitors,
   ApiGetVisitor,
   ApiUpdateVisitorStatus,
-  ApiVerifyPassCode,
+  ApiScanPassCode,
 } from './visitor.docs';
 
 @ApiTags('visitors')
@@ -69,29 +70,14 @@ export class VisitorController {
     };
   }
 
-  @Get('verify/:passCode')
-  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
-  @ApiVerifyPassCode()
-  async verifyPassCode(
-    @Param('passCode') passCode: string,
-    @CurrentUser('societyId') societyId: string,
-  ) {
-    const data = await this.service.verifyPassCode(passCode, societyId);
-    return {
-      success: true,
-      message: 'Pass code verified successfully',
-      data,
-    };
-  }
-
-  @Get(':visitorId')
+  @Get(':logId')
   @Roles(UserRoles.ADMIN, UserRoles.GUARD, UserRoles.RESIDENTS)
   @ApiGetVisitor()
   async findOne(
-    @Param('visitorId') visitorId: string,
+    @Param('logId') logId: string,
     @CurrentUser('societyId') societyId: string,
   ) {
-    const data = await this.service.findOne(visitorId, societyId);
+    const data = await this.service.findOne(logId, societyId);
     return {
       success: true,
       message: 'Visitor retrieved successfully',
@@ -99,18 +85,51 @@ export class VisitorController {
     };
   }
 
-  @Patch(':visitorId/status')
+  @Get(':logId/visits')
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD, UserRoles.RESIDENTS)
+  async findVisits(
+    @Param('logId') logId: string,
+    @CurrentUser('societyId') societyId: string,
+  ) {
+    const data = await this.service.findVisitsByLogId(logId, societyId);
+    return {
+      success: true,
+      message: 'Visitor visits retrieved successfully',
+      data,
+    };
+  }
+
+  @Patch(':logId/status')
   @Roles(UserRoles.ADMIN, UserRoles.GUARD, UserRoles.RESIDENTS)
   @ApiUpdateVisitorStatus()
   async updateStatus(
-    @Param('visitorId') visitorId: string,
+    @Param('logId') logId: string,
     @CurrentUser('societyId') societyId: string,
-    @Body('status') status: 'approved' | 'rejected' | 'completed',
+    @Body() dto: UpdateVisitorStatusDto,
   ) {
-    const data = await this.service.updateStatus(visitorId, societyId, status);
+    const data = await this.service.updateStatus(logId, societyId, dto.status);
     return {
       success: true,
-      message: `Visitor status updated to ${status}`,
+      message: `Visitor status updated to ${dto.status}`,
+      data,
+    };
+  }
+
+  @Patch('scan/:passCode')
+  @Roles(UserRoles.ADMIN, UserRoles.GUARD)
+  @ApiScanPassCode()
+  async scanPassCode(
+    @Param('passCode') passCode: string,
+    @Query('type') type: 'entry' | 'exit',
+    @CurrentUser('societyId') societyId: string,
+    @CurrentUser('firstName') firstName: string,
+    @CurrentUser('lastName') lastName: string,
+  ) {
+    const scannedBy = `${firstName} ${lastName}`.trim();
+    const data = await this.service.scanPassCode(passCode, societyId, type, scannedBy);
+    return {
+      success: true,
+      message: `Pass code scanned for ${type}`,
       data,
     };
   }

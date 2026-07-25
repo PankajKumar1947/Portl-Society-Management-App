@@ -7,6 +7,8 @@ export interface TokenPayload {
   email: string;
   role: UserRole;
   societyId?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 const ACCESS_TOKEN_EXPIRY = '15m';

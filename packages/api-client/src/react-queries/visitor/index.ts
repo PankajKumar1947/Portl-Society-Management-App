@@ -3,20 +3,28 @@ export const visitorQueries = {
     key: ["get-visitors"],
     endpoint: "/visitors",
   },
-  getVisitorDetail: (visitorId: string) => ({
-    key: ["get-visitor-detail", visitorId],
-    endpoint: `/visitors/${visitorId}`,
+  getVisitorDetail: (logId: string) => ({
+    key: ["get-visitor-detail", logId],
+    endpoint: `/visitors/${logId}`,
   }),
+  getVisitorVisits: (logId: string) => ({
+    key: ["get-visitor-visits", logId],
+    endpoint: `/visitors/${logId}/visits`,
+  }),
+  getVisitorLogs: {
+    key: ["get-visitor-logs"],
+    endpoint: "/visitor-logs",
+  },
   create: {
     key: ["create-visitor"],
     endpoint: "/visitors",
   },
-  updateStatus: (visitorId: string) => ({
-    key: ["update-visitor-status", visitorId],
-    endpoint: `/visitors/${visitorId}/status`,
+  updateStatus: (logId: string) => ({
+    key: ["update-visitor-status", logId],
+    endpoint: `/visitors/${logId}/status`,
   }),
-  verifyPassCode: (passCode: string) => ({
-    key: ["verify-pass-code", passCode],
-    endpoint: `/visitors/verify/${passCode}`,
+  scanPassCode: (passCode: string) => ({
+    key: ["scan-pass-code", passCode],
+    endpoint: `/visitors/scan/${passCode}`,
   }),
 } as const;

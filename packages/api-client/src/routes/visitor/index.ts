@@ -1,6 +1,5 @@
 import {
   CreateVisitorBody,
-  UpdateVisitorBody,
   VisitorResponse,
   VisitorListResponse,
 } from "@repo/schema";
@@ -12,8 +11,18 @@ export const getVisitors = async (params?: { status?: string; type?: string }): 
   return res.data;
 };
 
-export const getVisitorDetails = async (visitorId: string): Promise<VisitorResponse> => {
-  const res = await apiClient.get(visitorQueries.getVisitorDetail(visitorId).endpoint);
+export const getVisitorDetails = async (logId: string): Promise<VisitorResponse> => {
+  const res = await apiClient.get(visitorQueries.getVisitorDetail(logId).endpoint);
+  return res.data;
+};
+
+export const getVisitorVisits = async (logId: string): Promise<VisitorListResponse> => {
+  const res = await apiClient.get(visitorQueries.getVisitorVisits(logId).endpoint);
+  return res.data;
+};
+
+export const getVisitorLogs = async (): Promise<VisitorListResponse> => {
+  const res = await apiClient.get(visitorQueries.getVisitorLogs.endpoint);
   return res.data;
 };
 
@@ -23,14 +32,14 @@ export const createVisitor = async (data: CreateVisitorBody): Promise<VisitorRes
 };
 
 export const updateVisitorStatus = async (
-  visitorId: string,
-  status: 'approved' | 'rejected' | 'completed',
+  logId: string,
+  status: 'pending' | 'approved' | 'rejected' | 'completed',
 ): Promise<VisitorResponse> => {
-  const res = await apiClient.patch(visitorQueries.updateStatus(visitorId).endpoint, { status });
+  const res = await apiClient.patch(visitorQueries.updateStatus(logId).endpoint, { status });
   return res.data;
 };
 
-export const verifyPassCode = async (passCode: string): Promise<VisitorResponse> => {
-  const res = await apiClient.get(visitorQueries.verifyPassCode(passCode).endpoint);
+export const scanPassCode = async (params: { passCode: string; type: 'entry' | 'exit' }): Promise<VisitorResponse> => {
+  const res = await apiClient.patch(visitorQueries.scanPassCode(params.passCode).endpoint, null, { params: { type: params.type } });
   return res.data;
 };

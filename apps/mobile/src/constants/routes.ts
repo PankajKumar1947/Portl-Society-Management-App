@@ -107,7 +107,8 @@ export const Routes = {
   Visitors: {
     Index: app("/visitors"),
     Create: app("/visitors/create"),
-    History: app("/visitors/history"),
+    Scan: app("/visitors/scan"),
+    Logs: app("/visitors/logs"),
     Approval: (id: string) => ({
       pathname: app("/visitors/[id]/approval"),
       params: { id },

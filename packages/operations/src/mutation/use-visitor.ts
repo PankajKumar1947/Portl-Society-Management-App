@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createVisitor, updateVisitorStatus, verifyPassCode, visitorQueries } from "@repo/api-client";
-import { CreateVisitorBody } from "@repo/schema";
+import { createVisitor, updateVisitorStatus, scanPassCode, visitorQueries } from "@repo/api-client";
+import { CreateVisitorBody, UpdatableVisitorStatus, ScanDirection } from "@repo/schema";
 
 export const useCreateVisitor = () => {
   const queryClient = useQueryClient();
@@ -13,27 +13,26 @@ export const useCreateVisitor = () => {
   });
 };
 
-export const useUpdateVisitorStatus = (visitorId: string) => {
+export const useUpdateVisitorStatus = (logId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: visitorQueries.updateStatus(visitorId).key,
-    mutationFn: (status: 'approved' | 'rejected' | 'completed') =>
-      updateVisitorStatus(visitorId, status),
+    mutationKey: visitorQueries.updateStatus(logId).key,
+    mutationFn: (status: UpdatableVisitorStatus) =>
+      updateVisitorStatus(logId, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorDetail(visitorId).key });
+      queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorDetail(logId).key });
       queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitors.key });
     },
   });
 };
 
-export const useVerifyPassCode = (passCode: string) => {
+export const useScanPassCode = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: visitorQueries.verifyPassCode(passCode).key,
-    mutationFn: () => verifyPassCode(passCode),
+    mutationFn: (params: { passCode: string; type: ScanDirection }) => scanPassCode(params),
     onSuccess: (res) => {
-      if (res.data?.visitorId) {
-        queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorDetail(res.data.visitorId).key });
+      if (res.data?.logId) {
+        queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitorDetail(res.data.logId).key });
       }
       queryClient.invalidateQueries({ queryKey: visitorQueries.getVisitors.key });
     },
