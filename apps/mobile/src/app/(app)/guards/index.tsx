@@ -19,7 +19,7 @@ export default function GuardsListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
 
-  const { data: guards, isLoading } = useGetGuards({
+  const { data: guards, isLoading, refetch } = useGetGuards({
     type: activeTab,
     search: searchQuery,
   });
@@ -32,7 +32,7 @@ export default function GuardsListScreen() {
   ];
 
   const filteredGuards = guards || [];
-  if (isLoading) {
+  if (isLoading && !filteredGuards.length) {
     return <LoadingScreen title="Security Guards" onBack={() => router.back()} />;
   }
 
@@ -83,6 +83,8 @@ export default function GuardsListScreen() {
       <FlatList
         data={filteredGuards}
         keyExtractor={(item) => item.guardId}
+        refreshing={isLoading}
+        onRefresh={refetch}
         renderItem={({ item }) => {
           const userDetails = item.userDetails;
           return (

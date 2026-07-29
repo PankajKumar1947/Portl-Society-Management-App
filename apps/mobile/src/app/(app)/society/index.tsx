@@ -1,9 +1,9 @@
-import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,9 +24,9 @@ export default function SocietyDetailsScreen() {
   const router = useRouter();
   const { canUpdate } = useAccessControl(AclResource.SOCIETY);
 
-  const { data: society, isLoading, error } = useGetMySociety();
+  const { data: society, isLoading, error, refetch } = useGetMySociety();
 
-  if (isLoading) {
+  if (isLoading && !society) {
     return <LoadingScreen title="My Society" onBack={() => router.back()} />;
   }
 
@@ -54,7 +54,13 @@ export default function SocietyDetailsScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        }
+      >
         {/* Banner / Header Card */}
         <Card variant="flat" style={styles.headerCard}>
           <View style={styles.iconWrapper}>

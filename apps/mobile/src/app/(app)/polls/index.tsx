@@ -47,7 +47,7 @@ export default function PollsScreen() {
   const [draftStatus, setDraftStatus] = useState("all");
   const [draftRecipient, setDraftRecipient] = useState("all");
 
-  const { data: polls, isLoading } = useGetPolls({
+  const { data: polls, isLoading, refetch } = useGetPolls({
     search: searchQuery || undefined,
     status: activeStatus !== "all" ? activeStatus : undefined,
     recipient: activeRecipient !== "all" ? activeRecipient : undefined,
@@ -77,7 +77,7 @@ export default function PollsScreen() {
     setFilterModalVisible(false);
   };
 
-  if (isLoading) return <LoadingScreen title="Polls" />;
+  if (isLoading && !sortedPolls.length) return <LoadingScreen title="Polls" />;
 
   const clearFilters = () => {
     setDraftStatus("all");
@@ -134,6 +134,8 @@ export default function PollsScreen() {
         data={sortedPolls}
         keyExtractor={(item) => item.pollId}
         contentContainerStyle={styles.list}
+        refreshing={isLoading}
+        onRefresh={refetch}
         renderItem={({ item }) => (
           <PollCard
             poll={item}

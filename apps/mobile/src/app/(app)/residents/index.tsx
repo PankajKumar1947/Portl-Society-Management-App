@@ -21,7 +21,7 @@ export default function ResidentsListScreen() {
 
   const { canCreate } = useAccessControl(AclResource.RESIDENTS);
 
-  const { data: residents, isLoading } = useGetResidents(
+  const { data: residents, isLoading, refetch } = useGetResidents(
     undefined,
     { type: activeTab, search: searchQuery }
   );
@@ -35,7 +35,7 @@ export default function ResidentsListScreen() {
 
   const filteredResidents = residents || [];
 
-  if (isLoading) return <LoadingScreen title="Residents" />;
+  if (isLoading && !filteredResidents.length) return <LoadingScreen title="Residents" />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -84,6 +84,8 @@ export default function ResidentsListScreen() {
         <FlatList
           data={filteredResidents}
           keyExtractor={(item) => item.residentId}
+          refreshing={isLoading}
+          onRefresh={refetch}
           renderItem={({ item }) => (
             <View style={styles.listItemWrapper}>
               <PersonListItem

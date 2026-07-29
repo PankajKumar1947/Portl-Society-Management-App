@@ -50,7 +50,7 @@ export default function NoticesScreen() {
   const [draftRecipient, setDraftRecipient] = useState("all");
   const [draftTowerIds, setDraftTowerIds] = useState<string[]>([]);
 
-  const { data: notices, isLoading } = useGetNotices({
+  const { data: notices, isLoading, refetch } = useGetNotices({
     search: searchQuery || undefined,
     status: activeStatus,
     recipient: activeRecipient,
@@ -144,6 +144,8 @@ export default function NoticesScreen() {
         data={notices?.slice().sort(statusSort)}
         keyExtractor={(item) => item.noticeId}
         contentContainerStyle={styles.listContent}
+        refreshing={isLoading}
+        onRefresh={refetch}
         renderItem={({ item: notice }) => (
           <Card
             variant="outlined"

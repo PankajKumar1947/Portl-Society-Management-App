@@ -51,7 +51,7 @@ export default function TicketsContent() {
     };
   }, [searchQuery]);
 
-  const { data: tickets, isLoading } = useGetHelpdeskTickets({
+  const { data: tickets, isLoading, refetch } = useGetHelpdeskTickets({
     search: debouncedSearch || undefined,
     status: activeStatus !== "all" ? activeStatus : undefined,
     category: activeCategory !== "all" ? activeCategory : undefined,
@@ -120,6 +120,8 @@ export default function TicketsContent() {
           data={tickets || []}
           keyExtractor={(item) => item.ticketId}
           contentContainerStyle={styles.list}
+          refreshing={isLoading}
+          onRefresh={refetch}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyState}>
@@ -180,7 +182,7 @@ export default function TicketsContent() {
           activeOpacity={1}
           onPress={() => setFilterVisible(false)}
         >
-          <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+          <TouchableOpacity activeOpacity={1} onPress={() => { }} style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filters</Text>
               <TouchableOpacity onPress={() => setFilterVisible(false)}>

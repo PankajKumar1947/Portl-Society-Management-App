@@ -33,10 +33,14 @@ interface ListItem {
 export default function MyFamilyScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { data: myResident, isLoading: loadingResident } = useGetMyResident();
-  const { data: familyMembers, isLoading: loadingFamily } = useGetFamilyMembers();
+  const { data: myResident, isLoading: loadingResident, refetch: refetchResident } = useGetMyResident();
+  const { data: familyMembers, isLoading: loadingFamily, refetch: refetchFamily } = useGetFamilyMembers();
 
   const loading = loadingResident || loadingFamily;
+
+  const handleRefresh = async () => {
+    await Promise.all([refetchResident(), refetchFamily()]);
+  };
 
   const items = useMemo(() => {
     const result: ListItem[] = [];
@@ -73,7 +77,7 @@ export default function MyFamilyScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  if (loading) {
+  if (loading && !items.length) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScreenHeader title="My Family" onBack={() => router.back()} />
@@ -92,6 +96,8 @@ export default function MyFamilyScreen() {
         data={items}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, items.length === 0 && styles.center]}
+        refreshing={loading}
+        onRefresh={handleRefresh}
         renderItem={({ item }) => (
           <PersonListItem
             name={item.name}

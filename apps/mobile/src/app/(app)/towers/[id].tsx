@@ -20,8 +20,8 @@ export default function TowerDetailsScreen() {
 
   const { canUpdate } = useAccessControl(AclResource.TOWERS);
 
-  const { data: tower, isLoading: isTowerLoading } = useGetTowerDetails(id || "", { enabled: !!id });
-  const { data: flats, isLoading: isFlatsLoading } = useGetFlats(id || "", { enabled: !!id });
+  const { data: tower, isLoading: isTowerLoading, refetch: refetchTower } = useGetTowerDetails(id || "", { enabled: !!id });
+  const { data: flats, isLoading: isFlatsLoading, refetch: refetchFlats } = useGetFlats(id || "", { enabled: !!id });
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -30,7 +30,12 @@ export default function TowerDetailsScreen() {
   }, [navigation]);
 
   const isLoading = isTowerLoading || isFlatsLoading;
-  if (isLoading) return <LoadingScreen title="Tower Details" />;
+
+  const handleRefresh = async () => {
+    await Promise.all([refetchTower(), refetchFlats()]);
+  };
+
+  if (isLoading && !tower) return <LoadingScreen title="Tower Details" />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -52,6 +57,8 @@ export default function TowerDetailsScreen() {
         <FlatList
           data={flats || []}
           keyExtractor={(item) => item.flatId}
+          refreshing={isLoading}
+          onRefresh={handleRefresh}
           renderItem={({ item }) => (
             <FlatCard
               item={item}

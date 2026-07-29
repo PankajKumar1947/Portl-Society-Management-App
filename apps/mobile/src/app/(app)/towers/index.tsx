@@ -9,13 +9,15 @@ import TowerCard from "./_components/tower-card";
 import LoadingScreen from "@/components/layout/loading-screen";
 import { useGetTowers, useAccessControl } from "@repo/operations";
 import { AclResource } from "@repo/schema";
+import NotFoundScreen from "@/components/layout/not-found-screen";
+import EmptyState from "@/components/layout/empty-state";
 
 export default function TowersListScreen() {
   const router = useRouter();
 
   const { canCreate } = useAccessControl(AclResource.TOWERS);
 
-  const { data: towers, isLoading: isTowersLoading } = useGetTowers();
+  const { data: towers, isLoading: isTowersLoading, refetch } = useGetTowers();
 
   const isLoading = isTowersLoading;
   if (isLoading) return <LoadingScreen title="Towers" />;
@@ -37,9 +39,17 @@ export default function TowersListScreen() {
         }
       />
 
+      {towers?.length === 0 ? (
+        <EmptyState
+          title="No Towers"
+          description="There are no towers yet. Click the '+' button to create one."
+        />
+      ) : (
         <FlatList
           data={towers || []}
           keyExtractor={(item) => item.towerId}
+          refreshing={isLoading}
+          onRefresh={refetch}
           renderItem={({ item }) => (
             <TowerCard
               item={item}
@@ -49,6 +59,7 @@ export default function TowersListScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
+      )}
     </SafeAreaView>
   );
 }

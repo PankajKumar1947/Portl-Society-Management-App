@@ -18,7 +18,7 @@ const TYPE_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; bg: st
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const { data: notifications = [] } = useGetNotifications();
+  const { data: notifications = [], isLoading, refetch } = useGetNotifications();
   const { mutate: markAllAsRead } = useMarkAllAsRead();
 
   const handleNotificationTap = useCallback(
@@ -48,6 +48,8 @@ export default function NotificationsScreen() {
         data={notifications}
         keyExtractor={(item) => item.notificationId}
         contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : styles.list}
+        refreshing={isLoading}
+        onRefresh={refetch}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons name="notifications-off-outline" size={48} color={theme.colors.textMuted} />
