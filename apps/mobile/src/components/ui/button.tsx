@@ -12,7 +12,7 @@ import { theme } from "../../constants";
 export interface ButtonProps {
   onPress: () => void;
   children: string;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
@@ -69,7 +69,13 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === "primary" ? theme.colors.text : theme.colors.primary}
+          color={
+            variant === "primary"
+              ? theme.colors.text
+              : variant === "danger"
+              ? "#ffffff"
+              : theme.colors.primary
+          }
         />
       ) : (
         <Text style={getTextStyles()}>{children}</Text>
@@ -117,6 +123,13 @@ const styles = StyleSheet.create({
   },
   ghostText: {
     color: theme.colors.textSecondary,
+  },
+  danger: {
+    backgroundColor: theme.colors.danger,
+    borderRadius: theme.radius.full,
+  },
+  dangerText: {
+    color: "#ffffff",
   },
   // Sizes
   sm: {

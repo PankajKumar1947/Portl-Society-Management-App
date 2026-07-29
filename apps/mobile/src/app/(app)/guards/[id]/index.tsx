@@ -140,9 +140,8 @@ export default function GuardDetailsScreen() {
         {canDelete && (
           <Button
             onPress={handleDelete}
-            variant="outline"
+            variant="danger"
             style={styles.deleteButton}
-            textStyle={{ color: theme.colors.danger }}
           >
             Remove Guard
           </Button>
@@ -204,6 +203,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xl,
     borderColor: theme.colors.border,
   },
 });

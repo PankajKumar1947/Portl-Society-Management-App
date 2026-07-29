@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { CreateSocietyBody } from "@repo/schema";
@@ -14,34 +13,28 @@ import { useCreateSociety } from "@repo/operations";
 import { useAuth } from "@/context/auth-context";
 import { Routes } from "@/constants/routes";
 import { theme } from "@/constants";
-import type { ApiErrorResponse } from "@repo/api-client";
 import { SocietyForm } from "@/components/society/society-form";
+import { useAlert } from "@/context/alert-context";
 
 export default function SetupSocietyScreen() {
   const router = useRouter();
   const { mutate: createSociety, isPending: isSubmitting } = useCreateSociety();
   const { markSocietyCreated } = useAuth();
+  const { showAlert } = useAlert();
 
   const handleCreateSociety = (data: CreateSocietyBody) => {
     createSociety(data, {
       onSuccess: (res) => {
-        Alert.alert(
-          "Setup Completed",
-          `Your society "${res.society.societyName}" has been successfully set up!\n\nJoining Code: ${res.society.societyCode}`,
-          [
-            {
-              text: "Continue",
-              onPress: async () => {
-                await markSocietyCreated();
-                router.replace(Routes.App);
-              },
-            },
-          ],
-        );
-      },
-      onError: (err) => {
-        const apiError = err as unknown as ApiErrorResponse;
-        Alert.alert("Setup Failed", apiError.message);
+        showAlert({
+          title: "Setup Completed",
+          description: `Your society "${res.society.societyName}" has been successfully set up!\n\nJoining Code: ${res.society.societyCode}`,
+          variant: "success",
+          confirmLabel: "Continue",
+          onConfirm: async () => {
+            await markSocietyCreated();
+            router.replace(Routes.App);
+          },
+        });
       },
     });
   };

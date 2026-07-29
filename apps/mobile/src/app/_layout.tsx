@@ -16,13 +16,11 @@ export default function RootLayout() {
     <ReactQueryProvider>
       <AuthProvider>
         <AlertProvider>
-          <AccessControlProvider>
-            <StatusBar style="dark" backgroundColor={theme.colors.background} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.surface } }} />
-            <NotificationSetup />
-          </AccessControlProvider>
+          <StatusBar style="dark" backgroundColor={theme.colors.background} />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.surface } }} />
+          <NotificationSetup />
         </AlertProvider>
       </AuthProvider>
-    </ReactQueryProvider>
+    </ReactQueryProvider >
   );
 }
