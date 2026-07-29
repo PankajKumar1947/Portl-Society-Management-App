@@ -15,7 +15,7 @@ export class VisitorService {
     private readonly residentRepository: ResidentRepository,
     private readonly flatRepository: FlatRepository,
     private readonly notificationService: NotificationService,
-  ) {}
+  ) { }
 
   private generatePassCode(): string {
     return `VP${Math.floor(10000000 + Math.random() * 90000000)}`;
@@ -28,12 +28,23 @@ export class VisitorService {
     role: UserRole,
   ) {
     const isResident = role === UserRoles.RESIDENTS;
-
     let resolvedFlatId = dto.flatId;
+    console.log('[DEBUG] Visitor Create:', { role, resolvedFlatId, isResident });
+    let residentId: string | undefined;
+
     if (isResident) {
       const residents = await this.residentRepository.find({ userId, societyId });
       if (residents.length > 0) {
         resolvedFlatId = residents[0].flatId;
+      }
+      residentId = userId;
+    } else if (resolvedFlatId) {
+      const flat = await this.flatRepository.findOne(resolvedFlatId);
+      if (flat) {
+        const residents = await this.residentRepository.find({ societyId, towerId: flat.towerId, flatId: flat.flatId });
+        if (residents.length > 0) {
+          residentId = residents[0].userId;
+        }
       }
     }
 
@@ -51,17 +62,31 @@ export class VisitorService {
       name: profile.name,
       mobile: profile.mobile,
       flatId: resolvedFlatId,
-      residentId: isResident ? userId : undefined,
+      residentId,
       type: dto.type,
       purpose: dto.purpose,
       passCode,
       status: isResident ? 'approved' : 'pending',
+      validFrom: dto.validFrom,
+      validTo: dto.validTo,
     });
 
     const populated = await this.repository.findOneLog(log.logId);
     if (!populated) {
       throw new NotFoundException('Visitor log creation failed');
     }
+
+    if (!isResident && residentId) {
+      console.log('[DEBUG] Sending Notification to:', residentId);
+      await this.notificationService.sendAndSave(residentId, {
+        type: 'visitor_request',
+        title: 'Visitor Entry Request',
+        body: `${profile.name} is at the gate requesting entry.`,
+        data: { logId: log.logId, visitorId: profile.visitorId },
+      });
+      console.log('[DEBUG] Notification sent successfully');
+    }
+
     return populated;
   }
 

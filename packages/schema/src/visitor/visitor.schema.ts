@@ -56,6 +56,8 @@ export const createVisitorSchema = z.object({
   type: visitorTypeSchema,
   purpose: z.string().optional(),
   flatId: z.string().optional(),
+  validFrom: z.string().optional(),
+  validTo: z.string().optional(),
 });
 
 export const updateVisitorLogSchema = createVisitorSchema.partial();

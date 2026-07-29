@@ -35,8 +35,8 @@ export interface CreateVisitorForm {
   name: string;
   mobile: string;
   purpose?: string;
-  visitDate?: Date;
-  visitTime?: Date;
+  validFrom?: Date;
+  validTo?: Date;
   towerId: string;
   flatId: string;
 }

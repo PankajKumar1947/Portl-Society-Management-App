@@ -18,12 +18,14 @@ import { FormInput } from "@/components/ui/form-input";
 import { FormPhone } from "@/components/ui/form-phone";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormDate } from "@/components/ui/form-date";
-import { useCreateVisitor, useGetTowers, useGetFlats, useAccessControl } from "@repo/operations";
-import { AclResource, VISITOR_TYPE, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, CreateVisitorForm } from "@repo/schema";
+import { useCreateVisitor, useGetTowers, useGetFlats, useAccessControl, useAccessControlContext } from "@repo/operations";
+import { AclResource, VISITOR_TYPE, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, CreateVisitorForm, UserRoles } from "@repo/schema";
 
 export default function CreateVisitorScreen() {
   const router = useRouter();
   const [preApprove, setPreApprove] = useState(false);
+  const { data: aclData } = useAccessControlContext();
+  const isResident = aclData?.role === UserRoles.RESIDENTS;
 
   const { canViewModule } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
@@ -38,8 +40,8 @@ export default function CreateVisitorScreen() {
       name: "",
       mobile: "",
       purpose: "",
-      visitDate: undefined,
-      visitTime: undefined,
+      validFrom: undefined,
+      validTo: undefined,
       towerId: "",
       flatId: "",
     },
@@ -61,6 +63,8 @@ export default function CreateVisitorScreen() {
       type: data.type,
       purpose: data.purpose,
       flatId: canViewFlat ? data.flatId : undefined,
+      validFrom: data.validFrom ? new Date(data.validFrom).toISOString() : undefined,
+      validTo: data.validTo ? new Date(data.validTo).toISOString() : undefined,
     }, {
       onSuccess: (res) => {
         router.push({
@@ -121,18 +125,18 @@ export default function CreateVisitorScreen() {
               <View style={styles.row}>
                 <View style={styles.halfField}>
                   <FormDate
-                    name="visitDate"
-                    label="Visit Date"
-                    placeholder="15 May 2024"
+                    name="validFrom"
+                    label="Valid From"
+                    placeholder="Start Date"
                     mode="date"
                   />
                 </View>
                 <View style={styles.halfField}>
                   <FormDate
-                    name="visitTime"
-                    label="Visit Time"
-                    placeholder="10:00 AM"
-                    mode="time"
+                    name="validTo"
+                    label="Valid To"
+                    placeholder="End Date"
+                    mode="date"
                   />
                 </View>
               </View>
