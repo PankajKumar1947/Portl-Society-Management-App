@@ -1,7 +1,7 @@
 export const RESIDENT_TYPE_OPTIONS = [
-  { label: "Owner", value: "OWNER" },
-  { label: "Tenant", value: "TENANT" },
-  { label: "Family Member", value: "FAMILY_MEMBER" },
+  { label: "Single", value: "SINGLE" },
+  { label: "Family", value: "FAMILY" },
+  { label: "Couple", value: "COUPLE" },
 ] as const;
 
 export const RELATIONSHIP_OPTIONS = [

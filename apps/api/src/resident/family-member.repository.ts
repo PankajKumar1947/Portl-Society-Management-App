@@ -10,17 +10,22 @@ export class FamilyMemberRepository {
     private readonly model: Model<FamilyMemberDocument>,
   ) {}
 
+  private readonly populateFields = [
+    { path: 'flat', select: 'flatId flatNumber' },
+    { path: 'tower', select: 'towerId towerName' },
+  ];
+
   async create(data: Partial<FamilyMember>): Promise<FamilyMemberDocument> {
     const created = new this.model(data);
     return created.save();
   }
 
   async find(filter: Record<string, unknown>): Promise<FamilyMemberDocument[]> {
-    return this.model.find(filter).sort({ createdAt: -1 }).exec();
+    return this.model.find(filter).populate(this.populateFields).sort({ createdAt: -1 }).exec();
   }
 
   async findOne(familyMemberId: string): Promise<FamilyMemberDocument | null> {
-    return this.model.findOne({ familyMemberId }).exec();
+    return this.model.findOne({ familyMemberId }).populate(this.populateFields).exec();
   }
 
   async remove(familyMemberId: string): Promise<FamilyMemberDocument | null> {

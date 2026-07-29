@@ -55,9 +55,11 @@ export default function StepVehicle({
         {fields.length === 0 ? (
           <EmptyState
             icon="car-outline"
-            title="No vehicles registered yet."
+            title="No vehicles registered yet"
+            description="Add vehicles owned by this resident now, or you can skip this step and add them later."
+            style={styles.emptyState}
             action={
-              <Button variant="outline" onPress={handleAddVehicle} style={styles.addButton}>
+              <Button variant="primary" onPress={handleAddVehicle} style={styles.addButton}>
                 Add Vehicle
               </Button>
             }
@@ -175,8 +177,18 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: theme.spacing.xs,
   },
+  emptyState: {
+    flex: 0,
+    paddingVertical: theme.spacing.xxl * 1.25,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    paddingHorizontal: theme.spacing.xl,
+  },
   addButton: {
-    width: "100%",
+    alignSelf: "center",
+    paddingHorizontal: theme.spacing.xxl,
   },
   buttonRow: {
     flexDirection: "row",

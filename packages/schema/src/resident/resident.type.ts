@@ -16,8 +16,10 @@ import {
 import { ApiResponse } from "../shared/api.type";
 
 import { User } from "../user/user.type";
+import { Flat } from "../flat/flat.type";
+import { Tower } from "../tower/tower.type";
 
-export type ResidentKind = "OWNER" | "TENANT" | "FAMILY_MEMBER";
+export type ResidentKind = "SINGLE" | "FAMILY" | "COUPLE";
 export type RelationshipType = z.infer<typeof relationshipSchema>;
 export type OwnershipStatus = z.infer<typeof ownershipStatusSchema>;
 export type VehicleType = z.infer<typeof vehicleTypeSchema>;
@@ -25,6 +27,8 @@ export type DocType = z.infer<typeof docTypeSchema>;
 
 export type ResidentData = z.infer<typeof residentSchema> & {
   userDetails?: User;
+  flat?: Flat;
+  tower?: Tower;
 };
 export type CreateResidentBody = z.infer<typeof createResidentSchema>;
 export type UpdateResidentBody = z.infer<typeof updateResidentSchema>;

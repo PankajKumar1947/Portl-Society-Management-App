@@ -28,9 +28,9 @@ export default function ResidentsListScreen() {
 
   const filterTabs = [
     { id: "ALL", label: "All" },
-    { id: "OWNER", label: "Owners" },
-    { id: "TENANT", label: "Tenants" },
-    { id: "FAMILY_MEMBER", label: "Family" },
+    { id: "SINGLE", label: "Single" },
+    { id: "FAMILY", label: "Family" },
+    { id: "THINGS", label: "Things" },
   ];
 
   const filteredResidents = residents || [];
@@ -90,13 +90,13 @@ export default function ResidentsListScreen() {
             <View style={styles.listItemWrapper}>
               <PersonListItem
                 name={`${item.userDetails?.firstName || ""} ${item.userDetails?.lastName || ""}`}
-                subtitle={`Flat ${item.flatNumber} • ${item.towerId.toUpperCase().replace("-", " ")}`}
+                subtitle={`Flat ${item.flat?.flatNumber || "N/A"} • ${item.tower?.towerName || "N/A"}`}
                 meta={`Mobile: ${item.userDetails?.phoneNumber || ""}`}
                 onPress={() => router.push(Routes.Residents.Details(item.residentId) as any)}
                 rightElement={
                   <View style={styles.rightContainer}>
-                    <Badge variant={item.residentType === "OWNER" ? "success" : item.residentType === "TENANT" ? "info" : "warning"}>
-                      {item.residentType === "FAMILY_MEMBER" ? "Family" : item.residentType.toLowerCase()}
+                    <Badge variant={item.residentType === "SINGLE" ? "success" : item.residentType === "FAMILY" ? "info" : "warning"}>
+                      {item.residentType.toLowerCase()}
                     </Badge>
                     <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} style={styles.chevron} />
                   </View>

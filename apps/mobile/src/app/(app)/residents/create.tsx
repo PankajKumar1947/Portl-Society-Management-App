@@ -148,67 +148,67 @@ export default function CreateResidentScreen() {
       >
         <ScreenHeader title="Add New Resident" onBack={() => router.back()} />
 
-          <ScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {canCreate ? (
-              <>
-            <View style={styles.stepperContainer}>
-              <View style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}>
-                <Text style={[styles.stepNumber, currentStep === "personal" && styles.stepNumberActive]}>1</Text>
-                <Text style={[styles.stepLabel, currentStep === "personal" && styles.stepLabelActive]}>Personal</Text>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {canCreate ? (
+            <>
+              <View style={styles.stepperContainer}>
+                <View style={[styles.stepItem, currentStep === "personal" && styles.stepItemActive]}>
+                  <Text style={[styles.stepNumber, currentStep === "personal" && styles.stepNumberActive]}>1</Text>
+                  <Text style={[styles.stepLabel, currentStep === "personal" && styles.stepLabelActive]}>Personal</Text>
+                </View>
+
+                <View style={styles.stepDivider} />
+
+                <View style={[styles.stepItem, currentStep === "allotment" && styles.stepItemActive]}>
+                  <Text style={[styles.stepNumber, currentStep === "allotment" && styles.stepNumberActive]}>2</Text>
+                  <Text style={[styles.stepLabel, currentStep === "allotment" && styles.stepLabelActive]}>Allotment</Text>
+                </View>
+
+                <View style={styles.stepDivider} />
+
+                <View style={[styles.stepItem, currentStep === "vehicle" && styles.stepItemActive]}>
+                  <Text style={[styles.stepNumber, currentStep === "vehicle" && styles.stepNumberActive]}>3</Text>
+                  <Text style={[styles.stepLabel, currentStep === "vehicle" && styles.stepLabelActive]}>Vehicle</Text>
+                </View>
               </View>
 
-              <View style={styles.stepDivider} />
+              {currentStep === "personal" && (
+                <StepPersonal
+                  initialValues={personalDetails || undefined}
+                  onSubmit={handlePersonalSubmit}
+                  isSubmitting={isStep1Pending}
+                />
+              )}
 
-              <View style={[styles.stepItem, currentStep === "allotment" && styles.stepItemActive]}>
-                <Text style={[styles.stepNumber, currentStep === "allotment" && styles.stepNumberActive]}>2</Text>
-                <Text style={[styles.stepLabel, currentStep === "allotment" && styles.stepLabelActive]}>Allotment</Text>
-              </View>
+              {currentStep === "allotment" && createdUserId && (
+                <StepAllotment
+                  initialValues={{
+                    ...allotmentDetails,
+                    userId: createdUserId,
+                  }}
+                  towers={towersOptions}
+                  onSubmit={handleAllotmentSubmit}
+                  onBack={handleBack}
+                  isSubmitting={isStep2Pending}
+                />
+              )}
 
-              <View style={styles.stepDivider} />
-
-              <View style={[styles.stepItem, currentStep === "vehicle" && styles.stepItemActive]}>
-                <Text style={[styles.stepNumber, currentStep === "vehicle" && styles.stepNumberActive]}>3</Text>
-                <Text style={[styles.stepLabel, currentStep === "vehicle" && styles.stepLabelActive]}>Vehicle</Text>
-              </View>
-            </View>
-
-            {currentStep === "personal" && (
-              <StepPersonal
-                initialValues={personalDetails || undefined}
-                onSubmit={handlePersonalSubmit}
-                isSubmitting={isStep1Pending}
-              />
-            )}
-
-            {currentStep === "allotment" && createdUserId && (
-              <StepAllotment
-                initialValues={{
-                  ...allotmentDetails,
-                  userId: createdUserId,
-                }}
-                towers={towersOptions}
-                onSubmit={handleAllotmentSubmit}
-                onBack={handleBack}
-                isSubmitting={isStep2Pending}
-              />
-            )}
-
-            {currentStep === "vehicle" && (
-              <StepVehicle
-                initialValues={undefined}
-                onSubmit={handleVehicleSubmit}
-                onBack={handleBack}
-                isSubmitting={isStep3Pending}
-                submitButtonText="Finish Registration"
-              />
-            )}
-              </>
-            ) : null}
-          </ScrollView>
+              {currentStep === "vehicle" && (
+                <StepVehicle
+                  initialValues={undefined}
+                  onSubmit={handleVehicleSubmit}
+                  onBack={handleBack}
+                  isSubmitting={isStep3Pending}
+                  submitButtonText="Finish"
+                />
+              )}
+            </>
+          ) : null}
+        </ScrollView>
         <OtpVerificationModal
           visible={isOtpVisible}
           email={personalDetails?.email || ""}

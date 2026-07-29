@@ -1,6 +1,6 @@
 import z from "zod";
 
-const _residentTypeSchema = z.enum(["OWNER", "TENANT", "FAMILY_MEMBER"]);
+const _residentTypeSchema = z.enum(["SINGLE", "FAMILY", "COUPLE"]);
 
 export const RELATIONSHIPS = ["SPOUSE", "SON", "DAUGHTER", "FATHER", "MOTHER", "BROTHER", "SISTER", "OTHER"] as const;
 export const relationshipSchema = z.enum(RELATIONSHIPS);
@@ -28,9 +28,8 @@ export const residentSchema = z.object({
   societyId: z.string().min(1, "Society ID is required"),
   userId: z.string().min(1, "User ID is required"),
   residentType: _residentTypeSchema,
-  relationship: relationshipSchema.optional().or(z.literal("")),
   towerId: z.string().min(1, "Tower is required"),
-  flatNumber: z.string().min(1, "Flat number is required"),
+  flatId: z.string().min(1, "Flat is required"),
   moveInDate: z.string().min(1, "Move-in date is required"),
   ownershipStatus: ownershipStatusSchema,
   isPrimary: z.boolean().default(false),
@@ -75,9 +74,8 @@ export const residentPersonalSchema = z.object({
 export const residentAllotmentSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   residentType: _residentTypeSchema,
-  relationship: relationshipSchema.optional().or(z.literal("")),
   towerId: z.string().min(1, "Tower is required"),
-  flatNumber: z.string().min(1, "Flat number is required"),
+  flatId: z.string().min(1, "Flat is required"),
   moveInDate: z.string().min(1, "Move-in date is required"),
   ownershipStatus: ownershipStatusSchema,
   isPrimary: z.boolean().default(false),

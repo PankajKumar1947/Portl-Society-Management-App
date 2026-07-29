@@ -110,9 +110,8 @@ export default function EditResidentScreen() {
   const initialAllotmentValues: ResidentAllotmentInput = {
     userId: resident.userId,
     residentType: resident.residentType,
-    relationship: resident.relationship,
     towerId: resident.towerId,
-    flatNumber: resident.flatNumber,
+    flatId: resident.flatId,
     moveInDate: resident.moveInDate,
     ownershipStatus: resident.ownershipStatus,
     isPrimary: resident.isPrimary,

@@ -33,12 +33,7 @@ export class VisitorService {
     if (isResident) {
       const residents = await this.residentRepository.find({ userId, societyId });
       if (residents.length > 0) {
-        const resident = residents[0];
-        const flats = await this.flatRepository.findByTowerId(resident.towerId);
-        const matchingFlat = flats.find(f => f.flatNumber === resident.flatNumber);
-        if (matchingFlat) {
-          resolvedFlatId = matchingFlat.flatId;
-        }
+        resolvedFlatId = residents[0].flatId;
       }
     }
 
@@ -206,7 +201,7 @@ export class VisitorService {
     if (resolvedFlatId) {
       const flat = await this.flatRepository.findOne(resolvedFlatId);
       if (flat) {
-        const residents = await this.residentRepository.find({ societyId, towerId: flat.towerId, flatNumber: flat.flatNumber });
+        const residents = await this.residentRepository.find({ societyId, towerId: flat.towerId, flatId: flat.flatId });
         if (residents.length > 0) {
           residentId = residents[0].userId;
         }

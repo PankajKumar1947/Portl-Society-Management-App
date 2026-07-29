@@ -10,9 +10,8 @@ import {
 export class ResidentAllotmentDto extends createZodDto(residentAllotmentSchema) {
   userId!: string;
   residentType!: ResidentKind;
-  relationship?: RelationshipType | '';
   towerId!: string;
-  flatNumber!: string;
+  flatId!: string;
   moveInDate!: string;
   ownershipStatus!: OwnershipStatus;
   isPrimary!: boolean;

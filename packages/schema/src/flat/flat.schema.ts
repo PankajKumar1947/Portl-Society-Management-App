@@ -33,7 +33,7 @@ export const FLAT_STATUS_OPTIONS = [
 ] as const;
 
 // Flat Resident Relation Schema
-export const RESIDENT_TYPES = ["OWNER", "TENANT", "FAMILY_MEMBER"] as const;
+export const RESIDENT_TYPES = ["SINGLE", "FAMILY", "COUPLE"] as const;
 export const residentTypeSchema = z.enum(RESIDENT_TYPES);
 
 export const flatResidentSchema = z.object({

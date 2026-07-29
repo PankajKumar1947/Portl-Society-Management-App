@@ -75,9 +75,8 @@ export class ResidentService {
       societyId,
       userId: dto.userId,
       residentType: dto.residentType,
-      relationship: dto.relationship || undefined,
       towerId: dto.towerId,
-      flatNumber: dto.flatNumber,
+      flatId: dto.flatId,
       moveInDate: dto.moveInDate,
       ownershipStatus: dto.ownershipStatus,
       isPrimary: dto.isPrimary,
@@ -132,7 +131,7 @@ export class ResidentService {
     return this.familyMemberRepository.find({
       societyId,
       towerId: myResident.towerId,
-      flatNumber: myResident.flatNumber,
+      flatId: myResident.flatId,
     });
   }
 
@@ -155,7 +154,7 @@ export class ResidentService {
       phoneNumber: dto.phoneNumber || undefined,
       dateOfBirth: dto.dateOfBirth || undefined,
       towerId: myResident.towerId,
-      flatNumber: myResident.flatNumber,
+      flatId: myResident.flatId,
     });
   }
 
@@ -190,10 +189,18 @@ export class ResidentService {
 
     if (query?.search) {
       const searchRegex = new RegExp(query.search, 'i');
+      
+      // Find matching flats first to search by flat number
+      const flats = await this.repository.vehicleModel.db.model('Flat').find({
+        societyId,
+        flatNumber: searchRegex,
+      }).select('flatId').exec();
+      const flatIds = flats.map((f: any) => f.flatId);
+
       filter.$or = [
         { firstName: searchRegex },
         { lastName: searchRegex },
-        { flatNumber: searchRegex },
+        { flatId: { $in: flatIds } },
         { mobileNumber: searchRegex },
       ];
     }

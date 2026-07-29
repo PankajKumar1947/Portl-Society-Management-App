@@ -38,8 +38,25 @@ export class FamilyMember {
   @Prop({ required: true, index: true })
   towerId: string;
 
-  @Prop({ required: true })
-  flatNumber: string;
+  @Prop({ required: true, index: true })
+  flatId: string;
 }
 
 export const FamilyMemberEntity = SchemaFactory.createForClass(FamilyMember);
+
+FamilyMemberEntity.virtual('flat', {
+  ref: 'Flat',
+  localField: 'flatId',
+  foreignField: 'flatId',
+  justOne: true,
+});
+
+FamilyMemberEntity.virtual('tower', {
+  ref: 'Tower',
+  localField: 'towerId',
+  foreignField: 'towerId',
+  justOne: true,
+});
+
+FamilyMemberEntity.set('toJSON', { virtuals: true });
+FamilyMemberEntity.set('toObject', { virtuals: true });

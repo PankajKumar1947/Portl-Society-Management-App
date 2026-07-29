@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useGetFlats } from "@repo/operations";
 import FormSelect from "@/components/ui/form-select";
 import FormInput from "@/components/ui/form-input";
 import FormDate from "@/components/ui/form-date";
@@ -38,10 +39,9 @@ export default function StepAllotment({
     resolver: zodResolver(residentAllotmentSchema) as any,
     defaultValues: {
       userId: initialValues?.userId || "",
-      residentType: initialValues?.residentType || "OWNER",
-      relationship: initialValues?.relationship || "",
+      residentType: initialValues?.residentType || "SINGLE",
       towerId: initialValues?.towerId || "",
-      flatNumber: initialValues?.flatNumber || "",
+      flatId: initialValues?.flatId || "",
       moveInDate: initialValues?.moveInDate || new Date().toISOString().split("T")[0],
       ownershipStatus: initialValues?.ownershipStatus || "OWNER",
       isPrimary: initialValues?.isPrimary ?? true,
@@ -53,6 +53,22 @@ export default function StepAllotment({
   const { handleSubmit, watch, control } = methods;
   const residentType = watch("residentType");
   const docType = watch("docType");
+  const selectedTowerId = watch("towerId");
+
+  const { data: flats = [], refetch } = useGetFlats(selectedTowerId || "", { enabled: !!selectedTowerId });
+
+  const isFirstMount = React.useRef(true);
+
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    if (selectedTowerId) {
+      methods.setValue("flatId", "");
+      refetch();
+    }
+  }, [selectedTowerId, refetch]);
 
   return (
     <FormProvider {...methods}>
@@ -65,14 +81,6 @@ export default function StepAllotment({
             required
           />
 
-          {residentType === "FAMILY_MEMBER" && (
-            <FormSelect
-              name="relationship"
-              label="Relationship to Primary Resident"
-              options={RELATIONSHIP_OPTIONS}
-              required
-            />
-          )}
 
           <FormSelect
             name="towerId"
@@ -81,12 +89,15 @@ export default function StepAllotment({
             required
           />
 
-          <FormInput
-            name="flatNumber"
-            label="Flat / Apartment Number"
-            placeholder="e.g. 402"
-            required
-          />
+          {selectedTowerId ? (
+            <FormSelect
+              name="flatId"
+              label="Flat / Apartment"
+              placeholder="Select Flat"
+              options={flats.map((f) => ({ label: f.flatNumber, value: f.flatId }))}
+              required
+            />
+          ) : null}
 
           <FormDate
             name="moveInDate"

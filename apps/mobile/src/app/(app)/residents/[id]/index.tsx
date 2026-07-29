@@ -56,7 +56,7 @@ export default function ResidentDetailsScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Resident Contact Info:\nName: ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}\nMobile: ${resident.userDetails?.phoneNumber || ""}\nFlat: ${resident.flatNumber}, ${resident.towerId.toUpperCase()}`,
+        message: `Resident Contact Info:\nName: ${resident.userDetails?.firstName || ""} ${resident.userDetails?.lastName || ""}\nMobile: ${resident.userDetails?.phoneNumber || ""}\nFlat: ${resident.flat?.flatNumber || "N/A"}, ${resident.tower?.towerName || "N/A"}`,
       });
     } catch (error) {
       Alert.alert("Error", "Failed to share contact info");
@@ -111,7 +111,7 @@ export default function ResidentDetailsScreen() {
           </Text>
 
           <View style={styles.badgeRow}>
-            <Badge variant={resident.residentType === "OWNER" ? "success" : "info"}>
+            <Badge variant={resident.residentType === "SINGLE" ? "success" : resident.residentType === "FAMILY" ? "info" : "warning"}>
               {resident.residentType.replace("_", " ")}
             </Badge>
             {resident.isPrimary && (
@@ -142,11 +142,11 @@ export default function ResidentDetailsScreen() {
         <Card style={styles.detailsCard}>
           <InfoRow
             label="Tower"
-            value={resident.towerId.toUpperCase().replace("-", " ")}
+            value={resident.tower?.towerName || "N/A"}
           />
           <InfoRow
             label="Flat / Apartment"
-            value={resident.flatNumber}
+            value={resident.flat?.flatNumber || "N/A"}
           />
           <InfoRow
             label="Move-In Date"
@@ -156,12 +156,6 @@ export default function ResidentDetailsScreen() {
             label="Ownership Status"
             value={resident.ownershipStatus}
           />
-          {resident.residentType === "FAMILY_MEMBER" && resident.relationship && (
-            <InfoRow
-              label="Relationship"
-              value={resident.relationship}
-            />
-          )}
         </Card>
 
         {/* Contact Details */}

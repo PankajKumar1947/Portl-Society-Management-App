@@ -2,9 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import {
   RESIDENT_TYPES,
-  RELATIONSHIPS,
   OWNERSHIP_STATUSES,
-  VEHICLE_TYPES,
   DOC_TYPES,
 } from '@repo/schema';
 import * as crypto from 'crypto';
@@ -31,14 +29,11 @@ export class Resident {
   @Prop({ required: true, enum: RESIDENT_TYPES })
   residentType: string;
 
-  @Prop({ enum: RELATIONSHIPS })
-  relationship?: string;
-
   @Prop({ required: true, index: true })
   towerId: string;
 
-  @Prop({ required: true })
-  flatNumber: string;
+  @Prop({ required: true, index: true })
+  flatId: string;
 
   @Prop({ required: true })
   moveInDate: string;
@@ -58,6 +53,20 @@ export class Resident {
 }
 
 export const ResidentSchema = SchemaFactory.createForClass(Resident);
+
+ResidentSchema.virtual('flat', {
+  ref: 'Flat',
+  localField: 'flatId',
+  foreignField: 'flatId',
+  justOne: true,
+});
+
+ResidentSchema.virtual('tower', {
+  ref: 'Tower',
+  localField: 'towerId',
+  foreignField: 'towerId',
+  justOne: true,
+});
 
 ResidentSchema.virtual('userDetails', {
   ref: 'User',
