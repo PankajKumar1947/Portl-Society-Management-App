@@ -24,10 +24,7 @@ import { AclResource, VISITOR_TYPE, VISITOR_TYPE_OPTIONS, PURPOSE_OPTIONS, Creat
 export default function CreateVisitorScreen() {
   const router = useRouter();
   const [preApprove, setPreApprove] = useState(false);
-  const { data: aclData } = useAccessControlContext();
-  const isResident = aclData?.role === UserRoles.RESIDENTS;
-
-  const { canViewModule } = useAccessControl();
+  const { canViewModule, isResident } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
   const canViewFlat = canViewModule(AclResource.FLATS);
 
@@ -65,6 +62,7 @@ export default function CreateVisitorScreen() {
       flatId: canViewFlat ? data.flatId : undefined,
       validFrom: data.validFrom ? new Date(data.validFrom).toISOString() : undefined,
       validTo: data.validTo ? new Date(data.validTo).toISOString() : undefined,
+      preApprove: isResident ? preApprove : false,
     }, {
       onSuccess: (res) => {
         router.push({
@@ -122,24 +120,26 @@ export default function CreateVisitorScreen() {
                 placeholder="Select purpose"
                 options={PURPOSE_OPTIONS}
               />
-              <View style={styles.row}>
-                <View style={styles.halfField}>
-                  <FormDate
-                    name="validFrom"
-                    label="Valid From"
-                    placeholder="Start Date"
-                    mode="date"
-                  />
+              {isResident && (
+                <View style={styles.row}>
+                  <View style={styles.halfField}>
+                    <FormDate
+                      name="validFrom"
+                      label="Valid From"
+                      placeholder="Start Date"
+                      mode="date"
+                    />
+                  </View>
+                  <View style={styles.halfField}>
+                    <FormDate
+                      name="validTo"
+                      label="Valid To"
+                      placeholder="End Date"
+                      mode="date"
+                    />
+                  </View>
                 </View>
-                <View style={styles.halfField}>
-                  <FormDate
-                    name="validTo"
-                    label="Valid To"
-                    placeholder="End Date"
-                    mode="date"
-                  />
-                </View>
-              </View>
+              )}
               {canViewTower && (
                 <FormSelect
                   name="towerId"
@@ -158,14 +158,16 @@ export default function CreateVisitorScreen() {
               )}
 
               {/* Pre-Approve toggle */}
-              <Card variant="flat" style={styles.toggleCard}>
-                <ToggleSwitch
-                  label="Pre-Approve"
-                  description="Allow auto-entry after approval"
-                  value={preApprove}
-                  onChange={setPreApprove}
-                />
-              </Card>
+              {isResident && (
+                <Card variant="flat" style={styles.toggleCard}>
+                  <ToggleSwitch
+                    label="Pre-Approve"
+                    description="Allow auto-entry after approval"
+                    value={preApprove}
+                    onChange={setPreApprove}
+                  />
+                </Card>
+              )}
             </View>
           </FormProvider>
           <Button onPress={methods.handleSubmit(onSubmit)} style={styles.submit} loading={isPending}>

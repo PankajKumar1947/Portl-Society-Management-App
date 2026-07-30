@@ -39,7 +39,7 @@ interface QuickAction {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { canViewModule } = useAccessControl();
+  const { canViewModule, isResident } = useAccessControl();
 
   const servicesGrid: GridItem[] = [
     { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index), resource: AclResource.SOCIETY },
@@ -56,11 +56,17 @@ export default function HomeScreen() {
   ].filter((item) => canViewModule(item.resource)) as GridItem[];
 
   const quickActions: QuickAction[] = [
-    { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: () => router.push(Routes.Visitors.Create) },
+    ...(isResident ? [
+      { id: "invite", title: "Invite Guest", icon: "person-add-outline", route: () => router.push(Routes.Visitors.Create) },
+    ] : []),
     { id: "scan", title: "Scan Pass", icon: "qr-code-outline", route: () => router.push(Routes.Visitors.Scan) },
-    { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: () => router.push(Routes.Visitors.Index) },
+    ...(isResident ? [
+      { id: "pre_approve", title: "Pre-Approve", icon: "checkmark-circle-outline", route: () => router.push(Routes.Visitors.Index) },
+    ] : []),
     { id: "bookings", title: "My Bookings", icon: "calendar-outline", route: () => router.push(Routes.Amenities.Bookings.Index) },
-    { id: "pass", title: "View Pass", icon: "eye-outline", route: () => router.push(Routes.Visitors.Index) },
+    ...(isResident ? [
+      { id: "pass", title: "View Pass", icon: "eye-outline", route: () => router.push(Routes.Visitors.Index) },
+    ] : []),
   ].filter((a) => canViewModule(AclResource.VISITORS)) as QuickAction[];
 
   return (

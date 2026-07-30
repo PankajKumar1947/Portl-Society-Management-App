@@ -31,7 +31,7 @@ export class Visitor {
 
 export const VisitorSchema = SchemaFactory.createForClass(Visitor);
 
-VisitorSchema.index({ mobile: 1, societyId: 1 }, { unique: true });
+VisitorSchema.index({ name: 1, mobile: 1, societyId: 1 }, { unique: true });
 
 VisitorSchema.set('toJSON', { virtuals: true });
 VisitorSchema.set('toObject', { virtuals: true });

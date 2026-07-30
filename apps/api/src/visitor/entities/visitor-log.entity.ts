@@ -46,6 +46,9 @@ export class VisitorLog {
   @Prop({ index: true })
   residentId?: string;
 
+  @Prop({ index: true })
+  createdBy?: string;
+
   @Prop({ required: true, enum: VISITOR_TYPES })
   type!: string;
 

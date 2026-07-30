@@ -6,6 +6,7 @@ import {
   ScrollView,
   Share,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
@@ -15,12 +16,11 @@ import { InfoRow } from "@/components/ui/info-row";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
-
 import QRCode from "react-native-qrcode-svg";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { Routes } from "@/constants/routes";
 import { formatDate } from "@/utils/date";
-import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers } from "@repo/operations";
+import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers, useUpdateVisitorStatus } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "secondary"> = {
@@ -51,12 +51,35 @@ export default function VisitorPassScreen() {
     passId: string;
   }>();
 
-  const { data: visitor } = useGetVisitorDetail(id || "", { enabled: !!id });
-  const { data: visits = [] } = useGetVisitorVisits(id || "", { enabled: !!id });
+  const { data: visitor, refetch: refetchDetail } = useGetVisitorDetail(id || "", { enabled: !!id });
+  const { data: visits = [], refetch: refetchVisits } = useGetVisitorVisits(id || "", { enabled: !!id });
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refetchDetail();
+      refetchVisits();
+    }, [refetchDetail, refetchVisits])
+  );
 
   const pastVisits = useMemo(() => visits.filter((v) => v.logId !== id), [visits, id]);
 
-  const { canViewModule } = useAccessControl();
+  const { canViewModule, isResident } = useAccessControl();
+  const { mutate: updateStatus } = useUpdateVisitorStatus(id || "");
+  const [pendingAction, setPendingAction] = useState<"approve" | "decline" | null>(null);
+
+  const handleApprove = () => {
+    setPendingAction("approve");
+    updateStatus(VISITOR_STATUS.APPROVED, {
+      onSettled: () => setPendingAction(null),
+    });
+  };
+
+  const handleDecline = () => {
+    setPendingAction("decline");
+    updateStatus(VISITOR_STATUS.REJECTED, {
+      onSettled: () => setPendingAction(null),
+    });
+  };
   const canViewTower = canViewModule(AclResource.TOWERS);
   const canViewFlat = canViewModule(AclResource.FLATS);
   const shouldFetchTowers = canViewTower || canViewFlat;
@@ -105,38 +128,56 @@ export default function VisitorPassScreen() {
             <Text style={styles.visitorType}>{type}</Text>
           </View>
 
-          <View style={styles.infoRowContainer}>
-            <Ionicons name="calendar-outline" size={20} color={theme.colors.textSecondary} style={styles.calendarIcon} />
-            <View style={styles.timeBlock}>
-              <Text style={styles.timeValue}>{date}</Text>
-              <Text style={styles.timeValue}>{time}</Text>
+          <View style={styles.detailsBlock}>
+            <View style={styles.detailsRow}>
+              <Ionicons name="calendar-outline" size={16} color={theme.colors.textSecondary} />
+              <Text style={styles.detailsText}>
+                {time === "Pending Arrival" ? `${date} (${time})` : `${date}, ${time}`}
+              </Text>
             </View>
+
+            {shouldFetchTowers && visitor?.flat && (
+              <View style={styles.detailsRow}>
+                <Ionicons name="business-outline" size={16} color={theme.colors.textSecondary} />
+                <Text style={styles.detailsText}>
+                  {canViewTower && towerMap.get(visitor.flat.towerId) ? `${towerMap.get(visitor.flat.towerId)} • ` : ''}Flat {visitor.flat.flatNumber}
+                </Text>
+              </View>
+            )}
           </View>
 
-          {shouldFetchTowers && visitor?.flat && (
-            <View style={styles.locationRow}>
-              {canViewTower && towerMap.get(visitor.flat.towerId) && (
-                <InfoRow icon="business-outline" label="Tower" value={towerMap.get(visitor.flat.towerId) || ""} />
-              )}
-              {canViewFlat && (
-                <InfoRow icon="home-outline" label="Flat" value={visitor.flat.flatNumber} />
-              )}
+          {status === VISITOR_STATUS.PENDING && passId === "N/A" ? (
+            <View style={styles.pendingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.warning} />
+              <Text style={styles.pendingText}>Waiting for Resident Approval</Text>
+            </View>
+          ) : passId && passId !== "N/A" ? (
+            <View style={styles.qrWrapperStyles}>
+              <QRCode value={passId} size={200} backgroundColor={theme.colors.surface} color={theme.colors.text} />
+            </View>
+          ) : null}
+
+          {passId && passId !== "N/A" && (
+            <View style={styles.passIdRow}>
+              <Text style={styles.passIdLabel}>Pass ID: </Text>
+              <Text style={styles.passId}>{passId}</Text>
             </View>
           )}
 
-          <View style={styles.qrWrapperStyles}>
-            <QRCode value={passId} size={200} backgroundColor="#fff" color="#000" />
-          </View>
-
-          <View style={styles.passIdRow}>
-            <Text style={styles.passIdLabel}>Pass ID: </Text>
-            <Text style={styles.passId}>{passId}</Text>
-          </View>
-
-          <View style={styles.hintContainer}>
-            <Ionicons name="alert-circle-outline" size={14} color={theme.colors.textMuted} />
-            <Text style={styles.hint}>Show this pass at the gate</Text>
-          </View>
+          {passId && passId !== "N/A" && (
+            <View style={styles.hintContainer}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={14}
+                color={status === VISITOR_STATUS.PENDING ? theme.colors.warning : theme.colors.textMuted}
+              />
+              <Text style={[styles.hint, status === VISITOR_STATUS.PENDING && { color: theme.colors.warning }]}>
+                {status === VISITOR_STATUS.PENDING
+                  ? "Approval required on arrival"
+                  : "Show this pass at the gate"}
+              </Text>
+            </View>
+          )}
         </Card>
 
         {/* Visit Timeline */}
@@ -245,9 +286,34 @@ export default function VisitorPassScreen() {
           </Card>
         )}
 
-        <Button onPress={handleShare} style={styles.shareBtn}>
-          Share Pass
-        </Button>
+        {status === VISITOR_STATUS.PENDING && isResident && (
+          <View style={styles.approvalRow}>
+            <Button
+              onPress={handleDecline}
+              variant="danger"
+              style={styles.approvalBtn}
+              loading={pendingAction === "decline"}
+              disabled={pendingAction !== null}
+            >
+              Decline
+            </Button>
+            <Button
+              onPress={handleApprove}
+              variant="primary"
+              style={styles.approvalBtn}
+              loading={pendingAction === "approve"}
+              disabled={pendingAction !== null}
+            >
+              Approve
+            </Button>
+          </View>
+        )}
+
+        {passId && passId !== "N/A" && (
+          <Button onPress={handleShare} style={styles.shareBtn}>
+            Share Pass
+          </Button>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -261,7 +327,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: 120,
   },
   passCard: {
     backgroundColor: theme.colors.surface,
@@ -287,21 +353,23 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     fontWeight: theme.fontWeights.medium,
   },
-  infoRowContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: theme.spacing.sm,
-    width: "100%",
+  detailsBlock: {
+    backgroundColor: theme.colors.surfaceSecondary,
+    borderRadius: theme.radius.md,
+    paddingVertical: theme.spacing.sm * 1.5,
     paddingHorizontal: theme.spacing.md,
+    alignItems: "center",
+    gap: 8,
+    width: "100%",
+    marginTop: theme.spacing.xs,
   },
-  calendarIcon: {
-    marginTop: 2,
+  detailsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  timeBlock: {
-    gap: 4,
-  },
-  timeValue: {
-    fontSize: 15,
+  detailsText: {
+    fontSize: 14,
     fontWeight: theme.fontWeights.semibold,
     color: theme.colors.textSecondary,
   },
@@ -333,11 +401,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: theme.spacing.lg,
   },
-  locationRow: {
-    flexDirection: "column",
-    gap: theme.spacing.xs,
-    width: "100%",
-  },
+
   historyCard: {
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.lg,
@@ -437,10 +501,31 @@ const styles = StyleSheet.create({
   },
   qrWrapperStyles: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     alignSelf: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
+  },
+  pendingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: theme.spacing.lg,
+    gap: theme.spacing.sm,
+  },
+  pendingText: {
+    fontSize: 15,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.warning,
+    textAlign: "center",
+  },
+  approvalRow: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+  },
+  approvalBtn: {
+    flex: 1,
   },
 });

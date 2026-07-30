@@ -22,6 +22,8 @@ function redirect(notification: Notifications.Notification) {
 
   if (type === "visitor_request" && logId) {
     router.push(Routes.Visitors.Approval(logId));
+  } else if ((type === "visitor_approved" || type === "visitor_rejected") && logId) {
+    router.push(Routes.Visitors.Pass(logId) as any);
   }
 }
 

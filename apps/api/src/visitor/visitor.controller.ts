@@ -108,7 +108,9 @@ export class VisitorController {
     @CurrentUser('firstName') firstName: string,
     @CurrentUser('lastName') lastName: string,
   ) {
-    const scannedBy = `${firstName} ${lastName}`.trim();
+    const scannedBy = (firstName || lastName)
+      ? `${firstName ?? ''} ${lastName ?? ''}`.trim()
+      : 'Security Guard';
     const data = await this.service.requestEntry(
       { ...dto, flatId: dto.flatId },
       societyId,
@@ -143,12 +145,15 @@ export class VisitorController {
   async scanPassCode(
     @Param('passCode') passCode: string,
     @Query('type') type: 'entry' | 'exit',
+    @CurrentUser('userId') userId: string,
     @CurrentUser('societyId') societyId: string,
     @CurrentUser('firstName') firstName: string,
     @CurrentUser('lastName') lastName: string,
   ) {
-    const scannedBy = `${firstName} ${lastName}`.trim();
-    const data = await this.service.scanPassCode(passCode, societyId, type, scannedBy);
+    const scannedBy = (firstName || lastName)
+      ? `${firstName ?? ''} ${lastName ?? ''}`.trim()
+      : 'Security Guard';
+    const data = await this.service.scanPassCode(passCode, societyId, type, scannedBy, userId);
     return {
       success: true,
       message: `Pass code scanned for ${type}`,

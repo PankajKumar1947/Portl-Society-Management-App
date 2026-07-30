@@ -201,20 +201,16 @@ export default function LogsScreen() {
         }
         renderItem={({ item }) => (
           <View style={styles.eventRow}>
-            <View style={styles.timelineCol}>
-              <View style={[styles.timelineDot, item.action === SCAN_DIRECTION.ENTRY ? styles.entryDot : styles.exitDot]} />
-            </View>
-
-            <View style={styles.timeCol}>
-              <Text style={styles.timeText}>{formatTime(item.timestamp)}</Text>
-            </View>
-
             <Badge
               variant={item.action === SCAN_DIRECTION.ENTRY ? "success" : "warning"}
               style={styles.actionBadge}
             >
               {item.action === SCAN_DIRECTION.ENTRY ? "IN" : "OUT"}
             </Badge>
+
+            <View style={styles.timeCol}>
+              <Text style={styles.timeText}>{formatTime(item.timestamp)}</Text>
+            </View>
 
             <View style={styles.infoCol}>
               <Text style={styles.visitorName} numberOfLines={1}>{item.visitorName}</Text>
@@ -400,7 +396,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.warning,
   },
   timeCol: {
-    width: 60,
+    width: 90,
   },
   timeText: {
     fontSize: 13,
@@ -409,9 +405,9 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
   },
   actionBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minWidth: 34,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minWidth: 42,
     alignItems: "center",
   },
   infoCol: {

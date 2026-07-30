@@ -55,6 +55,9 @@ export class VisitorService {
     });
 
     const passCode = isResident ? this.generatePassCode() : undefined;
+    const now = new Date();
+    const defaultValidFrom = now.toISOString();
+    const defaultValidTo = new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString();
 
     const log = await this.repository.createLog({
       societyId,
@@ -66,9 +69,10 @@ export class VisitorService {
       type: dto.type,
       purpose: dto.purpose,
       passCode,
-      status: isResident ? 'approved' : 'pending',
-      validFrom: dto.validFrom,
-      validTo: dto.validTo,
+      status: (isResident && dto.preApprove) ? 'approved' : 'pending',
+      validFrom: dto.validFrom || defaultValidFrom,
+      validTo: dto.validTo || defaultValidTo,
+      createdBy: userId,
     });
 
     const populated = await this.repository.findOneLog(log.logId);
@@ -159,6 +163,14 @@ export class VisitorService {
           data: { logId, status: 'approved' },
         });
       }
+      if (log.createdBy) {
+        await this.notificationService.sendAndSave(log.createdBy, {
+          type: 'visitor_approved',
+          title: 'Visitor Approved',
+          body: `${log.name}'s entry has been approved by the resident. Pass code: ${updateData.passCode || log.passCode}`,
+          data: { logId, status: 'approved' },
+        }).catch(err => this.logger.error(`Failed to notify creator guard: ${err.message}`));
+      }
     } else if (status === 'rejected') {
       if (log.residentId) {
         await this.notificationService.sendAndSave(log.residentId, {
@@ -167,6 +179,14 @@ export class VisitorService {
           body: `Entry for ${log.name} has been declined.`,
           data: { logId, status: 'rejected' },
         });
+      }
+      if (log.createdBy) {
+        await this.notificationService.sendAndSave(log.createdBy, {
+          type: 'visitor_rejected',
+          title: 'Visitor Declined',
+          body: `Entry for ${log.name} has been declined by the resident.`,
+          data: { logId, status: 'rejected' },
+        }).catch(err => this.logger.error(`Failed to notify creator guard: ${err.message}`));
       }
     } else if (status === 'completed') {
       const entries = log.entries || [];
@@ -284,10 +304,28 @@ export class VisitorService {
     societyId: string,
     type: 'entry' | 'exit',
     scannedBy?: string,
+    guardUserId?: string,
   ) {
     const log = await this.repository.findLogByPassCode(passCode);
     if (!log || log.societyId !== societyId) {
       throw new NotFoundException(`Visitor with pass code "${passCode}" not found`);
+    }
+
+    if (log.status === 'pending') {
+      if (guardUserId) {
+        log.createdBy = guardUserId;
+        await this.repository.updateLog(log.logId, { createdBy: guardUserId });
+      }
+
+      if (log.residentId) {
+        await this.notificationService.sendAndSave(log.residentId, {
+          type: 'visitor_request',
+          title: 'Visitor Entry Request',
+          body: `${log.name} is at the gate presenting their pass. Please approve.`,
+          data: { logId: log.logId, visitorId: log.visitorId },
+        });
+      }
+      return log;
     }
 
     if (log.status !== 'approved' && log.status !== 'active') {

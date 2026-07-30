@@ -28,7 +28,16 @@ export function formatDate(
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d.getTime())) return "—";
   const opts = FORMATTERS[variant];
-  const formatted = d.toLocaleDateString(locale ?? [], opts);
+  
+  let formatted: string;
+  if (variant === "time" || variant === "timeWithSeconds") {
+    formatted = d.toLocaleTimeString(locale ?? [], opts);
+  } else if (variant === "dateTime") {
+    formatted = d.toLocaleString(locale ?? [], opts);
+  } else {
+    formatted = d.toLocaleDateString(locale ?? [], opts);
+  }
+  
   if (variant === "weekday") return formatted.toUpperCase();
   return formatted;
 }

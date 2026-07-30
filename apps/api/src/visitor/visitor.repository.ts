@@ -15,14 +15,11 @@ export class VisitorRepository {
 
   async findOrCreateProfile(data: Partial<Visitor>): Promise<VisitorDocument> {
     const existing = await this.visitorModel.findOne({
+      name: data.name,
       mobile: data.mobile,
       societyId: data.societyId,
     }).exec();
     if (existing) {
-      if (data.name && data.name !== existing.name) {
-        existing.name = data.name;
-        return existing.save();
-      }
       return existing;
     }
     const created = new this.visitorModel(data);

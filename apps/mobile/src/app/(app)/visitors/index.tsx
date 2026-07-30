@@ -36,7 +36,7 @@ export default function VisitorsScreen() {
   const statusFilter = activeTab === VISITOR_STATUS.PENDING ? VISITOR_STATUS.PENDING : activeTab === VISITOR_STATUS.APPROVED ? VISITOR_STATUS.APPROVED : undefined;
   const { data: visitors = [], isLoading, refetch } = useGetVisitors({ status: statusFilter });
 
-  const { canViewModule } = useAccessControl();
+  const { canViewModule, isResident } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
   const canViewFlat = canViewModule(AclResource.FLATS);
   const shouldFetchTowers = canViewTower || canViewFlat;
@@ -127,7 +127,7 @@ export default function VisitorsScreen() {
       </View>
       <Fab
         icon="person-add-outline"
-        label="Invite Visitor"
+        label="Add Visitor"
         onPress={() => router.push(Routes.Visitors.Create)}
       />
     </SafeAreaView>

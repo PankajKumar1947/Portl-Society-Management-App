@@ -108,35 +108,60 @@ export default function ScanScreen() {
   }
 
   if (result) {
+    const isPending = result.status === "pending";
+
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScreenHeader title="Scan Result" showBack onBack={handleReset} />
         <View style={styles.center}>
           <Ionicons
-            name={result.action === SCAN_DIRECTION.ENTRY ? "enter-outline" : "exit-outline"}
+            name={
+              isPending
+                ? "time-outline"
+                : result.action === SCAN_DIRECTION.ENTRY
+                ? "enter-outline"
+                : "exit-outline"
+            }
             size={72}
-            color={result.action === SCAN_DIRECTION.ENTRY ? theme.colors.success : theme.colors.warning}
+            color={
+              isPending
+                ? theme.colors.warning
+                : result.action === SCAN_DIRECTION.ENTRY
+                ? theme.colors.success
+                : theme.colors.warning
+            }
           />
           <Text style={styles.resultAction}>
-            {result.action === SCAN_DIRECTION.ENTRY ? "ENTRY" : "EXIT"} LOGGED
+            {isPending
+              ? "APPROVAL REQUEST SENT"
+              : `${result.action === SCAN_DIRECTION.ENTRY ? "ENTRY" : "EXIT"} LOGGED`}
           </Text>
           <Card variant="flat" style={styles.resultCard}>
             <Text style={styles.resultName}>{result.name}</Text>
             <Text style={styles.resultType}>{result.type.toUpperCase()}</Text>
-            <Badge variant="success" style={styles.resultBadge}>
+            <Badge variant={isPending ? "warning" : "success"} style={styles.resultBadge}>
               {result.status}
             </Badge>
           </Card>
           <View style={styles.resultActions}>
-            <Button variant="outline" onPress={handleReset} style={styles.resultBtn}>
-              Scan Another
-            </Button>
             <Button
               onPress={() => router.push(Routes.Visitors.Pass(result.logId))}
-              style={styles.resultBtn}
+              style={styles.primaryResultBtn}
             >
               View Details
             </Button>
+            <View style={styles.secondaryActionsRow}>
+              <Button variant="outline" onPress={handleReset} style={styles.secondaryResultBtn}>
+                Scan Another
+              </Button>
+              <Button
+                variant="outline"
+                onPress={() => router.replace(Routes.Visitors.Index)}
+                style={styles.secondaryResultBtn}
+              >
+                Go to Visitors
+              </Button>
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -442,11 +467,20 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xs,
   },
   resultActions: {
+    gap: theme.spacing.sm,
+    width: "100%",
+    marginTop: theme.spacing.md,
+  },
+  primaryResultBtn: {
+    width: "100%",
+    height: 50,
+  },
+  secondaryActionsRow: {
     flexDirection: "row",
     gap: theme.spacing.md,
     width: "100%",
   },
-  resultBtn: {
+  secondaryResultBtn: {
     flex: 1,
     height: 50,
   },

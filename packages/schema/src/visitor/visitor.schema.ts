@@ -47,6 +47,7 @@ export const visitorLogSchema = z.object({
   entries: z.array(visitorLogEntrySchema).default([]),
   validFrom: z.string().optional(),
   validTo: z.string().optional(),
+  createdBy: z.string().optional(),
   createdAt: z.string().optional(),
 });
 
@@ -58,6 +59,7 @@ export const createVisitorSchema = z.object({
   flatId: z.string().optional(),
   validFrom: z.string().optional(),
   validTo: z.string().optional(),
+  preApprove: z.boolean().optional(),
 });
 
 export const updateVisitorLogSchema = createVisitorSchema.partial();

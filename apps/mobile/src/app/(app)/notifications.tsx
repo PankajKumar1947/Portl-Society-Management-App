@@ -25,6 +25,8 @@ export default function NotificationsScreen() {
     (item: { type: string; data?: Record<string, unknown>; notificationId: string }) => {
       if (item.type === "visitor_request" && item.data?.logId) {
         router.push(Routes.Visitors.Approval(item.data.logId as string));
+      } else if ((item.type === "visitor_approved" || item.type === "visitor_rejected") && item.data?.logId) {
+        router.push(Routes.Visitors.Pass(item.data.logId as string));
       }
     },
     [router],

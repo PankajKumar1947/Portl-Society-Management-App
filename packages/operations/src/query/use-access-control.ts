@@ -6,6 +6,9 @@ export const useAccessControl = (entity?: AclResourceName) => {
 
   const role = data?.role ?? "";
   const isSuperUser = role === UserRoles.SUPER_ADMIN;
+  const isAdmin = role === UserRoles.ADMIN;
+  const isGuard = role === UserRoles.GUARD;
+  const isResident = role === UserRoles.RESIDENTS;
   const resources = data?.resources ?? {};
 
   const checkPermission = (ent: AclResourceName) =>
@@ -26,5 +29,9 @@ export const useAccessControl = (entity?: AclResourceName) => {
     canDelete,
     canViewModule,
     isSuperUser,
+    role,
+    isAdmin,
+    isGuard,
+    isResident,
   };
 };

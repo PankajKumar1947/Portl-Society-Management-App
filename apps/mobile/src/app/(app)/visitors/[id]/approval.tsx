@@ -44,7 +44,39 @@ export default function ApprovalScreen() {
   const [note, setNote] = useState("");
 
   const { data: visitor } = useGetVisitorDetail(id || "", { enabled: !!id });
-  const { mutate: updateStatus, isPending } = useUpdateVisitorStatus(id || "");
+  const { mutate: updateStatus } = useUpdateVisitorStatus(id || "");
+  const [pendingAction, setPendingAction] = useState<"approve" | "decline" | null>(null);
+
+  const handleApprove = () => {
+    setPendingAction("approve");
+    updateStatus(VISITOR_STATUS.APPROVED, {
+      onSuccess: (res) => {
+        router.replace({
+          pathname: "/visitors/[id]/pass",
+          params: {
+            id: res.data.logId,
+            name: res.data.name,
+            type: res.data.type,
+            date: "Today",
+            time: "Approved Pass",
+            status: res.data.status,
+            passId: res.data.passCode || "N/A",
+          }
+        });
+      },
+      onSettled: () => setPendingAction(null),
+    });
+  };
+
+  const handleDecline = () => {
+    setPendingAction("decline");
+    updateStatus(VISITOR_STATUS.REJECTED, {
+      onSuccess: () => {
+        router.replace(Routes.Visitors.Index);
+      },
+      onSettled: () => setPendingAction(null),
+    });
+  };
 
   const { canViewModule } = useAccessControl();
   const canViewTower = canViewModule(AclResource.TOWERS);
@@ -104,38 +136,17 @@ export default function ApprovalScreen() {
           <Button
             variant="outline"
             style={{ flex: 1, height: 50, borderColor: theme.colors.danger }}
-            onPress={() => {
-              updateStatus(VISITOR_STATUS.REJECTED, {
-                onSuccess: () => {
-                  router.replace(Routes.Visitors.Index);
-                }
-              });
-            }}
-            loading={isPending}
+            onPress={handleDecline}
+            loading={pendingAction === "decline"}
+            disabled={pendingAction !== null}
           >
             Decline
           </Button>
           <Button
             style={{ flex: 1, height: 50 }}
-            onPress={() => {
-              updateStatus(VISITOR_STATUS.APPROVED, {
-                  onSuccess: (res) => {
-                    router.replace({
-                      pathname: "/visitors/[id]/pass",
-                      params: {
-                        id: res.data.logId,
-                        name: res.data.name,
-                        type: res.data.type,
-                        date: "Today",
-                        time: "Approved Pass",
-                        status: res.data.status,
-                        passId: res.data.passCode || "N/A",
-                      }
-                    });
-                }
-              });
-            }}
-            loading={isPending}
+            onPress={handleApprove}
+            loading={pendingAction === "approve"}
+            disabled={pendingAction !== null}
           >
             Approve
           </Button>
