@@ -8,13 +8,14 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import ProfileRow from "@/components/ui/profile-row";
 import { useAuth } from "@/context/auth-context";
-import { useGetMe, useGetMySociety } from "@repo/operations";
+import { useGetMe, useGetMySociety, useGetMyResident } from "@repo/operations";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const { data: user, isLoading: isUserLoading } = useGetMe();
   const { data: society } = useGetMySociety();
+  const { data: resident } = useGetMyResident({ enabled: user?.role === "RESIDENTS" });
 
   const handleLogout = async () => {
     try {
@@ -29,9 +30,11 @@ export default function ProfileScreen() {
     ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User Profile"
     : "Sunita Sharma";
 
-  const userSubtext = society?.societyName
-    ? `${society.societyName} (${society.societyType?.replace(/_/g, " ")})`
-    : user?.email || "Resident";
+  const userSubtext = resident?.tower && resident?.flat
+    ? `${resident.tower.towerName} • Flat ${resident.flat.flatNumber}`
+    : society?.societyName
+      ? `${society.societyName} (${society.societyType?.replace(/_/g, " ")})`
+      : user?.email || "Resident";
 
   const menuItems = [
     {

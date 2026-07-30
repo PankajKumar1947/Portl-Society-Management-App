@@ -9,7 +9,7 @@ export const ROLE_PERMISSIONS: Record<string, PermissionMap> = {
     [AclResource.RESIDENTS]: { view: true, create: false, update: false, delete: false },
     [AclResource.FAMILY_MEMBERS]: { view: false, create: false, update: false, delete: false },
     [AclResource.GUARDS]: { view: false, create: false, update: false, delete: false },
-    [AclResource.SOCIETY]: { view: false, create: false, update: false, delete: false },
+    [AclResource.SOCIETY]: { view: true, create: false, update: false, delete: false },
     [AclResource.TOWERS]: { view: true, create: false, update: false, delete: false },
     [AclResource.FLATS]: { view: true, create: false, update: false, delete: false },
     [AclResource.AMENITIES]: { view: false, create: false, update: false, delete: false },

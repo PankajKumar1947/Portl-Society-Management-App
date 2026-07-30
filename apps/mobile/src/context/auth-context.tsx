@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
-import { setAccessToken, setRefreshToken } from "@repo/api-client";
+import { setAccessToken, setRefreshToken, getMe } from "@repo/api-client";
 import { User } from "@repo/schema";
 
 interface AuthContextType {
@@ -33,6 +33,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setRefreshToken(storedRefreshToken);
           setIsAuthenticated(true);
           setIsSocietyCreated(storedSocietyCreated === "true");
+
+          try {
+            const profile = await getMe();
+            setUser(profile);
+          } catch (profileErr) {
+            console.error("Failed to fetch user profile during bootstrap:", profileErr);
+          }
         }
       } catch (e) {
         console.error("Failed to load auth state:", e);
@@ -54,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRefreshToken(refreshToken);
       setIsAuthenticated(true);
       setIsSocietyCreated(societyCreatedStatus);
+
+      const profile = await getMe();
+      setUser(profile);
     } catch (e) {
       console.error("Failed to sign in:", e);
       throw e;
@@ -111,3 +121,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

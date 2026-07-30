@@ -6,6 +6,7 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../constants";
@@ -16,11 +17,9 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Routes } from "@/constants";
 import { Images } from "@/assets/images";
-import { useAccessControl } from "@repo/operations";
+import { useAccessControl, useGetMyResident } from "@repo/operations";
 import { AclResource, type AclResourceName } from "@repo/schema";
-
-const { width } = Dimensions.get("window");
-const GRID_ITEM_WIDTH = (width - theme.spacing.lg * 2 - theme.spacing.md * 2) / 3;
+import { useAuth } from "@/context/auth-context";
 
 interface GridItem {
   id: string;
@@ -40,6 +39,12 @@ interface QuickAction {
 export default function HomeScreen() {
   const router = useRouter();
   const { canViewModule, isResident } = useAccessControl();
+  const { user } = useAuth();
+  const { data: resident } = useGetMyResident({ enabled: isResident });
+  const { width } = useWindowDimensions();
+  const numColumns = 3;
+  const totalGap = theme.spacing.lg * 2 + theme.spacing.md * (numColumns - 1);
+  const gridItemWidth = Math.floor((width - totalGap) / numColumns) - 1;
 
   const servicesGrid: GridItem[] = [
     { id: "society", title: "My Society", icon: "business-outline", route: () => router.push(Routes.Society.Index), resource: AclResource.SOCIETY },
@@ -98,8 +103,17 @@ export default function HomeScreen() {
         {/* Welcome Greeting Section */}
         <View style={styles.welcomeSection}>
           <Text style={styles.greetingText}>Good Morning,</Text>
-          <Text style={styles.nameText}>Sunita 👋</Text>
+          <Text style={styles.nameText}>{user ? `${user.firstName} ${user.lastName}`.trim() : "Resident"} 👋</Text>
+          {isResident && resident && (
+            <View style={styles.allotmentContainer}>
+              <Ionicons name="business" size={16} color={theme.colors.textSecondary} style={styles.allotmentIcon} />
+              <Text style={styles.allotmentText}>
+                {resident.tower?.towerName || "Tower"} • Flat {resident.flat?.flatNumber || "Flat"}
+              </Text>
+            </View>
+          )}
         </View>
+
 
         {/* Dashboard Grid Services Section */}
         <View style={styles.gridContainer}>
@@ -108,7 +122,7 @@ export default function HomeScreen() {
               key={item.id}
               variant="flat"
               onPress={item.route}
-              style={styles.gridCard}
+              style={[styles.gridCard, { width: gridItemWidth }]}
             >
               <View style={styles.iconContainer}>
                 <Ionicons name={item.icon} size={28} color={theme.colors.primaryDark} />
@@ -209,6 +223,19 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     marginTop: 2,
   },
+  allotmentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  allotmentIcon: {
+    marginRight: 6,
+  },
+  allotmentText: {
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.semibold,
+  },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
@@ -228,7 +255,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
   },
   gridCard: {
-    width: GRID_ITEM_WIDTH,
     height: 105,
     justifyContent: "center",
     alignItems: "center",
