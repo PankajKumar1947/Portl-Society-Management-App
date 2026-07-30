@@ -37,13 +37,12 @@ export default function ProfileScreen() {
       : user?.email || "Resident";
 
   const menuItems = [
-    {
+    ...(user?.role === "RESIDENTS" ? [{
       id: "family",
       title: "My Family",
       icon: "people-outline" as const,
-      badge: "3 Members",
       onPress: () => router.push(Routes.Profile.MyFamily),
-    },
+    }] : []),
     {
       id: "vehicles",
       title: "Vehicle Details",

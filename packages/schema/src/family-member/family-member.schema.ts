@@ -21,3 +21,6 @@ export const addFamilyMemberSchema = z.object({
   phoneNumber: z.string().optional(),
   dateOfBirth: z.string().optional(),
 });
+
+export const updateFamilyMemberSchema = addFamilyMemberSchema.partial();
+

@@ -8,8 +8,7 @@ import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import PersonListItem from "@/components/ui/person-list-item";
 import { Ionicons } from "@expo/vector-icons";
-import { useGetMyResident, useGetFamilyMembers } from "@repo/operations";
-import type { FamilyMemberData } from "@repo/schema";
+import { useGetFamilyMembers } from "@repo/operations";
 
 const RELATIONSHIP_LABEL: Record<string, string> = {
   SPOUSE: "Spouse",
@@ -33,28 +32,16 @@ interface ListItem {
 export default function MyFamilyScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { data: myResident, isLoading: loadingResident, refetch: refetchResident } = useGetMyResident();
   const { data: familyMembers, isLoading: loadingFamily, refetch: refetchFamily } = useGetFamilyMembers();
 
-  const loading = loadingResident || loadingFamily;
+  const loading = loadingFamily;
 
   const handleRefresh = async () => {
-    await Promise.all([refetchResident(), refetchFamily()]);
+    await refetchFamily();
   };
 
   const items = useMemo(() => {
     const result: ListItem[] = [];
-
-    if (myResident) {
-      const u = myResident.userDetails;
-      result.push({
-        id: `resident_${myResident.residentId}`,
-        name: u ? `${u.firstName} ${u.lastName}` : "Unknown",
-        subtitle: "Me",
-        isHead: myResident.isPrimary,
-        avatar: u?.profilePhoto ?? "",
-      });
-    }
 
     if (familyMembers) {
       for (const fm of familyMembers) {
@@ -69,7 +56,7 @@ export default function MyFamilyScreen() {
     }
 
     return result;
-  }, [myResident, familyMembers]);
+  }, [familyMembers]);
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -104,7 +91,7 @@ export default function MyFamilyScreen() {
             subtitle={item.subtitle}
             imageUrl={item.avatar}
             style={styles.memberCard}
-            onPress={() => router.push(Routes.Profile.AddFamily)}
+            onPress={() => router.push(Routes.Profile.EditFamily(item.id.replace("family_", "")))}
             rightElement={
               item.isHead ? (
                 <Badge variant="success">

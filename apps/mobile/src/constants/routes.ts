@@ -48,6 +48,10 @@ export const Routes = {
     Index: app("/profile"),
     MyFamily: app("/profile/family"),
     AddFamily: app("/profile/family/add"),
+    EditFamily: (id: string) => ({
+      pathname: app("/profile/family/[id]/edit"),
+      params: { id },
+    }),
     EditProfile: app("/profile/edit"),
     Settings: app("/profile/settings"),
     Support: app("/profile/support"),

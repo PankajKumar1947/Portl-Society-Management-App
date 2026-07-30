@@ -18,6 +18,7 @@ import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 import { ResidentVehicleDto } from './dto/resident-vehicle.dto';
 import { AddFamilyMemberDto } from './dto/add-family-member.dto';
+import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -184,6 +185,46 @@ export class ResidentController {
       success: true,
       message: 'Family member added successfully',
       data: member,
+    };
+  }
+
+  @Get('family-members/:familyMemberId')
+  @Roles(UserRoles.RESIDENTS)
+  async getFamilyMember(
+    @Param('familyMemberId') familyMemberId: string,
+  ) {
+    const member = await this.service.getFamilyMember(familyMemberId);
+    return {
+      success: true,
+      message: 'Family member retrieved successfully',
+      data: member,
+    };
+  }
+
+  @Patch('family-members/:familyMemberId')
+  @Roles(UserRoles.RESIDENTS)
+  async updateFamilyMember(
+    @Param('familyMemberId') familyMemberId: string,
+    @Body() dto: UpdateFamilyMemberDto,
+  ) {
+    const member = await this.service.updateFamilyMember(familyMemberId, dto);
+    return {
+      success: true,
+      message: 'Family member updated successfully',
+      data: member,
+    };
+  }
+
+  @Delete('family-members/:familyMemberId')
+  @Roles(UserRoles.RESIDENTS)
+  async deleteFamilyMember(
+    @Param('familyMemberId') familyMemberId: string,
+  ) {
+    await this.service.deleteFamilyMember(familyMemberId);
+    return {
+      success: true,
+      message: 'Family member deleted successfully',
+      data: null,
     };
   }
 

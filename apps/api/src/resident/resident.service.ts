@@ -4,6 +4,7 @@ import { FamilyMemberRepository } from './family-member.repository';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { AddFamilyMemberDto } from './dto/add-family-member.dto';
+import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { ResidentDocument } from './entities/resident.entity';
 import { FamilyMemberDocument } from './entities/family-member.entity';
 import { UserService } from '../user/user.service';
@@ -156,6 +157,32 @@ export class ResidentService {
       towerId: myResident.towerId,
       flatId: myResident.flatId,
     });
+  }
+
+  async getFamilyMember(familyMemberId: string): Promise<FamilyMemberDocument> {
+    const member = await this.familyMemberRepository.findOne(familyMemberId);
+    if (!member) {
+      throw new NotFoundException(`Family member with ID "${familyMemberId}" not found`);
+    }
+    return member;
+  }
+
+  async updateFamilyMember(
+    familyMemberId: string,
+    dto: UpdateFamilyMemberDto,
+  ): Promise<FamilyMemberDocument> {
+    const member = await this.familyMemberRepository.update(familyMemberId, dto);
+    if (!member) {
+      throw new NotFoundException(`Family member with ID "${familyMemberId}" not found`);
+    }
+    return member;
+  }
+
+  async deleteFamilyMember(familyMemberId: string): Promise<void> {
+    const member = await this.familyMemberRepository.remove(familyMemberId);
+    if (!member) {
+      throw new NotFoundException(`Family member with ID "${familyMemberId}" not found`);
+    }
   }
 
   async create(dto: CreateResidentDto): Promise<ResidentDocument> {

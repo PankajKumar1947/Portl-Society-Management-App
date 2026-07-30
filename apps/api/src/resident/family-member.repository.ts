@@ -8,7 +8,7 @@ export class FamilyMemberRepository {
   constructor(
     @InjectModel(FamilyMember.name)
     private readonly model: Model<FamilyMemberDocument>,
-  ) {}
+  ) { }
 
   private readonly populateFields = [
     { path: 'flat', select: 'flatId flatNumber' },
@@ -26,6 +26,16 @@ export class FamilyMemberRepository {
 
   async findOne(familyMemberId: string): Promise<FamilyMemberDocument | null> {
     return this.model.findOne({ familyMemberId }).populate(this.populateFields).exec();
+  }
+
+  async update(
+    familyMemberId: string,
+    data: Partial<FamilyMember>,
+  ): Promise<FamilyMemberDocument | null> {
+    return this.model
+      .findOneAndUpdate({ familyMemberId }, data, { returnDocument: "after" })
+      .populate(this.populateFields)
+      .exec();
   }
 
   async remove(familyMemberId: string): Promise<FamilyMemberDocument | null> {
