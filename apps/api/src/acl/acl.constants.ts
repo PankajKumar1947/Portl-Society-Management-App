@@ -22,6 +22,7 @@ export const ROLE_PERMISSIONS: Record<string, PermissionMap> = {
     [AclResource.VISITORS]: { view: true, create: false, update: false, delete: false },
     [AclResource.COMMUNITY]: { view: false, create: false, update: false, delete: false },
     [AclResource.NOTIFICATIONS]: { view: false, create: false, update: false, delete: false },
+    [AclResource.VEHICLES]: { view: false, create: false, update: false, delete: false },
   },
   RESIDENTS: {
     [AclResource.RESIDENTS]: { view: false, create: false, update: false, delete: false },
@@ -40,6 +41,7 @@ export const ROLE_PERMISSIONS: Record<string, PermissionMap> = {
     [AclResource.VISITORS]: { view: true, create: true, update: false, delete: false },
     [AclResource.COMMUNITY]: { view: true, create: false, update: false, delete: false },
     [AclResource.NOTIFICATIONS]: { view: true, create: false, update: false, delete: false },
+    [AclResource.VEHICLES]: { view: true, create: true, update: true, delete: true },
   },
 };
 
@@ -61,5 +63,6 @@ function allResources(val: boolean): PermissionMap {
     [AclResource.VISITORS]: { view: val, create: val, update: val, delete: val },
     [AclResource.COMMUNITY]: { view: val, create: val, update: val, delete: val },
     [AclResource.NOTIFICATIONS]: { view: val, create: val, update: val, delete: val },
+    [AclResource.VEHICLES]: { view: val, create: val, update: val, delete: val },
   };
 }

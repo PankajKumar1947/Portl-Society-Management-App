@@ -15,6 +15,7 @@ export const AclResource = {
   VISITORS: "visitors",
   COMMUNITY: "community",
   NOTIFICATIONS: "notifications",
+  VEHICLES: "vehicles",
 } as const;
 
 export type AclResourceName = (typeof AclResource)[keyof typeof AclResource];

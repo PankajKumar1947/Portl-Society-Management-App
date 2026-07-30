@@ -17,6 +17,7 @@ import { UpdateResidentDto } from './dto/update-resident.dto';
 import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 import { ResidentVehicleDto } from './dto/resident-vehicle.dto';
+import { AddVehicleDto } from './dto/add-vehicle.dto';
 import { AddFamilyMemberDto } from './dto/add-family-member.dto';
 import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -225,6 +226,77 @@ export class ResidentController {
       success: true,
       message: 'Family member deleted successfully',
       data: null,
+    };
+  }
+
+  @Get('vehicles')
+  @Roles(UserRoles.RESIDENTS)
+  async getMyVehicles(@CurrentUser() user: TokenPayload) {
+    if (!user.societyId) {
+      return { success: false, message: 'Society context not found', data: [] };
+    }
+    const vehicles = await this.service.getMyVehicles(user.userId, user.societyId);
+    return {
+      success: true,
+      message: 'Vehicles fetched successfully',
+      data: vehicles,
+    };
+  }
+
+  @Post('vehicles')
+  @Roles(UserRoles.RESIDENTS)
+  async addVehicle(
+    @CurrentUser() user: TokenPayload,
+    @Body() dto: AddVehicleDto,
+  ) {
+    if (!user.societyId) {
+      return { success: false, message: 'Society context not found', data: null };
+    }
+    const vehicle = await this.service.addVehicle(user.userId, user.societyId, dto);
+    return {
+      success: true,
+      message: 'Vehicle added successfully',
+      data: vehicle,
+    };
+  }
+
+  @Delete('vehicles/:vehicleId')
+  @Roles(UserRoles.RESIDENTS)
+  async deleteVehicle(
+    @Param('vehicleId') vehicleId: string,
+  ) {
+    await this.service.deleteVehicle(vehicleId);
+    return {
+      success: true,
+      message: 'Vehicle deleted successfully',
+      data: null,
+    };
+  }
+
+  @Get('vehicles/:vehicleId')
+  @Roles(UserRoles.RESIDENTS)
+  async getVehicle(
+    @Param('vehicleId') vehicleId: string,
+  ) {
+    const vehicle = await this.service.getVehicle(vehicleId);
+    return {
+      success: true,
+      message: 'Vehicle retrieved successfully',
+      data: vehicle,
+    };
+  }
+
+  @Patch('vehicles/:vehicleId')
+  @Roles(UserRoles.RESIDENTS)
+  async updateVehicle(
+    @Param('vehicleId') vehicleId: string,
+    @Body() dto: AddVehicleDto,
+  ) {
+    const vehicle = await this.service.updateVehicle(vehicleId, dto);
+    return {
+      success: true,
+      message: 'Vehicle updated successfully',
+      data: vehicle,
     };
   }
 

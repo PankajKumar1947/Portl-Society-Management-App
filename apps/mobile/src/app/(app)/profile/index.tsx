@@ -8,14 +8,18 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import ProfileRow from "@/components/ui/profile-row";
 import { useAuth } from "@/context/auth-context";
-import { useGetMe, useGetMySociety, useGetMyResident } from "@repo/operations";
+import { useGetMe, useGetMySociety, useGetMyResident, useGetFamilyMembers, useGetMyVehicles, useAccessControl } from "@repo/operations";
+import { AclResource } from "@repo/schema";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const { data: user, isLoading: isUserLoading } = useGetMe();
   const { data: society } = useGetMySociety();
+  const { canViewModule } = useAccessControl();
   const { data: resident } = useGetMyResident({ enabled: user?.role === "RESIDENTS" });
+  const { data: familyMembers } = useGetFamilyMembers({ enabled: user?.role === "RESIDENTS" });
+  const { data: vehicles } = useGetMyVehicles({ enabled: user?.role === "RESIDENTS" });
 
   const handleLogout = async () => {
     try {
@@ -37,19 +41,20 @@ export default function ProfileScreen() {
       : user?.email || "Resident";
 
   const menuItems = [
-    ...(user?.role === "RESIDENTS" ? [{
+    ...(canViewModule(AclResource.FAMILY_MEMBERS) ? [{
       id: "family",
       title: "My Family",
       icon: "people-outline" as const,
+      badge: familyMembers && familyMembers.length > 0 ? `${familyMembers.length} Member${familyMembers.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.MyFamily),
     }] : []),
-    {
+    ...(canViewModule(AclResource.VEHICLES) ? [{
       id: "vehicles",
       title: "Vehicle Details",
       icon: "car-outline" as const,
-      badge: "2 Vehicles",
+      badge: vehicles && vehicles.length > 0 ? `${vehicles.length} Vehicle${vehicles.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.Vehicles),
-    },
+    }] : []),
     {
       id: "settings",
       title: "Settings",

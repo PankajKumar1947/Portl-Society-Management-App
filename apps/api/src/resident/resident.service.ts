@@ -11,6 +11,8 @@ import { UserService } from '../user/user.service';
 import { ResidentPersonalDto } from './dto/resident-personal.dto';
 import { ResidentAllotmentDto } from './dto/resident-allotment.dto';
 import { ResidentVehicleDto } from './dto/resident-vehicle.dto';
+import { AddVehicleDto } from './dto/add-vehicle.dto';
+import { VehicleDocument } from './entities/vehicle.entity';
 import { AuthService } from '../auth/auth.service';
 import { UserRoles } from '@repo/schema';
 
@@ -183,6 +185,52 @@ export class ResidentService {
     if (!member) {
       throw new NotFoundException(`Family member with ID "${familyMemberId}" not found`);
     }
+  }
+
+  async getMyVehicles(userId: string, societyId: string): Promise<VehicleDocument[]> {
+    const resident = await this.repository.findByUserId(userId, societyId);
+    if (!resident) {
+      throw new NotFoundException('Resident profile not found');
+    }
+    return this.repository.vehicleModel.find({ residentId: resident.residentId }).exec();
+  }
+
+  async addVehicle(userId: string, societyId: string, dto: AddVehicleDto): Promise<VehicleDocument> {
+    const resident = await this.repository.findByUserId(userId, societyId);
+    if (!resident) {
+      throw new NotFoundException('Resident profile not found');
+    }
+    return this.repository.vehicleModel.create({
+      ...dto,
+      residentId: resident.residentId,
+    });
+  }
+
+  async deleteVehicle(vehicleId: string): Promise<void> {
+    const deleted = await this.repository.vehicleModel.findOneAndDelete({ vehicleId }).exec();
+    if (!deleted) {
+      throw new NotFoundException(`Vehicle with ID "${vehicleId}" not found`);
+    }
+  }
+
+  async getVehicle(vehicleId: string): Promise<VehicleDocument> {
+    const vehicle = await this.repository.vehicleModel.findOne({ vehicleId }).exec();
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID "${vehicleId}" not found`);
+    }
+    return vehicle;
+  }
+
+  async updateVehicle(vehicleId: string, dto: AddVehicleDto): Promise<VehicleDocument> {
+    const vehicle = await this.repository.vehicleModel.findOneAndUpdate(
+      { vehicleId },
+      dto,
+      { returnDocument: 'after' }
+    ).exec();
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID "${vehicleId}" not found`);
+    }
+    return vehicle;
   }
 
   async create(dto: CreateResidentDto): Promise<ResidentDocument> {

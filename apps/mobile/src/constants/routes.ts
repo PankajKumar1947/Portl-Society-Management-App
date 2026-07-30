@@ -58,6 +58,10 @@ export const Routes = {
     About: app("/profile/about"),
     Vehicles: app("/profile/vehicles"),
     AddVehicle: app("/profile/vehicles/add"),
+    EditVehicle: (id: string) => ({
+      pathname: app("/profile/vehicles/[id]/edit"),
+      params: { id },
+    }),
   },
 
   Society: {

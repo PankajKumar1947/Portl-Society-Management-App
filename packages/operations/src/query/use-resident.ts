@@ -3,9 +3,11 @@ import {
   getResidents,
   getResidentDetails,
   getMyResident,
+  getMyVehicles,
+  getVehicleDetail,
   residentQueries,
 } from "@repo/api-client";
-import { ResidentListResponse, ResidentResponse } from "@repo/schema";
+import { ResidentListResponse, ResidentResponse, ApiResponse, Vehicle } from "@repo/schema";
 
 export const useGetResidents = (
   societyId?: string,
@@ -38,5 +40,23 @@ export const useGetMyResident = (options?: { enabled?: boolean }) => {
     queryFn: getMyResident,
     select: (response: ResidentResponse) => response.data,
     enabled: options?.enabled ?? true,
+  });
+};
+
+export const useGetMyVehicles = (options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: residentQueries.getVehicles.key,
+    queryFn: getMyVehicles,
+    select: (response: ApiResponse<Vehicle[]>) => response.data,
+    enabled: options?.enabled ?? true,
+  });
+};
+
+export const useGetVehicleDetail = (vehicleId: string, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: residentQueries.getVehicleDetail(vehicleId).key,
+    queryFn: () => getVehicleDetail(vehicleId),
+    select: (response: ApiResponse<Vehicle>) => response.data,
+    enabled: !!vehicleId && (options?.enabled ?? true),
   });
 };

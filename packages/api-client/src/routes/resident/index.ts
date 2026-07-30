@@ -7,6 +7,8 @@ import {
   ResidentPersonalInput,
   ResidentAllotmentInput,
   ResidentVehicleInput,
+  Vehicle,
+  VehicleInput,
 } from "@repo/schema";
 import { residentQueries } from "../../react-queries/resident";
 import { apiClient } from "../../services/axios-instance";
@@ -84,5 +86,30 @@ export const onboardResidentVehicle = async (
 
 export const getMyResident = async (): Promise<ResidentResponse> => {
   const res = await apiClient.get<ResidentResponse>(residentQueries.myResident.endpoint);
+  return res.data;
+};
+
+export const getMyVehicles = async (): Promise<ApiResponse<Vehicle[]>> => {
+  const res = await apiClient.get<ApiResponse<Vehicle[]>>(residentQueries.getVehicles.endpoint);
+  return res.data;
+};
+
+export const addVehicle = async (data: VehicleInput): Promise<ApiResponse<Vehicle>> => {
+  const res = await apiClient.post<ApiResponse<Vehicle>>(residentQueries.addVehicle.endpoint, data);
+  return res.data;
+};
+
+export const deleteVehicle = async (vehicleId: string): Promise<ApiResponse<null>> => {
+  const res = await apiClient.delete<ApiResponse<null>>(residentQueries.deleteVehicle(vehicleId).endpoint);
+  return res.data;
+};
+
+export const getVehicleDetail = async (vehicleId: string): Promise<ApiResponse<Vehicle>> => {
+  const res = await apiClient.get<ApiResponse<Vehicle>>(residentQueries.getVehicleDetail(vehicleId).endpoint);
+  return res.data;
+};
+
+export const updateVehicle = async (vehicleId: string, data: VehicleInput): Promise<ApiResponse<Vehicle>> => {
+  const res = await apiClient.patch<ApiResponse<Vehicle>>(residentQueries.updateVehicle(vehicleId).endpoint, data);
   return res.data;
 };

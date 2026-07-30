@@ -35,5 +35,25 @@ export const residentQueries = {
     key: ["my-resident"],
     endpoint: "/residents/me",
   },
+  getVehicles: {
+    key: ["my-vehicles"],
+    endpoint: "/residents/vehicles",
+  },
+  addVehicle: {
+    key: ["add-vehicle"],
+    endpoint: "/residents/vehicles",
+  },
+  deleteVehicle: (vehicleId: string) => ({
+    key: ["delete-vehicle", vehicleId],
+    endpoint: `/residents/vehicles/${vehicleId}`,
+  }),
+  getVehicleDetail: (vehicleId: string) => ({
+    key: ["vehicle-detail", vehicleId],
+    endpoint: `/residents/vehicles/${vehicleId}`,
+  }),
+  updateVehicle: (vehicleId: string) => ({
+    key: ["update-vehicle", vehicleId],
+    endpoint: `/residents/vehicles/${vehicleId}`,
+  }),
 } as const;
 

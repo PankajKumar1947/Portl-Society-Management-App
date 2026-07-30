@@ -7,13 +7,15 @@ import {
   onboardResidentPersonal,
   onboardResidentAllotment,
   onboardResidentVehicle,
+  addVehicle,
+  deleteVehicle,
+  updateVehicle,
 } from "@repo/api-client";
 import {
   CreateResidentBody,
   UpdateResidentBody,
-  ResidentPersonalInput,
-  ResidentAllotmentInput,
   ResidentVehicleInput,
+  VehicleInput,
 } from "@repo/schema";
 
 // Base prefix for all list queries — derived from the list key so there's no magic string
@@ -93,6 +95,50 @@ export const useOnboardResidentVehicle = () => {
       });
       queryClient.invalidateQueries({
         queryKey: residentsListBaseKey,
+      });
+    },
+  });
+};
+
+export const useAddVehicle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: residentQueries.addVehicle.key,
+    mutationFn: (data: VehicleInput) => addVehicle(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.getVehicles.key,
+      });
+    },
+  });
+};
+
+export const useDeleteVehicle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (vehicleId: string) => deleteVehicle(vehicleId),
+    onSuccess: (_, vehicleId) => {
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.getVehicles.key,
+      });
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.deleteVehicle(vehicleId).key,
+      });
+    },
+  });
+};
+
+export const useUpdateVehicle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ vehicleId, data }: { vehicleId: string; data: VehicleInput }) =>
+      updateVehicle(vehicleId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.getVehicles.key,
+      });
+      queryClient.invalidateQueries({
+        queryKey: residentQueries.getVehicleDetail(variables.vehicleId).key,
       });
     },
   });

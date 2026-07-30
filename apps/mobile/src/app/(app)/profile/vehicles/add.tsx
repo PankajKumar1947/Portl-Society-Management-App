@@ -1,25 +1,21 @@
 import React, { useLayoutEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
-import { useForm, FormProvider } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme, Routes } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
-import Button from "@/components/ui/button";
-import FormInput from "@/components/ui/form-input";
-import FormSelect from "@/components/ui/form-select";
-
-const VEHICLE_TYPE_OPTIONS = [
-  { label: "Car (Sedan)", value: "Car (Sedan)" },
-  { label: "Car (SUV)", value: "Car (SUV)" },
-  { label: "Car (Hatchback)", value: "Car (Hatchback)" },
-  { label: "Two Wheeler", value: "Two Wheeler" },
-  { label: "Other", value: "Other" },
-];
+import { useGetMyVehicles, useAddVehicle } from "@repo/operations";
+import { useAlert } from "@/context/alert-context";
+import type { VehicleInput } from "@repo/schema";
+import VehicleForm from "./_components/vehicle-form";
 
 export default function AddVehicleScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { showAlert } = useAlert();
+
+  const { data: vehicles = [], isLoading } = useGetMyVehicles();
+  const { mutate: addVehicle, isPending: isSaving } = useAddVehicle();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -27,69 +23,56 @@ export default function AddVehicleScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
-  const methods = useForm({
-    defaultValues: {
-      type: "",
-      number: "",
-      model: "",
-    },
-  });
+  const onSubmit = async (form: VehicleInput) => {
+    const formattedNumber = form.vehicleNumber.trim().replace(/\s/g, "").toUpperCase();
 
-  const onSubmit = () => {
-    router.replace(Routes.Profile.Vehicles);
+    // Check if vehicle number already exists
+    const exists = vehicles.some(
+      (v) => v.vehicleNumber.trim().replace(/\s/g, "").toUpperCase() === formattedNumber
+    );
+
+    if (exists) {
+      showAlert({
+        title: "Duplicate Vehicle",
+        description: "A vehicle with this plate number is already registered.",
+        variant: "warning",
+      });
+      return;
+    }
+
+    addVehicle({
+      vehicleType: form.vehicleType,
+      vehicleNumber: formattedNumber,
+      vehicleBrand: form.vehicleBrand?.trim() || "",
+      vehicleModel: form.vehicleModel?.trim() || "",
+      vehicleColor: "",
+      parkingSlot: "",
+    }, {
+      onSuccess() {
+        router.replace(Routes.Profile.Vehicles);
+      },
+    });
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader title="Add Vehicle" onBack={() => router.back()} />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScreenHeader title="Add Vehicle" onBack={() => router.back()} />
-
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          <FormProvider {...methods}>
-            <FormSelect
-              name="type"
-              label="Select vehicle type"
-              options={VEHICLE_TYPE_OPTIONS}
-              required
-            />
-
-            <View style={styles.fieldGap} />
-
-            <FormInput
-              name="number"
-              label="Enter vehicle plate number"
-              placeholder="e.g. MH 12 AB 1234"
-              autoCapitalize="characters"
-              required
-            />
-
-            <View style={styles.fieldGap} />
-
-            <FormInput
-              name="model"
-              label="Enter vehicle brand/model"
-              placeholder="e.g. Honda City"
-              required
-            />
-          </FormProvider>
-        </ScrollView>
-
-        <View style={styles.bottomContainer}>
-          <Button
-            variant="primary"
-            style={styles.submitButton}
-            onPress={methods.handleSubmit(onSubmit)}
-          >
-            Save Vehicle
-          </Button>
-        </View>
-      </KeyboardAvoidingView>
+      <ScreenHeader title="Add Vehicle" onBack={() => router.back()} />
+      <VehicleForm
+        onSubmit={onSubmit}
+        submitText="Save Vehicle"
+        isPending={isSaving}
+      />
     </SafeAreaView>
   );
 }
@@ -99,27 +82,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
-    padding: theme.spacing.lg,
-    paddingBottom: 100,
-  },
-  fieldGap: {
-    height: theme.spacing.md,
-  },
-  bottomContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
-    backgroundColor: theme.colors.background,
-  },
-  submitButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
+

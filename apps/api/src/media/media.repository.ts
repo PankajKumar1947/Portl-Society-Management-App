@@ -24,7 +24,7 @@ export class MediaRepository {
   }
 
   async update(mediaId: string, data: Partial<Media>): Promise<MediaDocument | null> {
-    return this.model.findByIdAndUpdate(mediaId, data, { new: true }).exec();
+    return this.model.findByIdAndUpdate(mediaId, data, { returnDocument: 'after' }).exec();
   }
 
   async delete(mediaId: string): Promise<MediaDocument | null> {

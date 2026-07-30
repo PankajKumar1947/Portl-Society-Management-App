@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: 80,
     left: 0,
     right: 0,
     paddingHorizontal: theme.spacing.lg,
