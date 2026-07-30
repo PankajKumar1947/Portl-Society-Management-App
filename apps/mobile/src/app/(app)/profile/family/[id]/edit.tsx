@@ -18,8 +18,8 @@ export default function EditFamilyMemberScreen() {
   const { showAlert } = useAlert();
 
   const { data: member, isLoading } = useGetFamilyMemberDetail(id);
-  const { mutateAsync: updateMember, isPending: isUpdating } = useUpdateFamilyMember(id);
-  const { mutateAsync: deleteMember, isPending: isDeleting } = useDeleteFamilyMember();
+  const { mutate: updateMember, isPending: isUpdating } = useUpdateFamilyMember(id);
+  const { mutate: deleteMember, isPending: isDeleting } = useDeleteFamilyMember();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -34,38 +34,28 @@ export default function EditFamilyMemberScreen() {
       variant: "warning",
       confirmLabel: "Delete",
       showCancel: true,
-      onConfirm: async () => {
-        try {
-          await deleteMember(id);
-          router.replace(Routes.Profile.MyFamily);
-        } catch {
-          showAlert({
-            title: "Error",
-            description: "Failed to delete family member. Please try again.",
-            variant: "error",
-          });
-        }
+      onConfirm: () => {
+        deleteMember(id, {
+          onSuccess() {
+            router.replace(Routes.Profile.MyFamily);
+          },
+        });
       },
     });
   };
 
-  const onSubmit = async (form: AddFamilyMemberInput) => {
-    try {
-      await updateMember({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        relationship: form.relationship,
-        phoneNumber: form.phoneNumber?.replace(/\s/g, "") || undefined,
-        dateOfBirth: form.dateOfBirth || undefined,
-      });
-      router.replace(Routes.Profile.MyFamily);
-    } catch {
-      showAlert({
-        title: "Error",
-        description: "Failed to update family member. Please try again.",
-        variant: "error",
-      });
-    }
+  const onSubmit = (form: AddFamilyMemberInput) => {
+    updateMember({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      relationship: form.relationship,
+      phoneNumber: form.phoneNumber?.replace(/\s/g, "") || undefined,
+      dateOfBirth: form.dateOfBirth || undefined,
+    }, {
+      onSuccess() {
+        router.replace(Routes.Profile.MyFamily);
+      }
+    });
   };
 
   if (isLoading || !member) {

@@ -8,8 +8,15 @@ import ScreenHeader from "@/components/ui/screen-header";
 import Button from "@/components/ui/button";
 import ProfileRow from "@/components/ui/profile-row";
 import { useAuth } from "@/context/auth-context";
-import { useGetMe, useGetMySociety, useGetMyResident, useGetFamilyMembers, useGetMyVehicles, useAccessControl } from "@repo/operations";
+import { useGetMe, useGetMySociety, useGetMyResident, useAccessControl } from "@repo/operations";
 import { AclResource } from "@repo/schema";
+
+interface MenuItem {
+  id: string;
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -19,8 +26,6 @@ export default function ProfileScreen() {
   const { canViewModule, isResident, isAdmin } = useAccessControl();
 
   const { data: resident } = useGetMyResident({ enabled: isResident });
-  const { data: familyMembers } = useGetFamilyMembers({ enabled: isResident });
-  const { data: vehicles } = useGetMyVehicles({ enabled: isResident });
 
   const handleLogout = async () => {
     try {
@@ -41,7 +46,7 @@ export default function ProfileScreen() {
       ? `${society.societyName} (${society.societyType?.replace(/_/g, " ")})`
       : user?.email || "Resident";
 
-  const menuItems = [
+  const menuItems: Array<MenuItem> = [
     ...(isAdmin ? [{
       id: "society-stats",
       title: "Society Overview",
@@ -52,14 +57,12 @@ export default function ProfileScreen() {
       id: "family",
       title: "My Family",
       icon: "people-outline" as const,
-      badge: familyMembers && familyMembers.length > 0 ? `${familyMembers.length} Member${familyMembers.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.MyFamily),
     }] : []),
     ...(isResident && canViewModule(AclResource.VEHICLES) ? [{
       id: "vehicles",
       title: "My Vehicles",
       icon: "car-outline" as const,
-      badge: vehicles && vehicles.length > 0 ? `${vehicles.length} Vehicle${vehicles.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.Vehicles),
     }] : []),
     {
@@ -124,13 +127,6 @@ export default function ProfileScreen() {
               title={item.title}
               onPress={item.onPress}
               showBorder={index < menuItems.length - 1}
-              rightElement={
-                item.badge ? (
-                  <View style={styles.badgeContainer}>
-                    <Text style={styles.badgeText}>{item.badge}</Text>
-                  </View>
-                ) : undefined
-              }
             />
           ))}
         </View>

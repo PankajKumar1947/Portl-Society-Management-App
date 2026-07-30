@@ -26,7 +26,7 @@ export default function VehiclesScreen() {
   const { canCreate, canDelete } = useAccessControl(AclResource.VEHICLES);
 
   const { data: vehicles = [], isLoading, refetch } = useGetMyVehicles();
-  const { mutateAsync: deleteVehicle, isPending: isDeleting } = useDeleteVehicle();
+  const { mutate: deleteVehicle, isPending: isDeleting } = useDeleteVehicle();
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -42,16 +42,11 @@ export default function VehiclesScreen() {
       confirmLabel: "Delete",
       showCancel: true,
       onConfirm: async () => {
-        try {
-          await deleteVehicle(vehicleId);
-          refetch();
-        } catch {
-          showAlert({
-            title: "Error",
-            description: "Failed to remove vehicle. Please try again.",
-            variant: "error",
-          });
-        }
+        deleteVehicle(vehicleId, {
+          onSuccess() {
+            refetch();
+          },
+        });
       },
     });
   };
