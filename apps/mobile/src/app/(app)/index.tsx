@@ -7,6 +7,8 @@ import {
   Dimensions,
   Image,
   useWindowDimensions,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../constants";
@@ -17,9 +19,10 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Routes } from "@/constants";
 import { Images } from "@/assets/images";
-import { useAccessControl, useGetMyResident } from "@repo/operations";
+import { useAccessControl, useGetMyResident, useGetNotices } from "@repo/operations";
 import { AclResource, type AclResourceName } from "@repo/schema";
 import { useAuth } from "@/context/auth-context";
+import { formatNoticeDate } from "@/utils/notice";
 
 interface GridItem {
   id: string;
@@ -41,6 +44,8 @@ export default function HomeScreen() {
   const { canViewModule, isResident } = useAccessControl();
   const { user } = useAuth();
   const { data: resident } = useGetMyResident({ enabled: isResident });
+  const { data: notices, isLoading: isNoticesLoading } = useGetNotices({ status: "published" });
+  const recentNotices = notices?.slice(0, 2) || [];
   const { width } = useWindowDimensions();
   const numColumns = 3;
   const totalGap = theme.spacing.lg * 2 + theme.spacing.md * (numColumns - 1);
@@ -158,28 +163,42 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* Upcoming Visits Section */}
-        <View style={styles.sectionHeaderContainer}>
-          <Text style={styles.sectionTitle}>Upcoming Visitors</Text>
+        {/* Recent Notices Section */}
+        <View style={styles.noticesHeaderContainer}>
+          <Text style={styles.sectionTitle}>Recent Notices</Text>
+          <TouchableOpacity onPress={() => router.push(Routes.Notices.Index)}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
-        <Card variant="flat" style={styles.upcomingCard}>
-          <View style={styles.upcomingContent}>
-            {/* Avatar Placeholder */}
-            <View style={styles.avatarContainer}>
-              <Ionicons name="person" size={28} color={theme.colors.textSecondary} />
-            </View>
 
-            <View style={styles.upcomingInfo}>
-              <Text style={styles.visitorName}>Rahul Sharma</Text>
-              <Text style={styles.visitorSubText}>Delivery Partner</Text>
-              <Text style={styles.visitorTimeText}>Today, 10:00 AM</Text>
-            </View>
-
-            <Badge variant="success" style={styles.approvedBadge}>
-              Approved
-            </Badge>
-          </View>
-        </Card>
+        {isNoticesLoading ? (
+          <ActivityIndicator size="small" color={theme.colors.primary} style={styles.loader} />
+        ) : recentNotices.length > 0 ? (
+          recentNotices.map((notice) => (
+            <Card
+              key={notice.noticeId}
+              variant="flat"
+              style={styles.noticeCard}
+              onPress={() => router.push(Routes.Notices.Details(notice.noticeId))}
+            >
+              <View style={styles.noticeHeader}>
+                <Text style={styles.noticeCardTitle} numberOfLines={1}>
+                  {notice.title}
+                </Text>
+                <Text style={styles.noticeDate}>
+                  {formatNoticeDate(notice.publishedOn || notice.createdAt)}
+                </Text>
+              </View>
+              <Text style={styles.noticeDesc} numberOfLines={2}>
+                {notice.description}
+              </Text>
+            </Card>
+          ))
+        ) : (
+          <Card variant="flat" style={styles.emptyNoticeCard}>
+            <Text style={styles.emptyNoticeText}>No recent notices from administration.</Text>
+          </Card>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -317,46 +336,65 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "100%",
   },
-  upcomingCard: {
-    marginHorizontal: theme.spacing.lg,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-  },
-  upcomingContent: {
+  noticesHeaderContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.xl,
   },
-  avatarContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: theme.colors.surfaceSecondary,
-    justifyContent: "center",
+  seeAllText: {
+    fontSize: 14,
+    color: theme.colors.primaryDark,
+    fontWeight: theme.fontWeights.semibold,
+  },
+  noticeCard: {
+    padding: theme.spacing.md,
+    marginHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+  },
+  noticeHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginRight: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
   },
-  upcomingInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  visitorName: {
+  noticeCardTitle: {
     fontSize: 15,
     fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
+    flex: 1,
+    marginRight: theme.spacing.sm,
   },
-  visitorSubText: {
+  noticeDate: {
     fontSize: 12,
     color: theme.colors.textSecondary,
-    marginTop: 1,
   },
-  visitorTimeText: {
-    fontSize: 11,
-    color: theme.colors.textMuted,
-    marginTop: 2,
+  noticeDesc: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
   },
-  approvedBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+  emptyNoticeCard: {
+    padding: theme.spacing.lg,
+    marginHorizontal: theme.spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surfaceSecondary,
+    borderWidth: 0,
+    borderRadius: theme.radius.lg,
+  },
+  emptyNoticeText: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+  },
+  loader: {
+    marginVertical: theme.spacing.lg,
   },
 });

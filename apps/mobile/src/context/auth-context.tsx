@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
 import { setAccessToken, setRefreshToken, getMe } from "@repo/api-client";
 import { User } from "@repo/schema";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSocietyCreated, setIsSocietyCreated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const bootstrapAsync = async () => {
@@ -57,6 +59,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await SecureStore.setItemAsync("refreshToken", refreshToken);
       await SecureStore.setItemAsync("isSocietyCreated", societyCreatedStatus ? "true" : "false");
 
+      // Clear the query cache from any previous sessions
+      queryClient.clear();
+
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
       setIsAuthenticated(true);
@@ -85,6 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await SecureStore.deleteItemAsync("accessToken");
       await SecureStore.deleteItemAsync("refreshToken");
       await SecureStore.deleteItemAsync("isSocietyCreated");
+
+      // Clear all cached query state to ensure data security
+      queryClient.clear();
 
       setAccessToken(null);
       setRefreshToken(null);
