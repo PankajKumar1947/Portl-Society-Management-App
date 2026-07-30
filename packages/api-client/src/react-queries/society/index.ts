@@ -15,4 +15,8 @@ export const societyQueries = {
     key: ["update-society", societyId],
     endpoint: `/societies/${societyId}`,
   }),
+  stats: {
+    key: ["society-stats"],
+    endpoint: "/societies/stats",
+  },
 } as const;

@@ -22,6 +22,7 @@ import {
   ApiGetSociety,
   ApiGetSocietyByUserId,
   ApiUpdateSociety,
+  ApiGetSocietyStats,
 } from './society.docs';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserRoles } from '@repo/schema';
@@ -51,6 +52,13 @@ export class SocietyController {
   @ApiGetSocietyByUserId()
   async findMe(@CurrentUser('userId') userId: string) {
     return this.societyService.findByUserId(userId);
+  }
+
+  @Get('stats')
+  @Roles(UserRoles.ADMIN)
+  @ApiGetSocietyStats()
+  async getStats(@CurrentUser('societyId') societyId: string) {
+    return this.societyService.getStats(societyId);
   }
 
   @Get(':societyId')

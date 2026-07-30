@@ -50,3 +50,13 @@ export function ApiUpdateSociety() {
     ApiResponse({ status: 404, description: 'Society not found.' }),
   );
 }
+
+export function ApiGetSocietyStats() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get society statistics (Admin only)' }),
+    ApiBearerAuth(),
+    ApiResponse({ status: 200, description: 'Society stats returned successfully.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Society not found.' }),
+  );
+}

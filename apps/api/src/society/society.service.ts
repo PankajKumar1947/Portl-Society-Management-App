@@ -75,4 +75,8 @@ export class SocietyService {
     }
     return society;
   }
+
+  async getStats(societyId: string) {
+    return this.societyRepository.getStats(societyId);
+  }
 }

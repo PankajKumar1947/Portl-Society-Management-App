@@ -62,6 +62,7 @@ export const Routes = {
       pathname: app("/profile/vehicles/[id]/edit"),
       params: { id },
     }),
+    SocietyStats: app("/profile/stats"),
   },
 
   Society: {

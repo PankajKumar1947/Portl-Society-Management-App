@@ -1,4 +1,4 @@
-import { CreateSocietyBody, CreateSocietyData, Society, UpdateSocietyBody } from "@repo/schema";
+import { CreateSocietyBody, CreateSocietyData, Society, UpdateSocietyBody, SocietyStats } from "@repo/schema";
 import { societyQueries } from "../../react-queries/society";
 import { apiClient } from "../../services/axios-instance";
 
@@ -24,5 +24,10 @@ export const updateSociety = async (
   data: UpdateSocietyBody,
 ): Promise<Society> => {
   const res = await apiClient.patch(societyQueries.update(societyId).endpoint, data);
+  return res.data;
+};
+
+export const getSocietyStats = async (): Promise<SocietyStats> => {
+  const res = await apiClient.get<SocietyStats>(societyQueries.stats.endpoint);
   return res.data;
 };

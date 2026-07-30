@@ -16,10 +16,11 @@ export default function ProfileScreen() {
   const { signOut } = useAuth();
   const { data: user, isLoading: isUserLoading } = useGetMe();
   const { data: society } = useGetMySociety();
-  const { canViewModule } = useAccessControl();
-  const { data: resident } = useGetMyResident({ enabled: user?.role === "RESIDENTS" });
-  const { data: familyMembers } = useGetFamilyMembers({ enabled: user?.role === "RESIDENTS" });
-  const { data: vehicles } = useGetMyVehicles({ enabled: user?.role === "RESIDENTS" });
+  const { canViewModule, isResident, isAdmin } = useAccessControl();
+
+  const { data: resident } = useGetMyResident({ enabled: isResident });
+  const { data: familyMembers } = useGetFamilyMembers({ enabled: isResident });
+  const { data: vehicles } = useGetMyVehicles({ enabled: isResident });
 
   const handleLogout = async () => {
     try {
@@ -41,16 +42,22 @@ export default function ProfileScreen() {
       : user?.email || "Resident";
 
   const menuItems = [
-    ...(canViewModule(AclResource.FAMILY_MEMBERS) ? [{
+    ...(isAdmin ? [{
+      id: "society-stats",
+      title: "Society Overview",
+      icon: "stats-chart-outline" as const,
+      onPress: () => router.push(Routes.Profile.SocietyStats),
+    }] : []),
+    ...(isResident && canViewModule(AclResource.FAMILY_MEMBERS) ? [{
       id: "family",
       title: "My Family",
       icon: "people-outline" as const,
       badge: familyMembers && familyMembers.length > 0 ? `${familyMembers.length} Member${familyMembers.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.MyFamily),
     }] : []),
-    ...(canViewModule(AclResource.VEHICLES) ? [{
+    ...(isResident && canViewModule(AclResource.VEHICLES) ? [{
       id: "vehicles",
-      title: "Vehicle Details",
+      title: "My Vehicles",
       icon: "car-outline" as const,
       badge: vehicles && vehicles.length > 0 ? `${vehicles.length} Vehicle${vehicles.length > 1 ? "s" : ""}` : undefined,
       onPress: () => router.push(Routes.Profile.Vehicles),

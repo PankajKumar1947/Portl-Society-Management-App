@@ -17,3 +17,14 @@ export type CreateSocietyData = {
   message: string;
   society: Society;
 };
+
+export type SocietyStats = {
+  towers: number;
+  flats: number;
+  residents: number;
+  guards: number;
+  vehicles: number;
+  notices: number;
+  polls: number;
+  complaints: number;
+};
