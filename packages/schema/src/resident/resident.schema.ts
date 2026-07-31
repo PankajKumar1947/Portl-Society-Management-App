@@ -40,6 +40,9 @@ export const residentSchema = z.object({
   // Documents
   docType: docTypeSchema.default("NONE"),
   documentNumber: z.string().optional().or(z.literal("")),
+
+  // Passcode
+  passCode: z.string().optional(),
 });
 
 export const createResidentSchema = residentSchema.omit({

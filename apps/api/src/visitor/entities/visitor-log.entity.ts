@@ -34,6 +34,8 @@ export class VisitorLog {
   @Prop({ required: true, index: true })
   visitorId!: string;
 
+  createdAt?: string;
+
   @Prop({ required: true })
   name!: string;
 

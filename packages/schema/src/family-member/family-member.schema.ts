@@ -12,6 +12,7 @@ export const familyMemberSchema = z.object({
   dateOfBirth: z.string().optional(),
   towerId: z.string().min(1, "Tower is required"),
   flatId: z.string().min(1, "Flat is required"),
+  passCode: z.string().optional(),
 });
 
 export const addFamilyMemberSchema = z.object({

@@ -16,6 +16,7 @@ import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/layout/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { useGetVisitorLogs, useAccessControl, useGetTowers } from "@repo/operations";
 import { AclResource, SCAN_DIRECTION } from "@repo/schema";
 import {
@@ -29,6 +30,7 @@ import {
 } from "../../../utils/logs.utils";
 
 export default function LogsScreen() {
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("today");
@@ -65,9 +67,18 @@ export default function LogsScreen() {
   const towerMap = useMemo(() => new Map(towers.map((t) => [t.towerId, t.towerName])), [towers]);
 
   const sections = useMemo(() => {
-    const allEvents = extractEvents(logs, towerMap);
+    let allEvents = extractEvents(logs, towerMap);
+    if (activeTab === "visitors") {
+      allEvents = allEvents.filter(
+        (e) => e.visitorType !== "RESIDENT" && e.visitorType !== "FAMILY_MEMBER"
+      );
+    } else if (activeTab === "residents") {
+      allEvents = allEvents.filter(
+        (e) => e.visitorType === "RESIDENT" || e.visitorType === "FAMILY_MEMBER"
+      );
+    }
     return groupByDate(allEvents);
-  }, [logs, towerMap]);
+  }, [logs, towerMap, activeTab]);
 
   const totalCount = useMemo(() => sections.reduce((sum, s) => sum + s.data.length, 0), [sections]);
 
@@ -90,7 +101,7 @@ export default function LogsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
-        title="Visitor Logs"
+        title="Activity Logs"
         rightElement={
           <TouchableOpacity
             onPress={() => setShowFilters((v) => !v)}
@@ -105,12 +116,23 @@ export default function LogsScreen() {
         }
       />
 
+      <FilterTabs
+        tabs={[
+          { id: "all", label: "All" },
+          { id: "visitors", label: "Visitors" },
+          { id: "residents", label: "Residents" },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        style={styles.filterTabs}
+      />
+
       <View style={styles.searchRow}>
         <View style={styles.searchInputWrapper}>
           <Ionicons name="search-outline" size={16} color={theme.colors.textMuted} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search visitor..."
+            placeholder="Search activity..."
             placeholderTextColor={theme.colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -213,7 +235,14 @@ export default function LogsScreen() {
             </View>
 
             <View style={styles.infoCol}>
-              <Text style={styles.visitorName} numberOfLines={1}>{item.visitorName}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, flexWrap: "wrap" }}>
+                <Text style={styles.visitorName} numberOfLines={1}>{item.visitorName}</Text>
+                {item.visitorType === "RESIDENT" ? (
+                  <Badge variant="success">Resident</Badge>
+                ) : item.visitorType === "FAMILY_MEMBER" ? (
+                  <Badge variant="info">Family</Badge>
+                ) : null}
+              </View>
               <View style={styles.metaRow}>
                 {(canViewTower && item.towerName) && (
                   <Text style={styles.metaText} numberOfLines={1}>{item.towerName}</Text>
@@ -244,6 +273,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  filterTabs: {
+    marginBottom: theme.spacing.xs,
   },
   filterToggle: {
     width: 36,

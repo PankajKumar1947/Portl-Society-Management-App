@@ -40,6 +40,13 @@ export class FamilyMember {
 
   @Prop({ required: true, index: true })
   flatId: string;
+
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `FPAS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
+  })
+  passCode!: string;
 }
 
 export const FamilyMemberEntity = SchemaFactory.createForClass(FamilyMember);

@@ -65,6 +65,12 @@ export default function ProfileScreen() {
       icon: "car-outline" as const,
       onPress: () => router.push(Routes.Profile.Vehicles),
     }] : []),
+    ...(isResident ? [{
+      id: "passes",
+      title: "My Passes",
+      icon: "qr-code-outline" as const,
+      onPress: () => router.push(Routes.Profile.Passes as unknown as Parameters<typeof router.push>[0]),
+    }] : []),
     {
       id: "settings",
       title: "Settings",

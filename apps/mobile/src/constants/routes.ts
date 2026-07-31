@@ -63,6 +63,7 @@ export const Routes = {
       params: { id },
     }),
     SocietyStats: app("/profile/stats"),
+    Passes: app("/profile/passes"),
   },
 
   Society: {

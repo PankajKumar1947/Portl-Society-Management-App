@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ResidentRepository } from './resident.repository';
+import * as crypto from 'crypto';
 import { FamilyMemberRepository } from './family-member.repository';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
@@ -122,6 +123,10 @@ export class ResidentService {
     if (!resident) {
       throw new NotFoundException('Resident profile not found');
     }
+    if (!resident.passCode) {
+      resident.passCode = `RPAS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+      await resident.save();
+    }
     return resident;
   }
 
@@ -131,11 +136,20 @@ export class ResidentService {
       throw new NotFoundException('Your resident profile was not found');
     }
 
-    return this.familyMemberRepository.find({
+    const members = await this.familyMemberRepository.find({
       societyId,
       towerId: myResident.towerId,
       flatId: myResident.flatId,
     });
+
+    for (const member of members) {
+      if (!member.passCode) {
+        member.passCode = `FPAS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+        await member.save();
+      }
+    }
+
+    return members;
   }
 
   async addFamilyMember(

@@ -4,6 +4,9 @@ import {
   RESIDENT_TYPES,
   OWNERSHIP_STATUSES,
   DOC_TYPES,
+  User,
+  Flat,
+  Tower,
 } from '@repo/schema';
 import * as crypto from 'crypto';
 
@@ -50,6 +53,17 @@ export class Resident {
 
   @Prop()
   documentNumber?: string;
+
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `RPAS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
+  })
+  passCode!: string;
+
+  userDetails?: User;
+  flat?: Flat;
+  tower?: Tower;
 }
 
 export const ResidentSchema = SchemaFactory.createForClass(Resident);
