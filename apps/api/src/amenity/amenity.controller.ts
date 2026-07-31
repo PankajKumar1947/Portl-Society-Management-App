@@ -34,7 +34,7 @@ import {
 @UseGuards(JwtGuard, RolesGuard, TenantGuard)
 @UsePipes(new ZodValidationPipe())
 export class AmenityController {
-  constructor(private readonly service: AmenityService) {}
+  constructor(private readonly service: AmenityService) { }
 
   @Post()
   @Roles(UserRoles.ADMIN)
@@ -52,7 +52,6 @@ export class AmenityController {
   }
 
   @Get()
-  @Roles(UserRoles.ADMIN, UserRoles.RESIDENTS)
   @ApiGetAmenities()
   async findAll(
     @CurrentUser("societyId") societyId: string,

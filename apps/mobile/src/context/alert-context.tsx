@@ -54,6 +54,13 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     globalShowAlert = showAlert;
 
     setOnApiError((message: string) => {
+      if (
+        message === "Authentication token is missing" ||
+        message === "Unauthorized" ||
+        message.toLowerCase().includes("token")
+      ) {
+        return;
+      }
       showAlert({
         title: "Request Failed",
         description: message,
