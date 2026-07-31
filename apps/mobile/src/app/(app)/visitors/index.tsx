@@ -11,7 +11,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Routes } from "@/constants/routes";
 import { useGetVisitors, useAccessControl, useGetTowers } from "@repo/operations";
 import { AclResource } from "@repo/schema";
-import { VisitorCard } from "./_components/visitor-card";
+import VisitorCard from "./_components/visitor-card";
 
 export default function VisitorsScreen() {
   const router = useRouter();

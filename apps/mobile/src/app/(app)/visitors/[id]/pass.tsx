@@ -4,14 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Share,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
-import { VisitorStatusBadge } from "../_components/visitor-status-badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,9 +18,7 @@ import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { formatDate } from "@/utils/date";
 import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers, useUpdateVisitorStatus } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
-import { captureRef } from "react-native-view-shot";
-import * as Sharing from "expo-sharing";
-
+import { sharePassAsImage } from "@/utils/sharing";
 
 export default function VisitorPassScreen() {
   const {
@@ -128,21 +124,11 @@ export default function VisitorPassScreen() {
   const viewRef = useRef<View>(null);
 
   const handleShare = async () => {
-    try {
-      const uri = await captureRef(viewRef, {
-        format: "png",
-        quality: 0.95,
-      });
-      await Sharing.shareAsync(uri, {
-        mimeType: "image/png",
-        dialogTitle: `Share Pass`,
-      });
-    } catch (error) {
-      console.error("Failed to capture and share pass image:", error);
-      await Share.share({
-        message: `My Visitor Pass ID: ${passId}\nShow this at the gate.`,
-      });
-    }
+    await sharePassAsImage({
+      viewRef,
+      passId,
+      dialogTitle: "Share Pass",
+    });
   };
 
   const isApproved = status === VISITOR_STATUS.APPROVED || status === VISITOR_STATUS.COMPLETED;
@@ -156,15 +142,8 @@ export default function VisitorPassScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Pass Card */}
-        <View ref={viewRef} collapsable={false} style={{ backgroundColor: theme.colors.background }}>
-          <Card variant="flat" style={styles.passCard}>
-            <View style={styles.badgeRow}>
-              <VisitorStatusBadge
-                status={status}
-                isResidentCategory={type === "RESIDENT" || type === "FAMILY_MEMBER"}
-              />
-            </View>
-
+        <Card variant="flat" style={styles.passCard}>
+          <View ref={viewRef} collapsable={false} style={{ width: "100%", alignItems: "center", gap: theme.spacing.lg }}>
             <View style={styles.visitorBlock}>
               <Text style={styles.visitorName}>{name}</Text>
               <Text style={styles.visitorType}>{type}</Text>
@@ -220,14 +199,14 @@ export default function VisitorPassScreen() {
                 </Text>
               </View>
             )}
+          </View>
 
-            {isResident && passId && passId !== "N/A" && (
-              <Button onPress={handleShare} style={styles.shareBtn}>
-                Share Pass
-              </Button>
-            )}
-          </Card>
-        </View>
+          {isResident && passId && passId !== "N/A" && (
+            <Button onPress={handleShare} style={styles.shareBtn}>
+              Share Pass
+            </Button>
+          )}
+        </Card>
 
         {/* Activity History */}
         {scanEvents.length > 0 && (

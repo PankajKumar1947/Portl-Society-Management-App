@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Card } from "@/components/ui/card";
 import { PersonListItem } from "@/components/ui/person-list-item";
 import { theme } from "@/constants";
-import { VisitorStatusBadge } from "./visitor-status-badge";
+import VisitorStatusBadge from "./visitor-status-badge";
 
 export interface VisitorCardProps {
   item: {
@@ -24,7 +24,7 @@ export interface VisitorCardProps {
   towerMap: Map<string, string>;
 }
 
-export const VisitorCard: React.FC<VisitorCardProps> = ({
+const VisitorCard: React.FC<VisitorCardProps> = ({
   item,
   isResidentCategory,
   onPress,
@@ -59,6 +59,8 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
     </Card>
   );
 };
+
+export default VisitorCard;
 
 const styles = StyleSheet.create({
   card: {

@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import QRCode from "react-native-qrcode-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import ScreenHeader from "@/components/ui/screen-header";
+import { Button } from "@/components/ui/button";
+import { sharePassAsImage } from "@/utils/sharing";
 import { useGetMyResident, useGetFamilyMembers } from "@repo/operations";
 
 export default function PassesScreen() {
@@ -23,6 +25,16 @@ export default function PassesScreen() {
   const { data: familyMembers = [], isLoading: isFamilyLoading } = useGetFamilyMembers();
 
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+
+  const viewRef = useRef<View>(null);
+
+  const handleShare = async () => {
+    await sharePassAsImage({
+      viewRef,
+      passId: activePass.passCode,
+      dialogTitle: "Share Pass",
+    });
+  };
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -125,15 +137,12 @@ export default function PassesScreen() {
         </ScrollView>
 
         {/* Pass Card Container */}
-        <View style={styles.passCard}>
+        <View ref={viewRef} collapsable={false} style={styles.passCard}>
           {/* Top segment */}
           <View style={styles.passHeader}>
             <View>
               <Text style={styles.passTitle}>{activePass.name}</Text>
               <Text style={styles.passType}>{activePass.type}</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Active Pass</Text>
             </View>
           </View>
 
@@ -171,6 +180,12 @@ export default function PassesScreen() {
             </View>
           </View>
         </View>
+
+        {activePass.passCode ? (
+          <Button onPress={handleShare} style={styles.shareBtn}>
+            Share Pass
+          </Button>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -350,5 +365,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textSecondary,
     lineHeight: 16,
+  },
+  shareBtn: {
+    height: 48,
+    width: "100%",
+    marginTop: theme.spacing.md,
   },
 });

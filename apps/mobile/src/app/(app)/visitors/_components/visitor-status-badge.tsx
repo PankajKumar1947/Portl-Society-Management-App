@@ -8,7 +8,7 @@ export interface VisitorStatusBadgeProps {
   style?: any;
 }
 
-export const VisitorStatusBadge: React.FC<VisitorStatusBadgeProps> = ({
+const VisitorStatusBadge: React.FC<VisitorStatusBadgeProps> = ({
   status,
   isResidentCategory = false,
   style,
@@ -61,3 +61,5 @@ export const VisitorStatusBadge: React.FC<VisitorStatusBadgeProps> = ({
       );
   }
 };
+
+export default VisitorStatusBadge;
