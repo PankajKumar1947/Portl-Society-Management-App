@@ -144,14 +144,6 @@ export default function ScanScreen() {
             </Badge>
           </Card>
           <View style={styles.resultActions}>
-            {result.type !== "RESIDENT" && result.type !== "FAMILY_MEMBER" && (
-              <Button
-                onPress={() => router.push(Routes.Visitors.Pass(result.logId))}
-                style={styles.primaryResultBtn}
-              >
-                View Details
-              </Button>
-            )}
             <View style={styles.secondaryActionsRow}>
               <Button variant="outline" onPress={handleReset} style={styles.secondaryResultBtn}>
                 Scan Another

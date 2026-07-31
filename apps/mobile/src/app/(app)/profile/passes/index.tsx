@@ -161,7 +161,6 @@ export default function PassesScreen() {
               </View>
             )}
 
-            <Text style={styles.passCodeText}>{activePass.passCode}</Text>
             <Text style={styles.subtext}>{activePass.subtext}</Text>
 
             <View style={styles.warningBox}>

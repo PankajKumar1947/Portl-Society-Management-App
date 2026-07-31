@@ -39,8 +39,8 @@ export class VisitorLog {
   @Prop({ required: true })
   name!: string;
 
-  @Prop({ required: true })
-  mobile!: string;
+  @Prop()
+  mobile?: string;
 
   @Prop({ index: true })
   flatId?: string;

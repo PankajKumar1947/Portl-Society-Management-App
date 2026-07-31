@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { Routes } from "@/constants/routes";
 import { formatDate } from "@/utils/date";
 import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers, useUpdateVisitorStatus } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
+import { VisitorStatusBadge } from "../_components/visitor-status-badge";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "secondary"> = {
   [VISITOR_STATUS.APPROVED]: "success",
@@ -88,7 +88,6 @@ export default function VisitorPassScreen() {
 
   const name = visitor?.name || paramName || "Visitor";
   const type = (visitor?.type || paramType || "Guest").toUpperCase();
-  const purpose = visitor?.purpose || "—";
   const entries = visitor?.entries || [];
   const latestEntry = entries[entries.length - 1];
   const entryDate = latestEntry?.enteredAt ? formatDate(latestEntry.enteredAt) : null;
@@ -118,9 +117,10 @@ export default function VisitorPassScreen() {
         {/* Pass Card */}
         <Card variant="flat" style={styles.passCard}>
           <View style={styles.badgeRow}>
-            <Badge variant={isApproved ? "success" : "warning"}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
+            <VisitorStatusBadge
+              status={status}
+              isResidentCategory={type === "RESIDENT" || type === "FAMILY_MEMBER"}
+            />
           </View>
 
           <View style={styles.visitorBlock}>
@@ -151,20 +151,20 @@ export default function VisitorPassScreen() {
               <ActivityIndicator size="large" color={theme.colors.warning} />
               <Text style={styles.pendingText}>Waiting for Resident Approval</Text>
             </View>
-          ) : passId && passId !== "N/A" ? (
+          ) : isResident && passId && passId !== "N/A" ? (
             <View style={styles.qrWrapperStyles}>
               <QRCode value={passId} size={200} backgroundColor={theme.colors.surface} color={theme.colors.text} />
             </View>
           ) : null}
 
-          {passId && passId !== "N/A" && (
+          {isResident && passId && passId !== "N/A" && (
             <View style={styles.passIdRow}>
               <Text style={styles.passIdLabel}>Pass ID: </Text>
               <Text style={styles.passId}>{passId}</Text>
             </View>
           )}
 
-          {passId && passId !== "N/A" && (
+          {isResident && passId && passId !== "N/A" && (
             <View style={styles.hintContainer}>
               <Ionicons
                 name="alert-circle-outline"
@@ -244,11 +244,9 @@ export default function VisitorPassScreen() {
                 {pastVisits.map((visit, idx) => {
                   const firstEntry = visit.entries?.[0];
                   return (
-                    <TouchableOpacity
+                    <View
                       key={visit.logId}
                       style={[styles.pastVisitCard, idx < pastVisits.length - 1 && styles.pastVisitCardBorder]}
-                      onPress={() => router.push(Routes.Visitors.Pass(visit.logId))}
-                      activeOpacity={0.7}
                     >
                       <View style={styles.pastVisitTop}>
                         <Text style={styles.pastVisitDate}>
@@ -259,7 +257,6 @@ export default function VisitorPassScreen() {
                         </Badge>
                       </View>
                       <View style={styles.pastVisitTimeline}>
-                        <Text style={styles.pastVisitPassId}>Pass: {visit.passCode || "N/A"}</Text>
                         {firstEntry?.enteredAt && (
                           <View style={styles.pastVisitEntryRow}>
                             <View style={[styles.pastVisitDot, styles.entryDotPast]} />
@@ -277,8 +274,7 @@ export default function VisitorPassScreen() {
                           </View>
                         )}
                       </View>
-                      {idx < pastVisits.length - 1 && <View style={styles.pastVisitConnector} />}
-                    </TouchableOpacity>
+                    </View>
                   );
                 })}
               </View>
@@ -309,7 +305,7 @@ export default function VisitorPassScreen() {
           </View>
         )}
 
-        {passId && passId !== "N/A" && (
+        {isResident && passId && passId !== "N/A" && (
           <Button onPress={handleShare} style={styles.shareBtn}>
             Share Pass
           </Button>

@@ -4,7 +4,6 @@ import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { UserRole, UserRoles } from '@repo/schema';
 import { ResidentRepository } from '../resident/resident.repository';
 import { FamilyMemberRepository } from '../resident/family-member.repository';
-import { ResidentLogRepository } from '../resident/resident-log.repository';
 import { FlatRepository } from '../flat/flat.repository';
 import { NotificationService } from '../notification/notification.service';
 
@@ -16,7 +15,6 @@ export class VisitorService {
     private readonly repository: VisitorRepository,
     private readonly residentRepository: ResidentRepository,
     private readonly familyMemberRepository: FamilyMemberRepository,
-    private readonly residentLogRepository: ResidentLogRepository,
     private readonly flatRepository: FlatRepository,
     private readonly notificationService: NotificationService,
   ) { }
@@ -119,8 +117,28 @@ export class VisitorService {
       }
     }
 
+    if (query?.type === 'residents') {
+      filter.type = { $in: ['resident', 'family_member'] };
+
+      const latestLogs = await this.repository.logModel.aggregate([
+        { $match: filter },
+        { $sort: { createdAt: -1 } },
+        {
+          $group: {
+            _id: { $ifNull: ['$passCode', '$visitorId'] },
+            latestLogId: { $first: '$logId' },
+          },
+        },
+      ]).exec();
+
+      const logIds = latestLogs.map((l) => l.latestLogId);
+      return this.repository.findLogs({ logId: { $in: logIds } });
+    }
+
     if (query?.type) {
       filter.type = query.type;
+    } else {
+      filter.type = { $nin: ['resident', 'family_member'] };
     }
 
     return this.repository.findLogs(filter);
@@ -218,76 +236,19 @@ export class VisitorService {
   }
 
   async findAllLogs(societyId: string, role: UserRole, userId: string, query?: { search?: string; dateFrom?: string; dateTo?: string }) {
-    let residentId: string | undefined;
+    const filter: Record<string, unknown> = { societyId };
     if (role === UserRoles.RESIDENTS) {
-      const resident = await this.residentRepository.findByUserId(userId, societyId);
-      if (resident) {
-        residentId = resident.residentId;
-      }
+      filter.residentId = userId;
     }
-
-    const visitorFilter: Record<string, any> = { societyId };
-    const residentFilter: Record<string, any> = { societyId };
-
-    if (role === UserRoles.RESIDENTS) {
-      visitorFilter.residentId = userId;
-      if (residentId) {
-        residentFilter.residentId = residentId;
-      } else {
-        residentFilter.residentId = '__non_existent__';
-      }
-    }
-
     if (query?.search) {
-      visitorFilter.name = { $regex: query.search, $options: 'i' };
-      residentFilter.name = { $regex: query.search, $options: 'i' };
+      filter.name = { $regex: query.search, $options: 'i' };
     }
-
     if (query?.dateFrom || query?.dateTo) {
-      const createdFilter: Record<string, string> = {};
-      const timestampFilter: Record<string, string> = {};
-      if (query.dateFrom) {
-        createdFilter.$gte = query.dateFrom;
-        timestampFilter.$gte = query.dateFrom;
-      }
-      if (query.dateTo) {
-        createdFilter.$lte = query.dateTo;
-        timestampFilter.$lte = query.dateTo;
-      }
-      visitorFilter.createdAt = createdFilter;
-      residentFilter.timestamp = timestampFilter;
+      filter.createdAt = {};
+      if (query.dateFrom) (filter.createdAt as Record<string, string>).$gte = query.dateFrom;
+      if (query.dateTo) (filter.createdAt as Record<string, string>).$lte = query.dateTo;
     }
-
-    const [visitorLogs, residentLogs] = await Promise.all([
-      this.repository.findLogs(visitorFilter),
-      this.residentLogRepository.find(residentFilter),
-    ]);
-
-    const mappedResidentLogs = residentLogs.map((rl) => ({
-      logId: rl.logId,
-      societyId: rl.societyId,
-      visitorId: rl.residentId || rl.familyMemberId || '',
-      name: rl.name,
-      mobile: '—',
-      flatId: rl.resident?.flat?.flatId,
-      residentId: rl.residentId,
-      type: rl.type, // 'RESIDENT' or 'FAMILY_MEMBER'
-      purpose: rl.action === 'entry' ? 'Entered Society' : 'Exited Society',
-      status: 'approved',
-      entries: [
-        rl.action === 'entry'
-          ? { enteredAt: rl.timestamp, scannedBy: rl.scannedBy }
-          : { exitedAt: rl.timestamp, scannedBy: rl.scannedBy }
-      ],
-      createdAt: rl.timestamp,
-      updatedAt: rl.timestamp,
-      flat: rl.resident?.flat,
-      resident: rl.resident?.userDetails,
-    }));
-
-    const combined = [...visitorLogs, ...mappedResidentLogs];
-    combined.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-    return combined;
+    return this.repository.findLogs(filter);
   }
 
   async requestEntry(
@@ -367,65 +328,92 @@ export class VisitorService {
     scannedBy?: string,
     guardUserId?: string,
   ) {
-    if (passCode.startsWith('RPAS-')) {
-      const residents = await this.residentRepository.find({ passCode });
-      const resident = residents[0];
-      if (!resident || resident.societyId !== societyId) {
-        throw new NotFoundException(`Resident with pass code "${passCode}" not found`);
+    if (passCode.startsWith('RPAS-') || passCode.startsWith('FPAS-')) {
+      let name = '';
+      let flatId = '';
+      let residentId = '';
+      let visitorType = '';
+      let personId = '';
+
+      if (passCode.startsWith('RPAS-')) {
+        const residents = await this.residentRepository.find({ passCode });
+        const resident = residents[0];
+        if (!resident || resident.societyId !== societyId) {
+          throw new NotFoundException(`Resident with pass code "${passCode}" not found`);
+        }
+        name = resident.userDetails
+          ? `${resident.userDetails.firstName} ${resident.userDetails.lastName}`.trim()
+          : 'Resident';
+        flatId = resident.flatId;
+        residentId = resident.userId;
+        visitorType = 'resident';
+        personId = resident.residentId;
+      } else {
+        const familyMembers = await this.familyMemberRepository.find({ passCode });
+        const familyMember = familyMembers[0];
+        if (!familyMember || familyMember.societyId !== societyId) {
+          throw new NotFoundException(`Family member with pass code "${passCode}" not found`);
+        }
+        name = `${familyMember.firstName} ${familyMember.lastName}`.trim();
+        flatId = familyMember.flatId;
+        
+        const myResident = await this.residentRepository.findOne(familyMember.residentId);
+        residentId = myResident?.userId || '';
+        
+        visitorType = 'family_member';
+        personId = familyMember.familyMemberId;
       }
 
-      const name = resident.userDetails
-        ? `${resident.userDetails.firstName} ${resident.userDetails.lastName}`.trim()
-        : 'Resident';
+      const activeLog = await this.repository.logModel.findOne({ passCode, status: 'active' }).exec();
 
-      const newLog = await this.residentLogRepository.create({
-        societyId,
-        passCode,
-        name,
-        type: 'RESIDENT',
-        residentId: resident.residentId,
-        action: type,
-        timestamp: new Date().toISOString(),
-        scannedBy: scannedBy || 'Security Guard',
-      });
+      if (type === 'exit') {
+        if (activeLog) {
+          activeLog.entries = [{
+            enteredAt: activeLog.entries[0]?.enteredAt,
+            exitedAt: new Date().toISOString(),
+            scannedBy,
+          }];
+          activeLog.status = 'completed';
+          await activeLog.save();
+          return activeLog;
+        } else {
+          const log = await this.repository.createLog({
+            societyId,
+            visitorId: personId,
+            name,
+            mobile: '—',
+            flatId,
+            residentId,
+            type: visitorType,
+            status: 'completed',
+            passCode,
+            entries: [{ enteredAt: new Date().toISOString(), exitedAt: new Date().toISOString(), scannedBy }],
+          });
+          return log;
+        }
+      } else {
+        if (activeLog) {
+          activeLog.status = 'completed';
+          if (activeLog.entries.length > 0 && !activeLog.entries[0].exitedAt) {
+            activeLog.entries[0].exitedAt = new Date().toISOString();
+          }
+          await activeLog.save();
+        }
 
-      return {
-        name: newLog.name,
-        type: 'RESIDENT',
-        status: 'approved',
-        logId: newLog.logId,
-        action: newLog.action,
-      };
-    }
-
-    if (passCode.startsWith('FPAS-')) {
-      const familyMembers = await this.familyMemberRepository.find({ passCode });
-      const familyMember = familyMembers[0];
-      if (!familyMember || familyMember.societyId !== societyId) {
-        throw new NotFoundException(`Family member with pass code "${passCode}" not found`);
+        const log = await this.repository.createLog({
+          societyId,
+          visitorId: personId,
+          name,
+          mobile: '—',
+          flatId,
+          residentId,
+          type: visitorType,
+          status: 'active',
+          passCode,
+          entries: [{ enteredAt: new Date().toISOString(), scannedBy }],
+        });
+        return log;
       }
-
-      const name = `${familyMember.firstName} ${familyMember.lastName}`.trim();
-
-      const newLog = await this.residentLogRepository.create({
-        societyId,
-        passCode,
-        name,
-        type: 'FAMILY_MEMBER',
-        residentId: familyMember.residentId,
-        familyMemberId: familyMember.familyMemberId,
-        action: type,
-        timestamp: new Date().toISOString(),
-        scannedBy: scannedBy || 'Security Guard',
-      });
-
-      return {
-        name: newLog.name,
-        type: 'FAMILY_MEMBER',
-        status: 'approved',
-        logId: newLog.logId,
-        action: newLog.action,
-      };
     }
 
     const log = await this.repository.findLogByPassCode(passCode);

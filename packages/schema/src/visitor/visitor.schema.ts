@@ -1,7 +1,7 @@
 import z from "zod";
 
-export const VISITOR_TYPES = ["guest", "delivery", "cab", "service_staff"] as const;
-export const VISITOR_TYPE = { GUEST: "guest", DELIVERY: "delivery", CAB: "cab", SERVICE_STAFF: "service_staff" } as const;
+export const VISITOR_TYPES = ["guest", "delivery", "cab", "service_staff", "resident", "family_member"] as const;
+export const VISITOR_TYPE = { GUEST: "guest", DELIVERY: "delivery", CAB: "cab", SERVICE_STAFF: "service_staff", RESIDENT: "resident", FAMILY_MEMBER: "family_member" } as const;
 export const visitorTypeSchema = z.enum(VISITOR_TYPES);
 
 export const VISITOR_STATUSES = ["pending", "approved", "rejected", "completed", "active"] as const;

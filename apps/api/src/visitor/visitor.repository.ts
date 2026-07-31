@@ -36,8 +36,9 @@ export class VisitorRepository {
   ): Promise<VisitorLogDocument[]> {
     return this.logModel
       .find(filter)
-      .populate('visitor', 'name mobile photoUrl')
-      .populate('resident', 'firstName lastName role phoneNumber')
+      .select('-mobile -passCode')
+      .populate('visitor', 'name photoUrl')
+      .populate('resident', 'firstName lastName role')
       .populate('flat')
       .sort({ createdAt: -1 })
       .exec();
@@ -46,8 +47,9 @@ export class VisitorRepository {
   async findOneLog(logId: string): Promise<VisitorLogDocument | null> {
     return this.logModel
       .findOne({ logId })
-      .populate('visitor', 'name mobile photoUrl')
-      .populate('resident', 'firstName lastName role phoneNumber')
+      .select('-mobile -passCode')
+      .populate('visitor', 'name photoUrl')
+      .populate('resident', 'firstName lastName role')
       .populate('flat')
       .exec();
   }
@@ -55,8 +57,9 @@ export class VisitorRepository {
   async findLogByPassCode(passCode: string): Promise<VisitorLogDocument | null> {
     return this.logModel
       .findOne({ passCode })
-      .populate('visitor', 'name mobile photoUrl')
-      .populate('resident', 'firstName lastName role phoneNumber')
+      .select('-mobile -passCode')
+      .populate('visitor', 'name photoUrl')
+      .populate('resident', 'firstName lastName role')
       .populate('flat')
       .exec();
   }
@@ -64,8 +67,9 @@ export class VisitorRepository {
   async findLogsByVisitorId(visitorId: string, societyId: string): Promise<VisitorLogDocument[]> {
     return this.logModel
       .find({ visitorId, societyId })
-      .populate('visitor', 'name mobile photoUrl')
-      .populate('resident', 'firstName lastName role phoneNumber')
+      .select('-mobile -passCode')
+      .populate('visitor', 'name photoUrl')
+      .populate('resident', 'firstName lastName role')
       .populate('flat')
       .sort({ createdAt: -1 })
       .exec();
@@ -77,8 +81,9 @@ export class VisitorRepository {
   ): Promise<VisitorLogDocument | null> {
     return this.logModel
       .findOneAndUpdate({ logId }, data, { returnDocument: 'after' })
-      .populate('visitor', 'name mobile photoUrl')
-      .populate('resident', 'firstName lastName role phoneNumber')
+      .select('-mobile -passCode')
+      .populate('visitor', 'name photoUrl')
+      .populate('resident', 'firstName lastName role')
       .populate('flat')
       .exec();
   }
