@@ -235,7 +235,7 @@ export class VisitorService {
     return this.repository.findLogsByVisitorId(log.visitorId, societyId);
   }
 
-  async findAllLogs(societyId: string, role: UserRole, userId: string, query?: { search?: string; dateFrom?: string; dateTo?: string }) {
+  async findAllLogs(societyId: string, role: UserRole, userId: string, query?: { search?: string; dateFrom?: string; dateTo?: string; direction?: string }) {
     const filter: Record<string, unknown> = { societyId };
     if (role === UserRoles.RESIDENTS) {
       filter.residentId = userId;
@@ -247,6 +247,11 @@ export class VisitorService {
       filter.createdAt = {};
       if (query.dateFrom) (filter.createdAt as Record<string, string>).$gte = query.dateFrom;
       if (query.dateTo) (filter.createdAt as Record<string, string>).$lte = query.dateTo;
+    }
+    if (query?.direction === 'IN') {
+      filter['entries.enteredAt'] = { $exists: true, $ne: null };
+    } else if (query?.direction === 'OUT') {
+      filter['entries.exitedAt'] = { $exists: true, $ne: null };
     }
     return this.repository.findLogs(filter);
   }

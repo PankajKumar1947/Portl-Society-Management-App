@@ -1,13 +1,13 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
   SectionList,
   StyleSheet,
   RefreshControl,
-  TextInput,
   TouchableOpacity,
   Platform,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +16,6 @@ import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/layout/empty-state";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { useGetVisitorLogs, useAccessControl, useGetTowers } from "@repo/operations";
 import { AclResource, SCAN_DIRECTION } from "@repo/schema";
 import {
@@ -27,12 +26,11 @@ import {
   groupByDate,
   DateFilter,
   DATE_FILTER_OPTIONS,
-} from "../../../utils/logs.utils";
+} from "@/utils/logs.utils";
 
 export default function LogsScreen() {
   const [activeTab, setActiveTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [directionFilter, setDirectionFilter] = useState<"ALL" | "IN" | "OUT">("ALL");
   const [dateFilter, setDateFilter] = useState<DateFilter>("today");
   const [showFilters, setShowFilters] = useState(false);
   const [customFrom, setCustomFrom] = useState(new Date());
@@ -40,23 +38,18 @@ export default function LogsScreen() {
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
   const apiParams = useMemo(() => {
-    const trimmed = debouncedSearch.trim();
-    if (dateFilter === "all" && !trimmed) return undefined;
-    const params: { search?: string; dateFrom?: string; dateTo?: string } = {};
-    if (trimmed) params.search = trimmed;
+    const params: { dateFrom?: string; dateTo?: string; direction?: string } = {};
     if (dateFilter !== "all") {
       const { start, end } = getDateRange(dateFilter, customFrom, customTo);
       params.dateFrom = start.toISOString();
       params.dateTo = end.toISOString();
     }
+    if (directionFilter !== "ALL") {
+      params.direction = directionFilter;
+    }
     return params;
-  }, [debouncedSearch, dateFilter, customFrom, customTo]);
+  }, [dateFilter, customFrom, customTo, directionFilter]);
 
   const { data: logs = [], isLoading, refetch } = useGetVisitorLogs(apiParams);
 
@@ -69,18 +62,25 @@ export default function LogsScreen() {
   const sections = useMemo(() => {
     let allEvents = extractEvents(logs, towerMap);
     if (activeTab === "visitors") {
-      allEvents = allEvents.filter(
-        (e) => e.visitorType !== "RESIDENT" && e.visitorType !== "FAMILY_MEMBER"
-      );
+      allEvents = allEvents.filter((e) => {
+        const type = e.visitorType.toLowerCase();
+        return type !== "resident" && type !== "family_member";
+      });
     } else if (activeTab === "residents") {
-      allEvents = allEvents.filter(
-        (e) => e.visitorType === "RESIDENT" || e.visitorType === "FAMILY_MEMBER"
-      );
+      allEvents = allEvents.filter((e) => {
+        const type = e.visitorType.toLowerCase();
+        return type === "resident" || type === "family_member";
+      });
     }
-    return groupByDate(allEvents);
-  }, [logs, towerMap, activeTab]);
 
-  const totalCount = useMemo(() => sections.reduce((sum, s) => sum + s.data.length, 0), [sections]);
+    if (directionFilter === "IN") {
+      allEvents = allEvents.filter((e) => e.action === SCAN_DIRECTION.ENTRY);
+    } else if (directionFilter === "OUT") {
+      allEvents = allEvents.filter((e) => e.action === SCAN_DIRECTION.EXIT);
+    }
+
+    return groupByDate(allEvents);
+  }, [logs, towerMap, activeTab, directionFilter]);
 
   const handleFromChange = useCallback((_e: DateTimePickerEvent, d?: Date) => {
     if (Platform.OS === "android") setShowFromPicker(false);
@@ -98,107 +98,168 @@ export default function LogsScreen() {
     }
   }, [customFrom]);
 
+  const handleClearFilters = useCallback(() => {
+    setDateFilter("all");
+    setDirectionFilter("ALL");
+    setCustomFrom(new Date());
+    setCustomTo(new Date());
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         title="Activity Logs"
-        rightElement={
+        showBack={true}
+      />
+
+      <View style={styles.tabRow}>
+        <View style={[styles.segmentContainer, { flex: 1 }]}>
           <TouchableOpacity
-            onPress={() => setShowFilters((v) => !v)}
-            style={[styles.filterToggle, showFilters && styles.filterToggleActive]}
+            style={[styles.segmentButton, activeTab === "all" && styles.segmentButtonActive]}
+            onPress={() => setActiveTab("all")}
+            activeOpacity={0.8}
           >
-            <Ionicons
-              name="options-outline"
-              size={20}
-              color={showFilters ? "#fff" : theme.colors.text}
-            />
+            <Text style={[styles.segmentText, activeTab === "all" && styles.segmentTextActive]}>
+              All
+            </Text>
           </TouchableOpacity>
-        }
-      />
-
-      <FilterTabs
-        tabs={[
-          { id: "all", label: "All" },
-          { id: "visitors", label: "Visitors" },
-          { id: "residents", label: "Residents" },
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        style={styles.filterTabs}
-      />
-
-      <View style={styles.searchRow}>
-        <View style={styles.searchInputWrapper}>
-          <Ionicons name="search-outline" size={16} color={theme.colors.textMuted} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search activity..."
-            placeholderTextColor={theme.colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            clearButtonMode="while-editing"
-          />
+          <TouchableOpacity
+            style={[styles.segmentButton, activeTab === "visitors" && styles.segmentButtonActive]}
+            onPress={() => setActiveTab("visitors")}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, activeTab === "visitors" && styles.segmentTextActive]}>
+              Visitors
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segmentButton, activeTab === "residents" && styles.segmentButtonActive]}
+            onPress={() => setActiveTab("residents")}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, activeTab === "residents" && styles.segmentTextActive]}>
+              Residents
+            </Text>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.countText}>{totalCount}</Text>
+
+        <TouchableOpacity
+          onPress={() => setShowFilters(true)}
+          style={[styles.filterBtn, dateFilter !== "all" && styles.filterBtnActive]}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="options-outline"
+            size={20}
+            color={dateFilter !== "all" ? "#fff" : theme.colors.text}
+          />
+        </TouchableOpacity>
       </View>
 
-      {showFilters && (
-        <View style={styles.filterPanel}>
-          <View style={styles.filterBar}>
-            {DATE_FILTER_OPTIONS.map((f) => (
-              <TouchableOpacity
-                key={f.key}
-                style={[styles.filterChip, dateFilter === f.key && styles.filterChipActive]}
-                onPress={() => setDateFilter(f.key)}
-              >
-                <Text style={[styles.filterChipText, dateFilter === f.key && styles.filterChipTextActive]}>
-                  {f.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {dateFilter === "custom" && (
-            <View style={styles.customDateRow}>
-              <TouchableOpacity
-                style={styles.dateBtn}
-                onPress={() => setShowFromPicker(true)}
-              >
-                <Text style={styles.dateLabel}>From</Text>
-                <Text style={styles.dateValue}>{formatPickerDate(customFrom)}</Text>
-              </TouchableOpacity>
-              <Text style={styles.dateSep}>→</Text>
-              <TouchableOpacity
-                style={styles.dateBtn}
-                onPress={() => setShowToPicker(true)}
-              >
-                <Text style={styles.dateLabel}>To</Text>
-                <Text style={styles.dateValue}>{formatPickerDate(customTo)}</Text>
-              </TouchableOpacity>
+      <Modal
+        visible={showFilters}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilters(false)}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Logs</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.md }}>
+                <TouchableOpacity onPress={handleClearFilters} activeOpacity={0.7}>
+                  <Text style={styles.clearText}>Clear All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowFilters(false)}>
+                  <Ionicons name="close-outline" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
 
-          {showFromPicker && (
-            <DateTimePicker
-              value={customFrom}
-              mode="date"
-              display={Platform.OS === "ios" ? "inline" : "default"}
-              maximumDate={new Date()}
-              onChange={handleFromChange}
-            />
-          )}
+            <Text style={styles.modalSectionTitle}>Date Period</Text>
+            <View style={styles.filterBar}>
+              {DATE_FILTER_OPTIONS.map((f) => (
+                <TouchableOpacity
+                  key={f.key}
+                  style={[styles.filterChip, dateFilter === f.key && styles.filterChipActive]}
+                  onPress={() => setDateFilter(f.key)}
+                >
+                  <Text style={[styles.filterChipText, dateFilter === f.key && styles.filterChipTextActive]}>
+                    {f.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-          {showToPicker && (
-            <DateTimePicker
-              value={customTo}
-              mode="date"
-              display={Platform.OS === "ios" ? "inline" : "default"}
-              maximumDate={new Date()}
-              onChange={handleToChange}
-            />
-          )}
-        </View>
-      )}
+            <Text style={styles.modalSectionTitle}>Direction</Text>
+            <View style={styles.filterBar}>
+              {(["ALL", "IN", "OUT"] as const).map((d) => (
+                <TouchableOpacity
+                  key={d}
+                  style={[styles.filterChip, directionFilter === d && styles.filterChipActive]}
+                  onPress={() => setDirectionFilter(d)}
+                >
+                  <Text style={[styles.filterChipText, directionFilter === d && styles.filterChipTextActive]}>
+                    {d === "ALL" ? "All" : d === "IN" ? "In Only" : "Out Only"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {dateFilter === "custom" && (
+              <View style={styles.customDateRow}>
+                <TouchableOpacity
+                  style={styles.dateBtn}
+                  onPress={() => setShowFromPicker(true)}
+                >
+                  <Text style={styles.dateLabel}>From</Text>
+                  <Text style={styles.dateValue}>{formatPickerDate(customFrom)}</Text>
+                </TouchableOpacity>
+                <Text style={styles.dateSep}>→</Text>
+                <TouchableOpacity
+                  style={styles.dateBtn}
+                  onPress={() => setShowToPicker(true)}
+                >
+                  <Text style={styles.dateLabel}>To</Text>
+                  <Text style={styles.dateValue}>{formatPickerDate(customTo)}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {showFromPicker && (
+              <DateTimePicker
+                value={customFrom}
+                mode="date"
+                display={Platform.OS === "ios" ? "inline" : "default"}
+                maximumDate={new Date()}
+                onChange={handleFromChange}
+              />
+            )}
+
+            {showToPicker && (
+              <DateTimePicker
+                value={customTo}
+                mode="date"
+                display={Platform.OS === "ios" ? "inline" : "default"}
+                maximumDate={new Date()}
+                onChange={handleToChange}
+              />
+            )}
+
+            <TouchableOpacity
+              style={styles.applyBtn}
+              onPress={() => setShowFilters(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.applyBtnText}>Apply Filters</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <SectionList
         sections={sections}
@@ -218,31 +279,13 @@ export default function LogsScreen() {
           <EmptyState
             icon="document-text-outline"
             title="No matching events"
-            description={searchQuery ? "Try a different name." : "No visitor activity in this period."}
+            description="No visitor activity in this period."
           />
         }
         renderItem={({ item }) => (
           <View style={styles.eventRow}>
-            <Badge
-              variant={item.action === SCAN_DIRECTION.ENTRY ? "success" : "warning"}
-              style={styles.actionBadge}
-            >
-              {item.action === SCAN_DIRECTION.ENTRY ? "IN" : "OUT"}
-            </Badge>
-
-            <View style={styles.timeCol}>
-              <Text style={styles.timeText}>{formatTime(item.timestamp)}</Text>
-            </View>
-
             <View style={styles.infoCol}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, flexWrap: "wrap" }}>
-                <Text style={styles.visitorName} numberOfLines={1}>{item.visitorName}</Text>
-                {item.visitorType === "RESIDENT" ? (
-                  <Badge variant="success">Resident</Badge>
-                ) : item.visitorType === "FAMILY_MEMBER" ? (
-                  <Badge variant="info">Family</Badge>
-                ) : null}
-              </View>
+              <Text style={styles.visitorName} numberOfLines={1}>{item.visitorName}</Text>
               <View style={styles.metaRow}>
                 {(canViewTower && item.towerName) && (
                   <Text style={styles.metaText} numberOfLines={1}>{item.towerName}</Text>
@@ -254,13 +297,26 @@ export default function LogsScreen() {
                   </>
                 )}
               </View>
-              {item.scannedBy && (
-                <View style={styles.scannedRow}>
-                  <Ionicons name="shield-checkmark-outline" size={11} color={theme.colors.textMuted} />
-                  <Text style={styles.scannedText}>{item.scannedBy}</Text>
-                </View>
+            </View>
+
+            <View style={styles.typeCol}>
+              {(item.visitorType.toLowerCase() === "resident" || item.visitorType.toLowerCase() === "family_member") ? (
+                <Badge variant="success">Resident</Badge>
+              ) : (
+                <Badge variant="secondary">Visitor</Badge>
               )}
             </View>
+
+            <View style={styles.timeCol}>
+              <Text style={styles.timeText}>{formatTime(item.timestamp)}</Text>
+            </View>
+
+            <Badge
+              variant={item.action === SCAN_DIRECTION.ENTRY ? "success" : "warning"}
+              style={styles.actionBadge}
+            >
+              {item.action === SCAN_DIRECTION.ENTRY ? "IN" : "OUT"}
+            </Badge>
           </View>
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -273,6 +329,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    marginBottom: 50
   },
   filterTabs: {
     marginBottom: theme.spacing.xs,
@@ -288,44 +345,105 @@ const styles = StyleSheet.create({
   filterToggleActive: {
     backgroundColor: theme.colors.primary,
   },
-  searchRow: {
+  tabRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
     gap: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    marginVertical: theme.spacing.sm,
   },
-  searchInputWrapper: {
-    flex: 1,
+  segmentContainer: {
     flexDirection: "row",
-    alignItems: "center",
     backgroundColor: theme.colors.surfaceSecondary,
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.spacing.sm,
-    height: 38,
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    height: 46,
+    alignItems: "center",
   },
-  searchIcon: {
-    marginRight: theme.spacing.xs,
-  },
-  searchInput: {
+  segmentButton: {
     flex: 1,
-    fontSize: 14,
-    color: theme.colors.text,
-    padding: 0,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: theme.radius.full,
   },
-  countText: {
+  segmentButtonActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  segmentText: {
     fontSize: 13,
     fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.textSecondary,
+  },
+  segmentTextActive: {
+    color: theme.colors.text,
+  },
+  filterBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surfaceSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  filterBtnActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: theme.colors.surface,
+    borderTopLeftRadius: theme.radius.lg,
+    borderTopRightRadius: theme.radius.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.lg,
+    gap: theme.spacing.md,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xs,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+  },
+  modalSectionTitle: {
+    fontSize: 14,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  clearText: {
     color: theme.colors.textMuted,
-    minWidth: 24,
-    textAlign: "right",
+    fontSize: 13,
+    fontWeight: theme.fontWeights.semibold,
+  },
+  applyBtn: {
+    backgroundColor: theme.colors.primary,
+    height: 48,
+    borderRadius: theme.radius.full,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: theme.spacing.sm,
+  },
+  applyBtnText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: theme.fontWeights.bold,
   },
   filterPanel: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
     paddingBottom: theme.spacing.sm,
   },
   filterBar: {
@@ -429,6 +547,10 @@ const styles = StyleSheet.create({
   },
   timeCol: {
     width: 90,
+  },
+  typeCol: {
+    width: 75,
+    alignItems: "flex-start",
   },
   timeText: {
     fontSize: 13,

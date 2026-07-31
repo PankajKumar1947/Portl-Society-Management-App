@@ -28,7 +28,7 @@ export const useGetVisitorVisits = (logId: string, options?: { enabled?: boolean
   });
 };
 
-export const useGetVisitorLogs = (query?: { search?: string; dateFrom?: string; dateTo?: string }) => {
+export const useGetVisitorLogs = (query?: { search?: string; dateFrom?: string; dateTo?: string; direction?: string }) => {
   return useQuery({
     queryKey: [...visitorQueries.getVisitorLogs.key, query],
     queryFn: () => getVisitorLogs(query),

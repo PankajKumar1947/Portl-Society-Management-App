@@ -31,8 +31,9 @@ export class VisitorLogsController {
     @Query('search') search?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('direction') direction?: string,
   ) {
-    const data = await this.service.findAllLogs(societyId, role, userId, { search, dateFrom, dateTo });
+    const data = await this.service.findAllLogs(societyId, role, userId, { search, dateFrom, dateTo, direction });
     return {
       success: true,
       message: 'Visitor logs retrieved successfully',

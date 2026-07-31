@@ -5,31 +5,19 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Fab } from "@/components/ui/fab";
 import { EmptyState } from "@/components/layout/empty-state";
 import { IconButton } from "@/components/ui/icon-button";
 import { Routes } from "@/constants/routes";
 import { useGetVisitors, useAccessControl, useGetTowers } from "@repo/operations";
-import { AclResource, VISITOR_STATUS } from "@repo/schema";
+import { AclResource } from "@repo/schema";
 import { VisitorCard } from "./_components/visitor-card";
-
-const TABS = [
-  { id: "all", label: "All" },
-  { id: VISITOR_STATUS.PENDING, label: "Pending" },
-  { id: VISITOR_STATUS.APPROVED, label: "Approved" },
-];
 
 export default function VisitorsScreen() {
   const router = useRouter();
   const [category, setCategory] = useState<"visitors" | "residents">("visitors");
-  const [activeTab, setActiveTab] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
 
-  const statusFilter =
-    category === "visitors" && activeTab !== "all" ? activeTab : undefined;
   const { data: visitors = [], isLoading, refetch } = useGetVisitors({
-    status: statusFilter,
     type: category === "residents" ? "residents" : undefined,
   });
 
@@ -62,51 +50,26 @@ export default function VisitorsScreen() {
       />
 
       <View style={styles.container}>
-        <View style={styles.tabRow}>
-          <View style={[styles.segmentContainer, { flex: 1 }]}>
-            <TouchableOpacity
-              style={[styles.segmentButton, category === "visitors" && styles.segmentButtonActive]}
-              onPress={() => setCategory("visitors")}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.segmentText, category === "visitors" && styles.segmentTextActive]}>
-                Visitors
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.segmentButton, category === "residents" && styles.segmentButtonActive]}
-              onPress={() => setCategory("residents")}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.segmentText, category === "residents" && styles.segmentTextActive]}>
-                Residents & Family
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {category === "visitors" && (
-            <TouchableOpacity
-              onPress={() => setShowFilters((v) => !v)}
-              style={[styles.filterBtn, showFilters && styles.filterBtnActive]}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="options-outline"
-                size={20}
-                color={showFilters ? "#fff" : theme.colors.text}
-              />
-            </TouchableOpacity>
-          )}
+        <View style={styles.segmentContainer}>
+          <TouchableOpacity
+            style={[styles.segmentButton, category === "visitors" && styles.segmentButtonActive]}
+            onPress={() => setCategory("visitors")}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, category === "visitors" && styles.segmentTextActive]}>
+              Visitors
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segmentButton, category === "residents" && styles.segmentButtonActive]}
+            onPress={() => setCategory("residents")}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segmentText, category === "residents" && styles.segmentTextActive]}>
+              Residents & Family
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        {showFilters && category === "visitors" && (
-          <FilterTabs
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            style={styles.filterTabs}
-          />
-        )}
 
         <FlatList
           data={visitors}
@@ -153,13 +116,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  tabRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: theme.spacing.lg,
-    gap: theme.spacing.sm,
-    marginVertical: theme.spacing.sm,
-  },
   segmentContainer: {
     flexDirection: "row",
     backgroundColor: theme.colors.surfaceSecondary,
@@ -168,6 +124,8 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     height: 46,
     alignItems: "center",
+    marginHorizontal: theme.spacing.lg,
+    marginVertical: theme.spacing.sm,
   },
   segmentButton: {
     flex: 1,
@@ -189,20 +147,6 @@ const styles = StyleSheet.create({
   },
   filterTabs: {
     marginBottom: theme.spacing.sm,
-  },
-  filterBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surfaceSecondary,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  filterBtnActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   list: {
     paddingHorizontal: theme.spacing.lg,

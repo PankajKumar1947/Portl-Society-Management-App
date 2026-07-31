@@ -21,7 +21,7 @@ export const getVisitorVisits = async (logId: string): Promise<VisitorListRespon
   return res.data;
 };
 
-export const getVisitorLogs = async (params?: { search?: string; dateFrom?: string; dateTo?: string }): Promise<VisitorListResponse> => {
+export const getVisitorLogs = async (params?: { search?: string; dateFrom?: string; dateTo?: string; direction?: string }): Promise<VisitorListResponse> => {
   const res = await apiClient.get(visitorQueries.getVisitorLogs.endpoint, { params });
   return res.data;
 };
