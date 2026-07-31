@@ -77,8 +77,18 @@ export class VisitorController {
   async findOne(
     @Param('logId') logId: string,
     @CurrentUser('societyId') societyId: string,
+    @CurrentUser('role') role: UserRole,
   ) {
     const data = await this.service.findOne(logId, societyId);
+    if (role !== UserRoles.RESIDENTS && data) {
+      const plain = data.toObject();
+      delete plain.passCode;
+      return {
+        success: true,
+        message: 'Visitor retrieved successfully',
+        data: plain,
+      };
+    }
     return {
       success: true,
       message: 'Visitor retrieved successfully',

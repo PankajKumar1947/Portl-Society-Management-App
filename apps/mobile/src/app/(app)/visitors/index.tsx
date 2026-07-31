@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +16,7 @@ import { VisitorCard } from "./_components/visitor-card";
 export default function VisitorsScreen() {
   const router = useRouter();
   const [category, setCategory] = useState<"visitors" | "residents">("visitors");
+  const [showScanModeModal, setShowScanModeModal] = useState(false);
 
   const { data: visitors = [], isLoading, refetch } = useGetVisitors({
     type: category === "residents" ? "residents" : undefined,
@@ -36,7 +37,7 @@ export default function VisitorsScreen() {
         rightElement={
           <View style={{ flexDirection: "row", gap: theme.spacing.xs }}>
             <IconButton
-              onPress={() => router.push(Routes.Visitors.Scan)}
+              onPress={() => setShowScanModeModal(true)}
               icon={<Ionicons name="qr-code-outline" size={22} color={theme.colors.text} />}
               variant="ghost"
             />
@@ -104,6 +105,51 @@ export default function VisitorsScreen() {
         label="Add Visitor"
         onPress={() => router.push(Routes.Visitors.Create)}
       />
+
+      <Modal
+        visible={showScanModeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowScanModeModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowScanModeModal(false)}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Scan Pass</Text>
+              <TouchableOpacity onPress={() => setShowScanModeModal(false)}>
+                <Ionicons name="close-outline" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalSubTitle}>Choose scan direction:</Text>
+            <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.xs }}>
+              <TouchableOpacity
+                style={styles.scanModeOption}
+                onPress={() => {
+                  setShowScanModeModal(false);
+                  router.push(`${Routes.Visitors.Scan}?dir=entry`);
+                }}
+              >
+                <Ionicons name="enter-outline" size={22} color={theme.colors.success} />
+                <Text style={styles.scanModeOptionText}>Scan for Entry</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.scanModeOption}
+                onPress={() => {
+                  setShowScanModeModal(false);
+                  router.push(`${Routes.Visitors.Scan}?dir=exit`);
+                }}
+              >
+                <Ionicons name="exit-outline" size={22} color={theme.colors.warning} />
+                <Text style={styles.scanModeOptionText}>Scan for Exit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -175,5 +221,48 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textMuted,
     marginHorizontal: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: theme.colors.surface,
+    borderTopLeftRadius: theme.radius.lg,
+    borderTopRightRadius: theme.radius.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.lg,
+    gap: theme.spacing.md,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xs,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+  },
+  modalSubTitle: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.semibold,
+  },
+  scanModeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surfaceSecondary,
+    gap: theme.spacing.sm,
+  },
+  scanModeOptionText: {
+    fontSize: 15,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
   },
 });

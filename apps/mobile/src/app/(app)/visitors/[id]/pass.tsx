@@ -1,38 +1,30 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Share,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { Badge } from "@/components/ui/badge";
-import { InfoRow } from "@/components/ui/info-row";
+import { VisitorStatusBadge } from "../_components/visitor-status-badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
-import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { formatDate } from "@/utils/date";
 import { useGetVisitorDetail, useGetVisitorVisits, useAccessControl, useGetTowers, useUpdateVisitorStatus } from "@repo/operations";
 import { AclResource, VISITOR_STATUS } from "@repo/schema";
-import { VisitorStatusBadge } from "../_components/visitor-status-badge";
+import { captureRef } from "react-native-view-shot";
+import * as Sharing from "expo-sharing";
 
-const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "secondary"> = {
-  [VISITOR_STATUS.APPROVED]: "success",
-  [VISITOR_STATUS.PENDING]: "warning",
-  [VISITOR_STATUS.REJECTED]: "danger",
-  [VISITOR_STATUS.COMPLETED]: "secondary",
-};
 
 export default function VisitorPassScreen() {
-  const router = useRouter();
-  const [showPastVisits, setShowPastVisits] = useState(false);
   const {
     id,
     name: paramName,
@@ -61,7 +53,42 @@ export default function VisitorPassScreen() {
     }, [refetchDetail, refetchVisits])
   );
 
-  const pastVisits = useMemo(() => visits.filter((v) => v.logId !== id), [visits, id]);
+  const scanEvents = useMemo(() => {
+    const events: Array<{
+      id: string;
+      timestamp: string;
+      action: "ENTRY" | "EXIT";
+    }> = [];
+
+    for (const v of visits) {
+      for (const entry of v.entries || []) {
+        if (entry.enteredAt) {
+          events.push({
+            id: `${v.logId}-entry-${entry.enteredAt}`,
+            timestamp: entry.enteredAt,
+            action: "ENTRY",
+          });
+        }
+        if (entry.exitedAt) {
+          events.push({
+            id: `${v.logId}-exit-${entry.exitedAt}`,
+            timestamp: entry.exitedAt,
+            action: "EXIT",
+          });
+        }
+      }
+    }
+
+    return events.sort((a, b) => {
+      const timeA = new Date(a.timestamp).getTime();
+      const timeB = new Date(b.timestamp).getTime();
+      if (timeA !== timeB) {
+        return timeB - timeA;
+      }
+      if (a.action === b.action) return 0;
+      return a.action === "EXIT" ? -1 : 1;
+    });
+  }, [visits]);
 
   const { canViewModule, isResident } = useAccessControl();
   const { mutate: updateStatus } = useUpdateVisitorStatus(id || "");
@@ -98,10 +125,24 @@ export default function VisitorPassScreen() {
   const passId = visitor?.passCode || paramPassId || "VP00000000";
   const createdAt = visitor?.createdAt ? formatDate(visitor.createdAt, "dateTime") : null;
 
+  const viewRef = useRef<View>(null);
+
   const handleShare = async () => {
-    await Share.share({
-      message: `My Visitor Pass ID: ${passId}\nShow this at the gate.`,
-    });
+    try {
+      const uri = await captureRef(viewRef, {
+        format: "png",
+        quality: 0.95,
+      });
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: `Share Pass`,
+      });
+    } catch (error) {
+      console.error("Failed to capture and share pass image:", error);
+      await Share.share({
+        message: `My Visitor Pass ID: ${passId}\nShow this at the gate.`,
+      });
+    }
   };
 
   const isApproved = status === VISITOR_STATUS.APPROVED || status === VISITOR_STATUS.COMPLETED;
@@ -115,170 +156,116 @@ export default function VisitorPassScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Pass Card */}
-        <Card variant="flat" style={styles.passCard}>
-          <View style={styles.badgeRow}>
-            <VisitorStatusBadge
-              status={status}
-              isResidentCategory={type === "RESIDENT" || type === "FAMILY_MEMBER"}
-            />
-          </View>
-
-          <View style={styles.visitorBlock}>
-            <Text style={styles.visitorName}>{name}</Text>
-            <Text style={styles.visitorType}>{type}</Text>
-          </View>
-
-          <View style={styles.detailsBlock}>
-            <View style={styles.detailsRow}>
-              <Ionicons name="calendar-outline" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.detailsText}>
-                {time === "Pending Arrival" ? `${date} (${time})` : `${date}, ${time}`}
-              </Text>
+        <View ref={viewRef} collapsable={false} style={{ backgroundColor: theme.colors.background }}>
+          <Card variant="flat" style={styles.passCard}>
+            <View style={styles.badgeRow}>
+              <VisitorStatusBadge
+                status={status}
+                isResidentCategory={type === "RESIDENT" || type === "FAMILY_MEMBER"}
+              />
             </View>
 
-            {shouldFetchTowers && visitor?.flat && (
+            <View style={styles.visitorBlock}>
+              <Text style={styles.visitorName}>{name}</Text>
+              <Text style={styles.visitorType}>{type}</Text>
+            </View>
+
+            <View style={styles.detailsBlock}>
               <View style={styles.detailsRow}>
-                <Ionicons name="business-outline" size={16} color={theme.colors.textSecondary} />
+                <Ionicons name="calendar-outline" size={16} color={theme.colors.textSecondary} />
                 <Text style={styles.detailsText}>
-                  {canViewTower && towerMap.get(visitor.flat.towerId) ? `${towerMap.get(visitor.flat.towerId)} • ` : ''}Flat {visitor.flat.flatNumber}
+                  {time === "Pending Arrival" ? `${date} (${time})` : `${date}, ${time}`}
+                </Text>
+              </View>
+
+              {shouldFetchTowers && visitor?.flat && (
+                <View style={styles.detailsRow}>
+                  <Ionicons name="business-outline" size={16} color={theme.colors.textSecondary} />
+                  <Text style={styles.detailsText}>
+                    {canViewTower && towerMap.get(visitor.flat.towerId) ? `${towerMap.get(visitor.flat.towerId)} • ` : ''}Flat {visitor.flat.flatNumber}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {status === VISITOR_STATUS.PENDING && passId === "N/A" ? (
+              <View style={styles.pendingContainer}>
+                <ActivityIndicator size="large" color={theme.colors.warning} />
+                <Text style={styles.pendingText}>Waiting for Resident Approval</Text>
+              </View>
+            ) : isResident && passId && passId !== "N/A" ? (
+              <View style={styles.qrWrapperStyles}>
+                <QRCode value={passId} size={200} backgroundColor={theme.colors.surface} color={theme.colors.text} />
+              </View>
+            ) : null}
+
+            {isResident && passId && passId !== "N/A" && (
+              <View style={styles.passIdRow}>
+                <Text style={styles.passIdLabel}>Pass ID: </Text>
+                <Text style={styles.passId}>{passId}</Text>
+              </View>
+            )}
+
+            {isResident && passId && passId !== "N/A" && (
+              <View style={styles.hintContainer}>
+                <Ionicons
+                  name="alert-circle-outline"
+                  size={14}
+                  color={status === VISITOR_STATUS.PENDING ? theme.colors.warning : theme.colors.textMuted}
+                />
+                <Text style={[styles.hint, status === VISITOR_STATUS.PENDING && { color: theme.colors.warning }]}>
+                  {status === VISITOR_STATUS.PENDING
+                    ? "Approval required on arrival"
+                    : "Show this pass at the gate"}
                 </Text>
               </View>
             )}
-          </View>
 
-          {status === VISITOR_STATUS.PENDING && passId === "N/A" ? (
-            <View style={styles.pendingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.warning} />
-              <Text style={styles.pendingText}>Waiting for Resident Approval</Text>
-            </View>
-          ) : isResident && passId && passId !== "N/A" ? (
-            <View style={styles.qrWrapperStyles}>
-              <QRCode value={passId} size={200} backgroundColor={theme.colors.surface} color={theme.colors.text} />
-            </View>
-          ) : null}
+            {isResident && passId && passId !== "N/A" && (
+              <Button onPress={handleShare} style={styles.shareBtn}>
+                Share Pass
+              </Button>
+            )}
+          </Card>
+        </View>
 
-          {isResident && passId && passId !== "N/A" && (
-            <View style={styles.passIdRow}>
-              <Text style={styles.passIdLabel}>Pass ID: </Text>
-              <Text style={styles.passId}>{passId}</Text>
-            </View>
-          )}
-
-          {isResident && passId && passId !== "N/A" && (
-            <View style={styles.hintContainer}>
-              <Ionicons
-                name="alert-circle-outline"
-                size={14}
-                color={status === VISITOR_STATUS.PENDING ? theme.colors.warning : theme.colors.textMuted}
-              />
-              <Text style={[styles.hint, status === VISITOR_STATUS.PENDING && { color: theme.colors.warning }]}>
-                {status === VISITOR_STATUS.PENDING
-                  ? "Approval required on arrival"
-                  : "Show this pass at the gate"}
-              </Text>
-            </View>
-          )}
-        </Card>
-
-        {/* Visit Timeline */}
-        <Card variant="flat" style={styles.historyCard}>
-          <Text style={styles.sectionTitle}>Visit Timeline</Text>
-          <View style={styles.divider} />
-          {createdAt && (
-            <InfoRow
-              icon="add-circle-outline"
-              label="Requested"
-              value={createdAt}
-            />
-          )}
-          {entries.map((entry, idx) => (
-            <View key={idx}>
-              {entry.enteredAt && (
-                <InfoRow
-                  icon="checkmark-circle-outline"
-                  label={idx === 0 && entries.length > 1 ? `Entry ${idx + 1}` : "Entered"}
-                  value={formatDate(entry.enteredAt, "dateTime")}
-                />
-              )}
-              {entry.exitedAt && (
-                <InfoRow
-                  icon="exit-outline"
-                  label={idx === 0 && entries.length > 1 ? `Exit ${idx + 1}` : "Exited"}
-                  value={formatDate(entry.exitedAt, "dateTime")}
-                />
-              )}
-            </View>
-          ))}
-          {visitor?.status === VISITOR_STATUS.REJECTED && (
-            <InfoRow
-              icon="close-circle-outline"
-              label="Status"
-              value="Rejected"
-            />
-          )}
-        </Card>
-
-        {/* Past Visits */}
-        {pastVisits.length > 0 && (
+        {/* Activity History */}
+        {scanEvents.length > 0 && (
           <Card variant="flat" style={styles.pastVisitsCard}>
-            <TouchableOpacity
-              style={styles.pastVisitsHeader}
-              onPress={() => setShowPastVisits((v) => !v)}
-              activeOpacity={0.7}
-            >
+            <View style={styles.pastVisitsHeader}>
               <View style={styles.pastVisitsHeaderLeft}>
-                <Text style={styles.sectionTitle}>Past Visits</Text>
+                <Text style={styles.sectionTitle}>Activity History</Text>
                 <View style={styles.pastVisitsCount}>
-                  <Text style={styles.pastVisitsCountText}>{pastVisits.length}</Text>
+                  <Text style={styles.pastVisitsCountText}>{scanEvents.length}</Text>
                 </View>
               </View>
-              <Ionicons
-                name={showPastVisits ? "chevron-up" : "chevron-down"}
-                size={20}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
+            </View>
             <View style={styles.divider} />
-            {showPastVisits && (
-              <View style={styles.pastVisitsList}>
-                {pastVisits.map((visit, idx) => {
-                  const firstEntry = visit.entries?.[0];
-                  return (
-                    <View
-                      key={visit.logId}
-                      style={[styles.pastVisitCard, idx < pastVisits.length - 1 && styles.pastVisitCardBorder]}
-                    >
-                      <View style={styles.pastVisitTop}>
-                        <Text style={styles.pastVisitDate}>
-                          {formatDate(visit.createdAt, "withWeekday")}
-                        </Text>
-                        <Badge variant={STATUS_VARIANT[visit.status]}>
-                          {visit.status.charAt(0).toUpperCase() + visit.status.slice(1)}
-                        </Badge>
-                      </View>
-                      <View style={styles.pastVisitTimeline}>
-                        {firstEntry?.enteredAt && (
-                          <View style={styles.pastVisitEntryRow}>
-                            <View style={[styles.pastVisitDot, styles.entryDotPast]} />
-                            <Text style={styles.pastVisitTime}>
-                              IN {formatDate(firstEntry.enteredAt, "time")}
-                            </Text>
-                          </View>
-                        )}
-                        {firstEntry?.exitedAt && (
-                          <View style={styles.pastVisitEntryRow}>
-                            <View style={[styles.pastVisitDot, styles.exitDotPast]} />
-                            <Text style={styles.pastVisitTime}>
-                              OUT {formatDate(firstEntry.exitedAt, "time")}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  );
-                })}
+            <View style={styles.pastVisitsList}>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.headerCell, { flex: 2 }]}>Date</Text>
+                <Text style={[styles.headerCell, { flex: 2 }]}>Time</Text>
+                <Text style={[styles.headerCell, { flex: 1, textAlign: "right" }]}>Type</Text>
               </View>
-            )}
+              {scanEvents.map((event, idx) => (
+                <View
+                  key={event.id}
+                  style={[styles.tableRow, idx < scanEvents.length - 1 && styles.pastVisitCardBorder]}
+                >
+                  <Text style={[styles.cellText, { flex: 2 }]}>
+                    {formatDate(event.timestamp, "short")}
+                  </Text>
+                  <Text style={[styles.cellText, { flex: 2 }]}>
+                    {formatDate(event.timestamp, "time")}
+                  </Text>
+                  <View style={{ flex: 1, alignItems: "flex-end" }}>
+                    <Badge variant={event.action === "ENTRY" ? "success" : "warning"} style={styles.smallBadge}>
+                      {event.action === "ENTRY" ? "IN" : "OUT"}
+                    </Badge>
+                  </View>
+                </View>
+              ))}
+            </View>
           </Card>
         )}
 
@@ -305,11 +292,6 @@ export default function VisitorPassScreen() {
           </View>
         )}
 
-        {isResident && passId && passId !== "N/A" && (
-          <Button onPress={handleShare} style={styles.shareBtn}>
-            Share Pass
-          </Button>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -445,44 +427,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: theme.spacing.xs,
   },
-  pastVisitDate: {
-    fontSize: 14,
-    fontWeight: theme.fontWeights.semibold,
-    color: theme.colors.text,
+  tableHeader: {
+    flexDirection: "row",
+    paddingBottom: theme.spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    marginBottom: theme.spacing.sm,
   },
-  pastVisitTimeline: {
-    gap: 3,
-  },
-  pastVisitPassId: {
+  headerCell: {
     fontSize: 12,
+    fontWeight: theme.fontWeights.bold,
     color: theme.colors.textMuted,
-    marginBottom: 2,
+    textTransform: "uppercase",
   },
-  pastVisitEntryRow: {
+  tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    paddingVertical: theme.spacing.sm,
   },
-  pastVisitDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  entryDotPast: {
-    backgroundColor: theme.colors.success,
-  },
-  exitDotPast: {
-    backgroundColor: theme.colors.warning,
-  },
-  pastVisitTime: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
+  cellText: {
+    fontSize: 13,
+    color: theme.colors.text,
     fontWeight: theme.fontWeights.medium,
   },
-  pastVisitConnector: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginTop: theme.spacing.sm,
+  smallBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: theme.radius.sm,
   },
   sectionTitle: {
     fontSize: 16,

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -15,7 +16,7 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useScanPassCode } from "@repo/operations";
 import { SCAN_DIRECTION, VISITOR_STATUS, VISITOR_TYPE, ScanDirection } from "@repo/schema";
 
@@ -23,8 +24,12 @@ type ScanMode = "camera" | "manual";
 
 export default function ScanScreen() {
   const router = useRouter();
+  const { dir } = useLocalSearchParams<{ dir?: string }>();
   const [mode, setMode] = useState<ScanMode>("camera");
-  const [direction, setDirection] = useState<ScanDirection>(SCAN_DIRECTION.ENTRY);
+  const [direction, setDirection] = useState<ScanDirection>(
+    dir === "exit" ? SCAN_DIRECTION.EXIT : SCAN_DIRECTION.ENTRY
+  );
+  const [showDirectionModal, setShowDirectionModal] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [scanned, setScanned] = useState(false);
   const [result, setResult] = useState<{
@@ -37,6 +42,14 @@ export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const { mutate: scanPass, isPending } = useScanPassCode();
   const lastScanned = useRef("");
+
+  useEffect(() => {
+    if (dir === "exit") {
+      setDirection(SCAN_DIRECTION.EXIT);
+    } else if (dir === "entry") {
+      setDirection(SCAN_DIRECTION.ENTRY);
+    }
+  }, [dir]);
 
   const handleScan = useCallback((code: string, dir: ScanDirection) => {
     if (lastScanned.current === `${dir}:${code}`) return;
@@ -182,48 +195,16 @@ export default function ScanScreen() {
       />
 
       <View style={styles.container}>
-        <View style={styles.directionSelector}>
+        <View style={styles.scanModeHeader}>
+          <Text style={styles.scanModeHeaderText}>
+            Scanning for <Text style={direction === SCAN_DIRECTION.ENTRY ? styles.modeTextEntry : styles.modeTextExit}>{direction === SCAN_DIRECTION.ENTRY ? "Entry" : "Exit"}</Text>
+          </Text>
           <TouchableOpacity
-            style={[
-              styles.directionBtn,
-              direction === SCAN_DIRECTION.ENTRY && styles.directionActive,
-            ]}
-            onPress={() => setDirection(SCAN_DIRECTION.ENTRY)}
+            onPress={() => setShowDirectionModal(true)}
+            style={styles.changeModeBtn}
+            activeOpacity={0.7}
           >
-            <Ionicons
-              name="enter-outline"
-              size={20}
-              color={direction === SCAN_DIRECTION.ENTRY ? "#fff" : theme.colors.success}
-            />
-            <Text
-              style={[
-                styles.directionText,
-                direction === SCAN_DIRECTION.ENTRY && styles.directionTextActive,
-              ]}
-            >
-              Entry
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.directionBtn,
-              direction === SCAN_DIRECTION.EXIT && styles.directionExitActive,
-            ]}
-            onPress={() => setDirection(SCAN_DIRECTION.EXIT)}
-          >
-            <Ionicons
-              name="exit-outline"
-              size={20}
-              color={direction === SCAN_DIRECTION.EXIT ? "#fff" : theme.colors.warning}
-            />
-            <Text
-              style={[
-                styles.directionText,
-                direction === SCAN_DIRECTION.EXIT && styles.directionTextActive,
-              ]}
-            >
-              Exit
-            </Text>
+            <Text style={styles.changeModeText}>Change</Text>
           </TouchableOpacity>
         </View>
 
@@ -278,6 +259,51 @@ export default function ScanScreen() {
             <Text style={styles.scanningText}>Verifying...</Text>
           </View>
         )}
+
+        <Modal
+          visible={showDirectionModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDirectionModal(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowDirectionModal(false)}
+          >
+            <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Change Scan Mode</Text>
+                <TouchableOpacity onPress={() => setShowDirectionModal(false)}>
+                  <Ionicons name="close-outline" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.modalSubTitle}>Choose scan direction:</Text>
+              <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.xs }}>
+                <TouchableOpacity
+                  style={styles.scanModeOption}
+                  onPress={() => {
+                    setDirection(SCAN_DIRECTION.ENTRY);
+                    setShowDirectionModal(false);
+                  }}
+                >
+                  <Ionicons name="enter-outline" size={22} color={theme.colors.success} />
+                  <Text style={styles.scanModeOptionText}>Scan for Entry</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.scanModeOption}
+                  onPress={() => {
+                    setDirection(SCAN_DIRECTION.EXIT);
+                    setShowDirectionModal(false);
+                  }}
+                >
+                  <Ionicons name="exit-outline" size={22} color={theme.colors.warning} />
+                  <Text style={styles.scanModeOptionText}>Scan for Exit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -306,39 +332,84 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  directionSelector: {
-    flexDirection: "row",
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    gap: theme.spacing.md,
-  },
-  directionBtn: {
-    flex: 1,
+  scanModeHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: theme.spacing.sm,
-    height: 48,
-    borderRadius: theme.radius.md,
-    borderWidth: 1.5,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
+    justifyContent: "space-between",
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.surfaceSecondary,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
-  directionActive: {
-    backgroundColor: theme.colors.success,
-    borderColor: theme.colors.success,
-  },
-  directionExitActive: {
-    backgroundColor: theme.colors.warning,
-    borderColor: theme.colors.warning,
-  },
-  directionText: {
+  scanModeHeaderText: {
     fontSize: 15,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
+  },
+  modeTextEntry: {
+    color: theme.colors.success,
+    fontWeight: theme.fontWeights.bold,
+  },
+  modeTextExit: {
+    color: theme.colors.warning,
+    fontWeight: theme.fontWeights.bold,
+  },
+  changeModeBtn: {
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 6,
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  changeModeText: {
+    fontSize: 13,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: theme.colors.surface,
+    borderTopLeftRadius: theme.radius.lg,
+    borderTopRightRadius: theme.radius.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.lg,
+    gap: theme.spacing.md,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xs,
+  },
+  modalTitle: {
+    fontSize: 16,
     fontWeight: theme.fontWeights.bold,
     color: theme.colors.text,
   },
-  directionTextActive: {
-    color: "#fff",
+  modalSubTitle: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.semibold,
+  },
+  scanModeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surfaceSecondary,
+    gap: theme.spacing.sm,
+  },
+  scanModeOptionText: {
+    fontSize: 15,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
   },
   cameraContainer: {
     flex: 1,

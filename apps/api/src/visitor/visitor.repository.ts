@@ -36,7 +36,7 @@ export class VisitorRepository {
   ): Promise<VisitorLogDocument[]> {
     return this.logModel
       .find(filter)
-      .select('-mobile -passCode')
+      .select('-mobile')
       .populate('visitor', 'name photoUrl')
       .populate('resident', 'firstName lastName role')
       .populate('flat')
@@ -47,7 +47,7 @@ export class VisitorRepository {
   async findOneLog(logId: string): Promise<VisitorLogDocument | null> {
     return this.logModel
       .findOne({ logId })
-      .select('-mobile -passCode')
+      .select('-mobile')
       .populate('visitor', 'name photoUrl')
       .populate('resident', 'firstName lastName role')
       .populate('flat')
@@ -57,7 +57,7 @@ export class VisitorRepository {
   async findLogByPassCode(passCode: string): Promise<VisitorLogDocument | null> {
     return this.logModel
       .findOne({ passCode })
-      .select('-mobile -passCode')
+      .select('-mobile')
       .populate('visitor', 'name photoUrl')
       .populate('resident', 'firstName lastName role')
       .populate('flat')
@@ -67,7 +67,7 @@ export class VisitorRepository {
   async findLogsByVisitorId(visitorId: string, societyId: string): Promise<VisitorLogDocument[]> {
     return this.logModel
       .find({ visitorId, societyId })
-      .select('-mobile -passCode')
+      .select('-mobile')
       .populate('visitor', 'name photoUrl')
       .populate('resident', 'firstName lastName role')
       .populate('flat')
