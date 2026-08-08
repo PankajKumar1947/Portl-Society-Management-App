@@ -79,11 +79,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   leftSlot: {
-    width: 44,
+    minWidth: 44,
     alignItems: "flex-start",
   },
   rightSlot: {
-    width: 44,
+    minWidth: 44,
     alignItems: "flex-end",
   },
   spacer: {

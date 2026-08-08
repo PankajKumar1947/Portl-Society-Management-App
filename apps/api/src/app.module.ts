@@ -19,6 +19,7 @@ import { HelpdeskTicketModule } from './helpdesk-ticket/helpdesk-ticket.module';
 import { AclModule } from './acl/acl.module';
 import { VisitorModule } from './visitor/visitor.module';
 import { NotificationModule } from './notification/notification.module';
+import { SocialsModule } from './socials/socials.module';
 import { Connection } from 'mongoose';
 import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
 
@@ -47,6 +48,7 @@ import { mongooseGlobalPlugin } from './common/plugins/mongoose-global.plugin';
     AclModule,
     VisitorModule,
     NotificationModule,
+    SocialsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

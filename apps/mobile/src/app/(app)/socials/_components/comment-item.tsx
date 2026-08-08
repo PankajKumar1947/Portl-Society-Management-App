@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { theme } from "@/constants";
-import { Comment } from "./types";
+import { SocialsComment as Comment } from "@repo/schema";
 
 interface CommentItemProps {
   comment: Comment;
@@ -16,11 +16,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   isFocused = false,
   onPress,
 }) => {
-  const getRoleBadgeVariant = (role: "resident" | "admin" | "guard") => {
+  const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case "admin":
+      case "ADMIN":
+      case "SUPER_ADMIN":
         return "danger";
-      case "guard":
+      case "GUARD":
         return "warning";
       default:
         return "primary";

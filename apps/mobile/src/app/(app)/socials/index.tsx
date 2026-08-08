@@ -16,169 +16,59 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Divider } from "@/components/ui/divider";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Post, Comment } from "./_components/types";
 import { PostCard } from "./_components/post-card";
 import { CommentItem } from "./_components/comment-item";
+import {
+  useGetSocialsFeed,
+  useCreateSocialsPost,
+  useToggleSocialsLike,
+  useAddSocialsComment,
+} from "@repo/operations";
+import { SocialsPost as Post, SocialsComment as Comment } from "@repo/schema";
 
-const INITIAL_POSTS: Post[] = [
-  {
-    id: "1",
-    authorName: "Ananya Sharma",
-    authorRole: "resident",
-    authorRoleLabel: "Resident · Flat 402, Block A",
-    time: "2h ago",
-    content: "Hey everyone! Found a set of keys near the children's play area this evening. They are with the guard at the main gate. Please collect them if they belong to you! 🔑",
-    likes: 12,
-    commentsCount: 3,
-    hasLiked: false,
-    comments: [
-      {
-        id: "c1",
-        authorName: "Rohan Verma",
-        authorRole: "resident",
-        authorRoleLabel: "Resident · Flat 501",
-        content: "Thanks for sharing, Ananya. I think Mr. Mehta from block B was looking for keys earlier.",
-        time: "1h ago",
-      },
-    ],
-  },
-  {
-    id: "2",
-    authorName: "Commanding Officer Baldev Singh",
-    authorRole: "guard",
-    authorRoleLabel: "Security Supervisor",
-    time: "4h ago",
-    content: "Routine security drill scheduled for tomorrow morning from 10:00 AM to 11:30 AM at the main gate. Kindly cooperate with the guards. Visitors may experience short delays.",
-    images: [
-      "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 24,
-    commentsCount: 2,
-    hasLiked: true,
-    comments: [],
-  },
-  {
-    id: "3",
-    authorName: "Society Management Office",
-    authorRole: "admin",
-    authorRoleLabel: "Admin · President Office",
-    time: "1d ago",
-    content: "Clubhouse renovation is almost done! Here is a sneak peek of the new gym area and lounge space. Reopening this Sunday! ☕🎉",
-    images: [
-      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 56,
-    commentsCount: 1,
-    hasLiked: false,
-    comments: [
-      {
-        id: "c2",
-        authorName: "Priyanka Sen",
-        authorRole: "resident",
-        authorRoleLabel: "Resident · Flat 1004",
-        content: "Looks stunning! Kudos to the committee for pulling this off. Can't wait for Sunday!",
-        time: "18h ago",
-      },
-    ],
-  },
-  {
-    id: "4",
-    authorName: "Ramesh Kumar",
-    authorRole: "admin",
-    authorRoleLabel: "Admin · Security Head",
-    time: "2d ago",
-    content: "New RFID scanner gates installed at Tower C entrance to improve automated security checkups. Residents can collect tags from the office starting tomorrow. 🚙🛡️",
-    images: [
-      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 42,
-    commentsCount: 0,
-    hasLiked: false,
-    comments: [],
-  },
-];
+
 
 type FilterType = "all" | "resident" | "admin" | "guard";
 
 export default function SocialsScreen() {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const { data: posts = [], isLoading, refetch } = useGetSocialsFeed();
+  const { mutate: toggleLike } = useToggleSocialsLike();
+  const { mutate: addComment } = useAddSocialsComment();
+
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-  const [newPostText, setNewPostText] = useState("");
   const [selectedPostComments, setSelectedPostComments] = useState<string | null>(null);
   const [newCommentText, setNewCommentText] = useState("");
 
   const handleLike = (postId: string) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          const updatedHasLiked = !post.hasLiked;
-          return {
-            ...post,
-            hasLiked: updatedHasLiked,
-            likes: updatedHasLiked ? post.likes + 1 : post.likes - 1,
-          };
-        }
-        return post;
-      })
-    );
-  };
-
-  const handleCreatePost = () => {
-    if (!newPostText.trim()) return;
-
-    const newPost: Post = {
-      id: Date.now().toString(),
-      authorName: "Pankaj Kumar", // Current user stub
-      authorRole: "admin",
-      authorRoleLabel: "Admin · Flat 303 (Me)",
-      time: "Just now",
-      content: newPostText,
-      likes: 0,
-      commentsCount: 0,
-      hasLiked: false,
-      comments: [],
-    };
-
-    setPosts([newPost, ...posts]);
-    setNewPostText("");
-    Alert.alert("Success", "Post shared with the society!");
+    toggleLike(postId);
   };
 
   const handleAddComment = (postId: string) => {
     if (!newCommentText.trim()) return;
 
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      authorName: "Pankaj Kumar",
-      authorRole: "admin",
-      authorRoleLabel: "Admin · Flat 303 (Me)",
-      content: newCommentText,
-      time: "Just now",
-    };
-
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            commentsCount: post.commentsCount + 1,
-            comments: [...post.comments, newComment],
-          };
-        }
-        return post;
-      })
+    addComment(
+      { id: postId, data: { content: newCommentText } },
+      {
+        onSuccess: () => {
+          setNewCommentText("");
+        },
+        onError: () => {
+          Alert.alert("Error", "Failed to add comment. Please try again.");
+        },
+      }
     );
-    setNewCommentText("");
   };
 
-  const filteredPosts = posts.filter(
-    (post) => activeFilter === "all" || post.authorRole === activeFilter
-  );
+  const filteredPosts = posts.filter((post) => {
+    if (activeFilter === "all") return true;
+    const roleMap: Record<string, string> = {
+      resident: "RESIDENTS",
+      admin: "ADMIN",
+      guard: "GUARD",
+    };
+    return post.authorRole === roleMap[activeFilter];
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -192,40 +82,35 @@ export default function SocialsScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        refreshing={isLoading}
+        onRefresh={refetch}
         ListHeaderComponent={
           <>
             {/* Create Post Section */}
-            <Card style={styles.createCard} variant="flat">
-              <View style={styles.createRow}>
-                <Avatar name="Pankaj Kumar" size="sm" />
-                <TextInput
-                  placeholder="Share something with your society..."
-                  placeholderTextColor={theme.colors.textMuted}
-                  style={styles.createInput}
-                  multiline
-                  value={newPostText}
-                  onChangeText={setNewPostText}
-                />
-              </View>
-              <Divider style={styles.createDivider} />
-              <View style={styles.createActions}>
-                <TouchableOpacity style={styles.mediaButton}>
-                  <Ionicons name="image-outline" size={20} color={theme.colors.textSecondary} />
-                  <Text style={styles.mediaButtonText}>Photo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.mediaButton}>
-                  <Ionicons name="bar-chart-outline" size={20} color={theme.colors.textSecondary} />
-                  <Text style={styles.mediaButtonText}>Poll</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.postButton, !newPostText.trim() && styles.postButtonDisabled]}
-                  onPress={handleCreatePost}
-                  disabled={!newPostText.trim()}
-                >
-                  <Text style={styles.postButtonText}>Post</Text>
-                </TouchableOpacity>
-              </View>
-            </Card>
+            <TouchableOpacity 
+              activeOpacity={0.9} 
+              onPress={() => router.push("/socials/new-post")}
+            >
+              <Card style={styles.createCard} variant="flat">
+                <View style={styles.createRow}>
+                  <Avatar name="Pankaj Kumar" size="sm" />
+                  <View style={styles.createInputTrigger}>
+                    <Text style={styles.createTriggerText}>Share something with your society...</Text>
+                  </View>
+                </View>
+                <Divider style={styles.createDivider} />
+                <View style={styles.createActions}>
+                  <View style={styles.mediaButton}>
+                    <Ionicons name="image-outline" size={20} color={theme.colors.textSecondary} />
+                    <Text style={styles.mediaButtonText}>Photo</Text>
+                  </View>
+                  <View style={styles.mediaButton}>
+                    <Ionicons name="bar-chart-outline" size={20} color={theme.colors.textSecondary} />
+                    <Text style={styles.mediaButtonText}>Poll</Text>
+                  </View>
+                </View>
+              </Card>
+            </TouchableOpacity>
 
             {/* Filter Pills */}
             <ScrollView
@@ -360,6 +245,16 @@ const styles = StyleSheet.create({
     minHeight: 40,
     textAlignVertical: "top",
     paddingTop: 4,
+  },
+  createInputTrigger: {
+    flex: 1,
+    marginLeft: theme.spacing.md,
+    justifyContent: "center",
+    minHeight: 32,
+  },
+  createTriggerText: {
+    fontSize: 14,
+    color: theme.colors.textMuted,
   },
   createDivider: {
     marginVertical: theme.spacing.sm,

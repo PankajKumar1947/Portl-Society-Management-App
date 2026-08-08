@@ -32,6 +32,8 @@ export * from "./react-queries/visitor";
 export * from "./routes/visitor";
 export * from "./react-queries/notification";
 export * from "./routes/notification";
+export * from "./react-queries/socials";
+export * from "./routes/socials";
 export {
   setAccessToken,
   setRefreshToken,

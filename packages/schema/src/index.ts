@@ -16,3 +16,4 @@ export * from "./family-member";
 export * from "./acl";
 export * from "./visitor";
 export * from "./notification";
+export * from "./socials";

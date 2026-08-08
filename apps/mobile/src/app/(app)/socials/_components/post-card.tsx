@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ViewStyle, Modal, ScrollView, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Divider } from "@/components/ui/divider";
-import { Post } from "./types";
+import { SocialsPost as Post } from "@repo/schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PostCardProps {
@@ -26,11 +26,18 @@ export const PostCard: React.FC<PostCardProps> = ({
 }) => {
   const [galleryVisible, setGalleryVisible] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const getRoleBadgeVariant = (role: "resident" | "admin" | "guard") => {
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  const onTextLayout = useCallback((e: any) => {
+    setIsTruncated(e.nativeEvent.lines.length > 4);
+  }, []);
+
+  const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case "admin":
+      case "ADMIN":
+      case "SUPER_ADMIN":
         return "danger";
-      case "guard":
+      case "GUARD":
         return "warning";
       default:
         return "primary";
@@ -56,7 +63,20 @@ export const PostCard: React.FC<PostCardProps> = ({
       </View>
 
       {/* Content text */}
-      <Text style={styles.postContent}>{post.content}</Text>
+      <View style={styles.contentContainer}>
+        <Text
+          style={styles.postContent}
+          numberOfLines={onPress ? 4 : undefined}
+          onTextLayout={onPress ? onTextLayout : undefined}
+        >
+          {post.content}
+        </Text>
+        {onPress && isTruncated && (
+          <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.moreContainer}>
+            <Text style={styles.moreText}>...more</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* Optional Images Grid */}
       {post.images && post.images.length > 0 && (
@@ -305,6 +325,19 @@ const styles = StyleSheet.create({
   lightboxImage: {
     width: "100%",
     height: "80%",
+  },
+  contentContainer: {
+    position: "relative",
+  },
+  moreContainer: {
+    alignSelf: "flex-start",
+    marginTop: -theme.spacing.sm,
+    marginBottom: theme.spacing.md,
+  },
+  moreText: {
+    color: theme.colors.primary,
+    fontWeight: theme.fontWeights.bold,
+    fontSize: 14,
   },
 });
 

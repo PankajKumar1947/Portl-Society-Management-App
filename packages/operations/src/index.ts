@@ -32,4 +32,6 @@ export * from "./query/use-visitor";
 export * from "./mutation/use-visitor";
 export * from "./query/use-notification";
 export * from "./mutation/use-notification";
+export * from "./query/use-socials";
+export * from "./mutation/use-socials";
 

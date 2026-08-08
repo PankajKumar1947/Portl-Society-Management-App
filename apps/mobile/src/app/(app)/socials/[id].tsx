@@ -8,107 +8,37 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import { Avatar } from "@/components/ui/avatar";
 import { Divider } from "@/components/ui/divider";
-import { Post, Comment } from "./_components/types";
 import { PostCard } from "./_components/post-card";
 import { CommentItem } from "./_components/comment-item";
+import {
+  useGetSocialsPostDetail,
+  useToggleSocialsLike,
+  useAddSocialsComment,
+} from "@repo/operations";
+import { SocialsPost as Post, SocialsComment as Comment } from "@repo/schema";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import NotFoundScreen from "@/components/layout/not-found-screen";
 import ScreenHeader from "@/components/ui/screen-header";
 
-const INITIAL_POSTS: Post[] = [
-  {
-    id: "1",
-    authorName: "Ananya Sharma",
-    authorRole: "resident",
-    authorRoleLabel: "Resident · Flat 402, Block A",
-    time: "2h ago",
-    content: "Hey everyone! Found a set of keys near the children's play area this evening. They are with the guard at the main gate. Please collect them if they belong to you! 🔑",
-    likes: 12,
-    commentsCount: 3,
-    hasLiked: false,
-    comments: [
-      {
-        id: "c1",
-        authorName: "Rohan Verma",
-        authorRole: "resident",
-        authorRoleLabel: "Resident · Flat 501",
-        content: "Thanks for sharing, Ananya. I think Mr. Mehta from block B was looking for keys earlier.",
-        time: "1h ago",
-      },
-    ],
-  },
-  {
-    id: "2",
-    authorName: "Commanding Officer Baldev Singh",
-    authorRole: "guard",
-    authorRoleLabel: "Security Supervisor",
-    time: "4h ago",
-    content: "Routine security drill scheduled for tomorrow morning from 10:00 AM to 11:30 AM at the main gate. Kindly cooperate with the guards. Visitors may experience short delays.",
-    images: [
-      "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 24,
-    commentsCount: 2,
-    hasLiked: true,
-    comments: [],
-  },
-  {
-    id: "3",
-    authorName: "Society Management Office",
-    authorRole: "admin",
-    authorRoleLabel: "Admin · President Office",
-    time: "1d ago",
-    content: "Clubhouse renovation is almost done! Here is a sneak peek of the new gym area and lounge space. Reopening this Sunday! ☕🎉",
-    images: [
-      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 56,
-    commentsCount: 1,
-    hasLiked: false,
-    comments: [
-      {
-        id: "c2",
-        authorName: "Priyanka Sen",
-        authorRole: "resident",
-        authorRoleLabel: "Resident · Flat 1004",
-        content: "Looks stunning! Kudos to the committee for pulling this off. Can't wait for Sunday!",
-        time: "18h ago",
-      },
-    ],
-  },
-  {
-    id: "4",
-    authorName: "Ramesh Kumar",
-    authorRole: "admin",
-    authorRoleLabel: "Admin · Security Head",
-    time: "2d ago",
-    content: "New RFID scanner gates installed at Tower C entrance to improve automated security checkups. Residents can collect tags from the office starting tomorrow. 🚙🛡️",
-    images: [
-      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60"
-    ],
-    likes: 42,
-    commentsCount: 0,
-    hasLiked: false,
-    comments: [],
-  },
-];
+
 
 export default function PostDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { id, focusedCommentId } = useLocalSearchParams<{ id: string; focusedCommentId?: string }>();
-  const [post, setPost] = useState<Post | null>(null);
+  const { id = "", focusedCommentId } = useLocalSearchParams<{ id: string; focusedCommentId?: string }>();
+
+  const { data: post, isLoading } = useGetSocialsPostDetail(id);
+  const { mutate: toggleLike } = useToggleSocialsLike();
+  const { mutate: addComment } = useAddSocialsComment();
+
   const [newCommentText, setNewCommentText] = useState("");
   const flatListRef = useRef<FlatList>(null);
 
@@ -124,47 +54,41 @@ export default function PostDetailsScreen() {
     };
   }, [navigation]);
 
-  useEffect(() => {
-    const foundPost = INITIAL_POSTS.find((p) => p.id === id);
-    if (foundPost) {
-      setPost(foundPost);
-    }
-  }, [id]);
-
   const handleLike = () => {
     if (!post) return;
-    const updatedHasLiked = !post.hasLiked;
-    setPost({
-      ...post,
-      hasLiked: updatedHasLiked,
-      likes: updatedHasLiked ? post.likes + 1 : post.likes - 1,
-    });
+    toggleLike(post.id);
   };
 
   const handleAddComment = () => {
     if (!post || !newCommentText.trim()) return;
 
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      authorName: "Pankaj Kumar",
-      authorRole: "admin",
-      authorRoleLabel: "Admin · Flat 303 (Me)",
-      content: newCommentText,
-      time: "Just now",
-    };
-
-    setPost({
-      ...post,
-      commentsCount: post.commentsCount + 1,
-      comments: [...post.comments, newComment],
-    });
-    setNewCommentText("");
-
-    // Scroll to bottom of comments list after adding
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    addComment(
+      { id: post.id, data: { content: newCommentText } },
+      {
+        onSuccess: () => {
+          setNewCommentText("");
+          // Scroll to bottom of comments list after adding
+          setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+          }, 100);
+        },
+        onError: () => {
+          Alert.alert("Error", "Failed to add comment. Please try again.");
+        },
+      }
+    );
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { marginBottom: -(60 + (insets.bottom > 0 ? insets.bottom : 8)) }]} edges={["top", "left", "right"]}>
+        <ScreenHeader title="Post Details" onBack={() => router.back()} />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading post details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!post) return <NotFoundScreen title="Post Not Found" message="The post you are looking for does not exist." />
 
