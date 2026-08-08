@@ -8,8 +8,16 @@ import {
 import { socialsQueries } from "../../react-queries/socials";
 import { apiClient } from "../../services/axios-instance";
 
-export const getSocialsFeed = async (): Promise<PostListResponse> => {
-  const res = await apiClient.get(socialsQueries.getFeed.endpoint);
+export interface SocialsFeedParams {
+  search?: string;
+  role?: string;
+  timeRange?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const getSocialsFeed = async (params?: SocialsFeedParams): Promise<PostListResponse> => {
+  const res = await apiClient.get(socialsQueries.getFeed.endpoint, { params });
   return res.data;
 };
 

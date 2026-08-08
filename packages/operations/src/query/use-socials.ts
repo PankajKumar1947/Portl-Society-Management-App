@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSocialsFeed, getSocialsPostDetail, socialsQueries } from "@repo/api-client";
+import { getSocialsFeed, getSocialsPostDetail, socialsQueries, SocialsFeedParams } from "@repo/api-client";
 import { PostListResponse, PostResponse, SocialsPost } from "@repo/schema";
 
-export const useGetSocialsFeed = () => {
+export const useGetSocialsFeed = (params?: SocialsFeedParams) => {
   return useQuery({
-    queryKey: socialsQueries.getFeed.key,
-    queryFn: () => getSocialsFeed(),
+    queryKey: [...socialsQueries.getFeed.key, params],
+    queryFn: () => getSocialsFeed(params),
     select: (response: PostListResponse): SocialsPost[] => response.data,
   });
 };

@@ -127,11 +127,64 @@ export class SocialsService {
     return this.formatPost(doc, userId);
   }
 
-  async findAll(societyId: string, currentUserId: string): Promise<SocialsPost[]> {
+  async findAll(
+    societyId: string,
+    currentUserId: string,
+    search?: string,
+    role?: string,
+    timeRange?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<SocialsPost[]> {
     const posts = await this.repository.find({ societyId });
     const formattedPosts: SocialsPost[] = [];
     for (const p of posts) {
-      formattedPosts.push(await this.formatPost(p, currentUserId));
+      const formatted = await this.formatPost(p, currentUserId);
+
+      // Search query filter
+      if (search && search.trim()) {
+        const query = search.toLowerCase();
+        const contentMatch = formatted.content?.toLowerCase().includes(query);
+        const nameMatch = formatted.authorName?.toLowerCase().includes(query);
+        if (!contentMatch && !nameMatch) {
+          continue;
+        }
+      }
+
+      // Role filter
+      if (role && role !== "all") {
+        const roleMap: Record<string, string> = {
+          resident: "RESIDENTS",
+          admin: "ADMIN",
+          guard: "GUARD",
+        };
+        if (formatted.authorRole !== roleMap[role]) {
+          continue;
+        }
+      }
+
+      // Time range filter
+      if (timeRange && timeRange !== "all") {
+        const postCreatedAt = p.createdAt || new Date();
+        const postDate = new Date(postCreatedAt);
+        const now = new Date();
+        if (timeRange === "hour") {
+          const limit = new Date(now.getTime() - 60 * 60 * 1000);
+          if (postDate < limit) continue;
+        } else if (timeRange === "day") {
+          const limit = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          if (postDate < limit) continue;
+        } else if (timeRange === "week") {
+          const limit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          if (postDate < limit) continue;
+        } else if (timeRange === "custom" && startDate) {
+          const start = new Date(startDate);
+          const end = endDate ? new Date(endDate) : now;
+          if (postDate < start || postDate > end) continue;
+        }
+      }
+
+      formattedPosts.push(formatted);
     }
     return formattedPosts;
   }

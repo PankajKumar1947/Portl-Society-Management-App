@@ -4,7 +4,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   FlatList,
@@ -13,32 +12,46 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants";
 import { Avatar } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
 import { Divider } from "@/components/ui/divider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PostCard } from "./_components/post-card";
 import { CommentItem } from "./_components/comment-item";
+import ScreenHeader from "@/components/ui/screen-header";
+import FilterModal from "./_components/filter-modal";
 import {
   useGetSocialsFeed,
-  useCreateSocialsPost,
   useToggleSocialsLike,
   useAddSocialsComment,
 } from "@repo/operations";
-import { SocialsPost as Post, SocialsComment as Comment } from "@repo/schema";
-
-
 
 type FilterType = "all" | "resident" | "admin" | "guard";
 
 export default function SocialsScreen() {
   const router = useRouter();
-  const { data: posts = [], isLoading, refetch } = useGetSocialsFeed();
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTimeRange, setActiveTimeRange] = useState<string>("all");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  const { data: posts = [], isLoading, refetch } = useGetSocialsFeed({
+    search: searchQuery || undefined,
+    role: activeFilter,
+    timeRange: activeTimeRange,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
+
   const { mutate: toggleLike } = useToggleSocialsLike();
   const { mutate: addComment } = useAddSocialsComment();
 
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedPostComments, setSelectedPostComments] = useState<string | null>(null);
   const [newCommentText, setNewCommentText] = useState("");
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [tempFilter, setTempFilter] = useState<FilterType>("all");
+  const [tempTimeRange, setTempTimeRange] = useState<string>("all");
+  const [tempStartDate, setTempStartDate] = useState<string>("");
+  const [tempEndDate, setTempEndDate] = useState<string>("");
 
   const handleLike = (postId: string) => {
     toggleLike(postId);
@@ -60,87 +73,80 @@ export default function SocialsScreen() {
     );
   };
 
-  const filteredPosts = posts.filter((post) => {
-    if (activeFilter === "all") return true;
-    const roleMap: Record<string, string> = {
-      resident: "RESIDENTS",
-      admin: "ADMIN",
-      guard: "GUARD",
-    };
-    return post.authorRole === roleMap[activeFilter];
-  });
+  const activeFilterCount = (activeFilter !== "all" ? 1 : 0) + (activeTimeRange !== "all" ? 1 : 0);
+
+  const applyFilters = () => {
+    setActiveFilter(tempFilter);
+    setActiveTimeRange(tempTimeRange);
+    setStartDate(tempStartDate);
+    setEndDate(tempEndDate);
+    setFilterModalVisible(false);
+  };
+
+  const clearFilters = () => {
+    setTempFilter("all");
+    setTempTimeRange("all");
+    setTempStartDate("");
+    setTempEndDate("");
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Society Socials</Text>
-        <Text style={styles.headerSubtitle}>Connect with your neighbors, admins & guards</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <ScreenHeader
+        title="Society Socials"
+        showBack={false}
+        rightElement={
+          <TouchableOpacity
+            onPress={() => router.push("/socials/new-post")}
+            style={styles.createButton}
+          >
+            <Ionicons name="add-circle-outline" size={26} color={theme.colors.primary} />
+          </TouchableOpacity>
+        }
+      />
+
+      {/* Search and Filter Row */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={20} color={theme.colors.textMuted} style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search posts or neighbors..."
+              placeholderTextColor={theme.colors.textMuted}
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={18} color={theme.colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => {
+              setTempFilter(activeFilter);
+              setFilterModalVisible(true);
+            }}
+          >
+            <Ionicons name="options-outline" size={22} color={theme.colors.text} />
+            {activeFilterCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
-        data={filteredPosts}
+        data={posts}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         refreshing={isLoading}
         onRefresh={refetch}
-        ListHeaderComponent={
-          <>
-            {/* Create Post Section */}
-            <TouchableOpacity 
-              activeOpacity={0.9} 
-              onPress={() => router.push("/socials/new-post")}
-            >
-              <Card style={styles.createCard} variant="flat">
-                <View style={styles.createRow}>
-                  <Avatar name="Pankaj Kumar" size="sm" />
-                  <View style={styles.createInputTrigger}>
-                    <Text style={styles.createTriggerText}>Share something with your society...</Text>
-                  </View>
-                </View>
-                <Divider style={styles.createDivider} />
-                <View style={styles.createActions}>
-                  <View style={styles.mediaButton}>
-                    <Ionicons name="image-outline" size={20} color={theme.colors.textSecondary} />
-                    <Text style={styles.mediaButtonText}>Photo</Text>
-                  </View>
-                  <View style={styles.mediaButton}>
-                    <Ionicons name="bar-chart-outline" size={20} color={theme.colors.textSecondary} />
-                    <Text style={styles.mediaButtonText}>Poll</Text>
-                  </View>
-                </View>
-              </Card>
-            </TouchableOpacity>
-
-            {/* Filter Pills */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.filtersContainer}
-              contentContainerStyle={styles.filtersContent}
-            >
-              {(["all", "resident", "admin", "guard"] as const).map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  style={[
-                    styles.filterPill,
-                    activeFilter === filter && styles.filterPillActive,
-                  ]}
-                  onPress={() => setActiveFilter(filter)}
-                >
-                  <Text
-                    style={[
-                      styles.filterPillText,
-                      activeFilter === filter && styles.filterPillTextActive,
-                    ]}
-                  >
-                    {filter.charAt(0).toUpperCase() + filter.slice(1) + "s"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </>
-        }
         renderItem={({ item }) => (
           <View>
             <PostCard
@@ -197,6 +203,22 @@ export default function SocialsScreen() {
           </View>
         )}
       />
+      <FilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        roleFilter={activeFilter}
+        timeRange={activeTimeRange}
+        startDate={startDate}
+        endDate={endDate}
+        onApply={(filters) => {
+          setActiveFilter(filters.roleFilter);
+          setActiveTimeRange(filters.timeRange);
+          setStartDate(filters.startDate);
+          setEndDate(filters.endDate);
+          setFilterModalVisible(false);
+        }}
+        onClear={clearFilters}
+      />
     </SafeAreaView>
   );
 }
@@ -206,118 +228,70 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
+  createButton: {
+    paddingHorizontal: theme.spacing.xs,
+  },
+  searchContainer: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    borderColor: theme.colors.border,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: theme.fontWeights.extrabold,
+  searchRow: {
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.md,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    paddingHorizontal: theme.spacing.md,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: theme.spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
     color: theme.colors.text,
+    fontSize: 14,
+    height: "100%",
   },
-  headerSubtitle: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
+  filterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  filterBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  filterBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: theme.fontWeights.bold,
   },
   listContent: {
     padding: theme.spacing.md,
-    paddingBottom: 80, // bottom padding for tabs
-  },
-  createCard: {
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-  },
-  createRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  createInput: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-    fontSize: 14,
-    color: theme.colors.text,
-    minHeight: 40,
-    textAlignVertical: "top",
-    paddingTop: 4,
-  },
-  createInputTrigger: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-    justifyContent: "center",
-    minHeight: 32,
-  },
-  createTriggerText: {
-    fontSize: 14,
-    color: theme.colors.textMuted,
-  },
-  createDivider: {
-    marginVertical: theme.spacing.sm,
-  },
-  createActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  mediaButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.sm,
-  },
-  mediaButtonText: {
-    marginLeft: theme.spacing.xs,
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.semibold,
-  },
-  postButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xs * 1.5,
-    borderRadius: theme.radius.full,
-  },
-  postButtonDisabled: {
-    backgroundColor: theme.colors.surfaceSecondary,
-    opacity: 0.6,
-  },
-  postButtonText: {
-    color: theme.colors.text,
-    fontWeight: theme.fontWeights.bold,
-    fontSize: 14,
-  },
-  filtersContainer: {
-    marginBottom: theme.spacing.md,
-  },
-  filtersContent: {
-    paddingRight: theme.spacing.md,
-  },
-  filterPill: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs * 1.5,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginRight: theme.spacing.xs,
-  },
-  filterPillActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  filterPillText: {
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.fontWeights.semibold,
-  },
-  filterPillTextActive: {
-    color: theme.colors.text,
-    fontWeight: theme.fontWeights.bold,
+    paddingBottom: 80,
   },
   postCard: {
     marginBottom: theme.spacing.md,

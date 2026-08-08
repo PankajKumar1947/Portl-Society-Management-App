@@ -201,15 +201,17 @@ export default function NewPostScreen() {
           </View>
 
           {/* Text Editor below */}
-          <TextInput
-            style={styles.editorInput}
-            placeholder="What's happening in your society? Share updates, requests, or questions..."
-            placeholderTextColor={theme.colors.textMuted}
-            multiline
-            value={content}
-            onChangeText={setContent}
-            maxLength={1000}
-          />
+          <View style={styles.editorContainer}>
+            <TextInput
+              style={styles.editorInput}
+              placeholder="What's happening in your society? Share updates, requests, or questions..."
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              value={content}
+              onChangeText={setContent}
+              maxLength={1000}
+            />
+          </View>
         </ScrollView>
 
         {/* Floating Media Actions Bar */}
@@ -323,8 +325,16 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontWeight: theme.fontWeights.medium,
   },
+  editorContainer: {
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.md,
+    minHeight: 180,
+  },
   editorInput: {
-    fontSize: 16,
+    fontSize: 15,
     color: theme.colors.text,
     minHeight: 150,
     textAlignVertical: "top",

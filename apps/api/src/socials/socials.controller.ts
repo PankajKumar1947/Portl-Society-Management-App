@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   UsePipes,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SocialsService } from './socials.service';
@@ -54,8 +55,13 @@ export class SocialsController {
   async findAll(
     @CurrentUser('societyId') societyId: string,
     @CurrentUser('userId') userId: string,
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('timeRange') timeRange?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
-    const data = await this.service.findAll(societyId, userId);
+    const data = await this.service.findAll(societyId, userId, search, role, timeRange, startDate, endDate);
     return {
       success: true,
       message: 'Socials feed retrieved successfully',
