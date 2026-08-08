@@ -98,8 +98,8 @@ export const Routes = {
     },
   },
 
-  Community: {
-    Index: app("/community"),
+  Socials: {
+    Index: app("/socials"),
   },
   Notices: {
     Index: app("/notices"),

@@ -59,7 +59,7 @@ export default function HomeScreen() {
     { id: "visitors", title: "Visitors", icon: "people-outline", route: () => router.push(Routes.Visitors.Index), resource: AclResource.VISITORS },
     { id: "amenities", title: "Amenities", icon: "home-outline", route: () => router.push(Routes.Amenities.Index), resource: AclResource.AMENITIES },
     { id: "notices", title: "Notices", icon: "document-text-outline", route: () => router.push(Routes.Notices.Index), resource: AclResource.NOTICES },
-    { id: "community", title: "Community", icon: "people-circle-outline", route: () => router.push(Routes.Community.Index), resource: AclResource.COMMUNITY },
+    { id: "socials", title: "Socials", icon: "share-social-outline", route: () => router.push(Routes.Socials.Index), resource: AclResource.SOCIALS },
     { id: "helpdesk", title: "Helpdesk", icon: "help-buoy-outline", route: () => router.push(Routes.Helpdesk.Index), resource: AclResource.HELPDESK_TICKETS },
     { id: "complaints", title: "Complaints", icon: "alert-circle-outline", route: () => router.push(Routes.Complaints.Index), resource: AclResource.COMPLAINTS },
     { id: "polls", title: "Polls", icon: "stats-chart-outline", route: () => router.push(Routes.Polls.Index), resource: AclResource.POLLS },

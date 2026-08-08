@@ -13,7 +13,7 @@ export const AclResource = {
   MEDIA: "media",
   USERS: "users",
   VISITORS: "visitors",
-  COMMUNITY: "community",
+  SOCIALS: "socials",
   NOTIFICATIONS: "notifications",
   VEHICLES: "vehicles",
 } as const;

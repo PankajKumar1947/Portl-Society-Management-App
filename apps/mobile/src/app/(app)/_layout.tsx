@@ -12,13 +12,13 @@ interface TabDef {
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
   activeIcon: keyof typeof Ionicons.glyphMap;
-  isCommunity?: boolean;
+  isSocials?: boolean;
 }
 
 const ALL_TABS: TabDef[] = [
   { name: "index", title: "Home", icon: "home-outline", activeIcon: "home" },
   { name: "visitors", title: "Visitors", icon: "people-outline", activeIcon: "people" },
-  { name: "community/index", title: "Community", icon: "people-circle-outline", activeIcon: "people-circle", isCommunity: true },
+  { name: "socials", title: "Socials", icon: "chatbubbles-outline", activeIcon: "chatbubbles", isSocials: true },
   { name: "amenities", title: "Amenities", icon: "business-outline", activeIcon: "business" },
   { name: "profile", title: "Profile", icon: "person-outline", activeIcon: "person" },
 ];
@@ -50,18 +50,18 @@ export default function AppLayout() {
           }}
         >
           {ALL_TABS.map((tab) => {
-            const isCommunity = tab.isCommunity;
+            const isSocials = tab.isSocials;
             return (
               <Tabs.Screen
                 key={tab.name}
                 name={tab.name}
                 options={{
                   title: tab.title,
-                  tabBarLabel: isCommunity ? () => null : tab.title,
+                  tabBarLabel: isSocials ? () => null : tab.title,
                   tabBarIcon: ({ color, focused }) => {
-                    if (isCommunity) {
+                    if (isSocials) {
                       return (
-                        <View style={[styles.communityTabContainer, focused && styles.communityTabContainerActive]}>
+                        <View style={[styles.socialsTabContainer, focused && styles.socialsTabContainerActive]}>
                           <Ionicons
                             name={focused ? tab.activeIcon : tab.icon}
                             size={28}
@@ -99,7 +99,7 @@ export default function AppLayout() {
 }
 
 const styles = StyleSheet.create({
-  communityTabContainer: {
+  socialsTabContainer: {
     width: 58,
     height: 58,
     borderRadius: 29,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  communityTabContainerActive: {
+  socialsTabContainerActive: {
     backgroundColor: theme.colors.primaryDark,
     transform: [{ scale: 1.05 }],
   },
